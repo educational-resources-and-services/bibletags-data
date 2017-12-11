@@ -1,5 +1,6 @@
-module.exports = `
-
+/*
+  eg.
+  
   input UserInput {
     email: String
     firstname: String
@@ -9,5 +10,9 @@ module.exports = `
     onVacationUntil: Date
     adminLevel: String
   }
+  
+*/
+
+module.exports = `
   
 `

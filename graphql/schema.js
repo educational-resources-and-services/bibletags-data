@@ -25,10 +25,11 @@ type Query {
   tagSets(chapterId: String!): [TagSet]
   tagSet(id: ID!): TagSet
   word(id: ID!): Word
-  wordByPosition(verseId: String!, wordNum: Int!): Word   --- in graphql is there a way to feed the result of one into the other?
+  wordByPosition(verseId: String!, wordNum: Int!): Word
   hits(id: ID!): Hits
   translations(id: ID!): Translations
   translationsByPosition(verseId: String!, wordNum: Int!): Translations
+  search(query: String!, offset: Int, limit: Int, tagVersions: [String]): SearchResult
 }
 
 type Mutation {

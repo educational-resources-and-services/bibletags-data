@@ -8,6 +8,11 @@
 // Tr:w is the translation word (eg. "son" would be one for υἱός)
 // LexEntry id: [extended strongs number]-[language] (eg. H234a-eng, G8289-esp)
 // LxxWord:w is the inflected greek word
+// TagSet:tags is an array of the "top" word numbers and "bottom" word numbers (eg. Gen 1:1's for the esv would be [{t:[1],b:[1,3]},...] wherein "בראשית" is tagged to "In" and "beginning")
+// SearchResult:hitsPerBook (eg. {"43":22,"44":3} would indicate 22 hits in John and 3 in Acts)
+// Word:syn and Word:rel are arrays of synonym/related word objects (eg. [{"lemma":"τέκνον","strongs":"G5043","hits":99,"gloss":"child"}])
+// Word:lxx is an object with info on the lxx translation of this word (eg. [{"w":"ἀρχῇ","lemma":"ἀρχή","strongs":"G746","hits":236,"bhpHits":55}]
+// Translations:Tr is an array of word translation objects (eg. [{"son":299,"sons":56,...},...])
 
 // usfm content is sent for a verse; every word in the original languages (or lxx) MUST be in a /w enclosure.
 
@@ -24,54 +29,41 @@ module.exports = `
   type TagSet {
     id: ID
     origLangId: String
-    
+    tags: JSON
   }
 
   type Word {
     id: ID
     lemma: String
-    sound: String
+    lemmaUnique: Boolean
+    vocal: String
     hits: Int
     gloss: String
     pos: [String]
-    syn: [Wrd]
-    rel: [Wrd]
-    lxxWord: LxxWord
+    syn: JSON
+    rel: JSON
+    lxxWord: JSON
   }
 
-  type LxxWord {
-    w: String
-    lemma: String
-    strongs: String
-    hits: Int
-    bhpHits: Int
-  }
-  
   type Hits {
     id: ID
     hits: Int
   }
 
-  type Wrd {
-    id: ID
-    lemma: String
-    hits: Int
-    gloss: String
-  }
-
   type Translations {
     id: ID
-    tr: [Tr]
-  }
-
-  type Tr {
-    w: String
-    hits: Int
+    tr: JSON
   }
 
   type LexEntry {
     id: ID
     entry: String
+  }
+
+  type SearchResult {
+    hitsPerBook: JSON
+    results: [Verse]
+    tagSets: [TagSet]
   }
 
 `
