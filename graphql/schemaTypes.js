@@ -1,7 +1,7 @@
 // Verse:id = [2-digit book][3-digit chapter][3-digit verse]-[original language or lxx versionCode] (eg. 0010101 for Gen 1:1)
 // Verse:usfm - every word MUST be in a /w enclosure
 // TagSet:id = [2-digit book][3-digit chapter][3-digit verse]-[versionCode] (eg. 0010101-esv)
-// TagSet:tags = an array of the "top" original language word numbers (including chapter and verse) and "bottom" translation word numbers (eg. Gen 1:1's for the esv would be [{t:["1:1|1"],b:[1,3]},...] wherein "בראשית" is tagged to "In" and "beginning")
+// TagSet:tags = an array of the original language word numbers (including chapter and verse) and translation word numbers (eg. Gen 1:1's for the esv would be [{o:["1:1|1"],t:[1,3]},...] wherein "בראשית" is tagged to "In" and "beginning")
 // Word:id = [extended strongs number]-[language] (eg. H234a-eng, G8289-esp; language is needed for the gloss)
 // Word:pos = an array of parts of speech abbreviations (N, V, etc) that this lemma is found in
 // Word:syn and Word:rel = arrays of synonym/related word objects (eg. [{"lemma":"τέκνον","strongs":"G5043","hits":99,"gloss":"child"},...])
