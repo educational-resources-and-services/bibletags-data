@@ -1,0 +1,31 @@
+{
+  "name": "bibletags-data",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndyHubert/bibletags-data.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "1.17.2",
+    "console-stamp": "0.2.6",
+    "dotenv": "4.0.0",
+    "express": "4.15.3",
+    "graphql": "0.10.1",
+    "graphql-server-express": "0.8.5",
+    "graphql-tools": "1.0.0",
+    "graphql-type-json": "0.1.4",
+    "mysql2": "1.5.1",
+    "sequelize": "4.1.0"
+  },
+  "bugs": {
+    "url": "https://github.com/AndyHubert/bibletags-data/issues"
+  },
+  "homepage": "https://github.com/AndyHubert/bibletags-data#readme"
+}

@@ -13,39 +13,129 @@
   
 */
 
+const fs = require('fs')
+const { makeExecutableSchema } = require('graphql-tools')
+const GraphQLJSON = require('graphql-type-json')
+const { GraphQLScalarType } = require('graphql')
+const { Kind } = require('graphql/language')
 const schemaTypes = require('./schemaTypes')
 const schemaInputs = require('./schemaInputs')
 
-`
+// mutation requires found inline below
 
-scalar JSON
-scalar Date
+module.exports = ({ connection, nullLikeDate }) => {
 
-${schemaTypes}
+  const { models } = connection
 
-${schemaInputs}
+  const queryFunctions = {}
+  const items = fs.readdirSync(`${__dirname}/queries`)
+  items.forEach(item => {
+    if(!item.match(/\.js$/)) return
+    const itemName = item.replace(/\.js$/, '')
+    queryFunctions[itemName] = require(`./queries/${itemName}`)({
+      connection,
+      models, 
+    })
+  })
 
-type Query {
-  chapter(bookId: Int!, chapter: Int!, version: String!): [Verse]
-  verse(id: ID!): Verse
-  tagSets(bookId: Int!, chapter: Int!, version: String!): [TagSet]
-  tagSet(id: ID!): TagSet
-  word(id: ID!): Word
-  wordsByPosition(verseId: String!, wordNum: Int!): [Word]
-  hits(id: ID!): Hits
-  translations(id: ID!): Translations
-  translationsByPosition(verseId: String!, wordNum: Int!): [Translations]
-  search(query: String!, offset: Int, limit: Int, tagVersions: [String]): SearchResult
-}
+  const schemaString = `
 
-type Mutation {
+    scalar JSON
+    scalar Date
+    
+    ${schemaTypes}
+    
+    ${schemaInputs}
+    
+    type Query {
+      chapter(bookId: Int!, chapter: Int!, version: String!): [Verse]
+      verse(id: ID!): Verse
+      tagSets(bookId: Int!, chapter: Int!, version: String!): [TagSet]
+      tagSet(id: ID!): TagSet
+      word(id: ID!): Word
+      wordsByPosition(verseId: String!, wordNum: Int!): [Word]
+      hits(id: ID!): Hits
+      translations(id: ID!): Translations
+      translationsByPosition(verseId: String!, wordNum: Int!): [Translations]
+      search(query: String!, offset: Int, limit: Int, tagVersions: [String]): SearchResult
+    }
+    
+    type Mutation {
+      example(param1: String!): Boolean
+    }
+    
+    schema {
+      query: Query
+      mutation: Mutation
+    }
   
+  `
+
+  const resolveFunctions = {
+    JSON: GraphQLJSON,
+    Date: new GraphQLScalarType({
+      name: 'Date',
+      description: 'Date custom scalar type',
+      parseValue(value) {
+        return new Date(value); // value from the client
+      },
+      serialize(value) {
+        return value.getTime(); // value sent to the client
+      },
+      parseLiteral(ast) {
+        if (ast.kind === Kind.INT) {
+          return parseInt(ast.value, 10); // ast value is always in string format
+        }
+        return null;
+      },
+    }),
+    Query: (() => {
+
+      const queries = {}
+      const items = fs.readdirSync(`${__dirname}/queries`)
+      
+      items.forEach(item => {
+        if(!item.match(/\.js$/)) return
+        const itemName = item.replace(/\.js$/, '')
+        queries[itemName] = require(`./queries/${itemName}`)({
+          connection,
+          nullLikeDate,
+          models, 
+        })
+      })
+
+      return queries
+
+    })(),
+    // Query: {
+    //   chapter(queries, { id }, { req }) {
+    //     return [{
+    //       id: 'test id',
+    //       usfm: 'usfm stuff here',    
+    //     }]
+    //   },
+    // },
+    Mutation: (() => {
+
+      const mutations = {}
+      const items = fs.readdirSync(`${__dirname}/mutations`)
+      
+      items.forEach(item => {
+        if(!item.match(/\.js$/)) return
+        const itemName = item.replace(/\.js$/, '')
+        mutations[itemName] = require(`./mutations/${itemName}`)(Object.assign({
+          connection,
+          nullLikeDate,
+          models, 
+        }, queryFunctions))
+      })
+
+      return mutations
+
+    })(),
+  }
+
+
+  return makeExecutableSchema({ typeDefs: schemaString, resolvers: resolveFunctions });
+
 }
-
-schema {
-  query: Query
-  mutation: Mutation
-}
-
-
-`
