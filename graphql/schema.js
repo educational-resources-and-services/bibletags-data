@@ -107,14 +107,6 @@ module.exports = ({ connection, nullLikeDate }) => {
       return queries
 
     })(),
-    // Query: {
-    //   chapter(queries, { id }, { req }) {
-    //     return [{
-    //       id: 'test id',
-    //       usfm: 'usfm stuff here',    
-    //     }]
-    //   },
-    // },
     Mutation: (() => {
 
       const mutations = {}
