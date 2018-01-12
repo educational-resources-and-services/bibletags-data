@@ -160,11 +160,91 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  // const Word = connection.define('word', Object.assign({
-  // }), Object.assign({
-  //   indexes: [
-  //   ],
-  // }))
+  const OSHBWord = connection.define('oshbWord', Object.assign({
+    bookId: {
+      type: Sequelize.INTEGER(7).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 39,
+      },
+    },
+    chapter: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 150,
+      },
+    },
+    verse: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 176,
+      },
+    },
+    number: {
+      type: Sequelize.INTEGER(5).UNSIGNED,
+      allowNull: false,
+    },
+    qere: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    word: {
+      type: Sequelize.STRING(30),
+      allowNull: false,
+    },
+    accentlessword: {
+      type: Sequelize.STRING(30),
+      allowNull: false,
+    },
+    append: {
+      type: Sequelize.STRING(1),
+    },
+    prefix: {
+      type: Sequelize.STRING(5),
+    },
+    strongs: {
+      type: Sequelize.STRING(6),
+      allowNull: false,
+    },
+    morph: {
+      type: Sequelize.STRING(20),
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['bookId'],
+      },
+      {
+        fields: ['chapter'],
+      },
+      {
+        fields: ['verse'],
+      },
+      {
+        fields: ['number'],
+      },
+      {
+        fields: ['qere'],
+      },
+      {
+        fields: ['accentlessword'],
+      },
+      {
+        fields: ['prefix'],
+      },
+      {
+        fields: ['strongs'],
+      },
+      {
+        fields: ['morph'],
+      },
+    ],
+  }, noTimestampsOptions))
 
   //////////////////////////////////////////////////////////////////
 
@@ -255,7 +335,7 @@ const createConnection = () => {
 
   const PartOfSpeech = connection.define('partOfSpeech', Object.assign({
     pos: {
-      type: Sequelize.ENUM('adjective', 'conjunction', 'adverb', 'noun', 'pronoun', 'preposition', 'particle', 'verb'),
+      type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V'),
       allowNull: false,
     },
   }), Object.assign({
