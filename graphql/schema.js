@@ -52,8 +52,8 @@ module.exports = ({ connection, nullLikeDate }) => {
       verse(id: ID!): Verse
       tagSets(bookId: Int!, chapter: Int!, version: String!): [TagSet]
       tagSet(id: ID!): TagSet
-      word(id: ID!): Word
-      wordsByPosition(verseId: String!, wordNum: Int!): [Word]
+      definition(id: ID!): Definition
+      definitionByPosition(verseId: String!, wordNum: Int!): [Definition]
       hits(id: ID!): Hits
       translations(id: ID!): Translations
       translationsByPosition(verseId: String!, wordNum: Int!): [Translations]
