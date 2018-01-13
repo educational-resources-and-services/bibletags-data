@@ -6,7 +6,7 @@
   "scripts": {
     "setup": "node db/setup.js",
     "test": "echo \"Error: no test specified\" && exit 1"
-},
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AndyHubert/bibletags-data.git"
@@ -22,8 +22,10 @@
     "graphql-server-express": "0.8.5",
     "graphql-tools": "1.0.0",
     "graphql-type-json": "0.1.4",
+    "js2xmlparser": "3.0.0",
     "mysql2": "1.5.1",
-    "sequelize": "4.1.0"
+    "sequelize": "4.1.0",
+    "xml2js": "0.4.19"
   },
   "bugs": {
     "url": "https://github.com/AndyHubert/bibletags-data/issues"

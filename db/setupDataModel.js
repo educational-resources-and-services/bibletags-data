@@ -248,7 +248,7 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const Verse = connection.define('verse', Object.assign({
+  const OSHBVerse = connection.define('oshbVerse', Object.assign({
     id: strongsVersionId,
     usfm,
   }), Object.assign({

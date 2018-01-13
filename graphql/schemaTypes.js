@@ -1,6 +1,6 @@
-// Verse:id = [2-digit book][3-digit chapter][3-digit verse]-[original language or lxx versionCode] (eg. 00100101-wlc for Gen 1:1)
+// Verse:id = [2-digit book][3-digit chapter][3-digit verse]-[original language or lxx versionCode] (eg. 01001001-wlc for Gen 1:1)
 // Verse:usfm - every word MUST be in a /w enclosure
-// TagSet:id = [2-digit book][3-digit chapter][3-digit verse]-[versionCode] (eg. 00100101-esv)
+// TagSet:id = [2-digit book][3-digit chapter][3-digit verse]-[versionCode] (eg. 01001001-esv)
 // TagSet:tags = an array of the original language word numbers (including chapter and verse, if different; including word part number, if multi-part) and translation word numbers
   // (eg. Gen 1:1's for the esv would be [{o:["||1"],t:[1]},{o:["||2"],t:[3]},...] wherein "בראשית" is tagged to "In" and "beginning")
 // Definition:id = [extended strongs number]-[language] (eg. H234a-eng, G8289-esp; language is needed for the gloss)
