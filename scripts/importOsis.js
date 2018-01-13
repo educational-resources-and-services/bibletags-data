@@ -130,30 +130,57 @@ connection.connect(async (err) => {
               process.exit()
             }
             chapter.group.forEach(verse => {
+
               if(verse['='] != 'verse') {
                 console.log(`UNEXPECTED TAG: ${JSON.stringify(verse)}`)
                 process.exit()
               }
+
+              const wordInserts = []
+              const osisIDParts = verse['@'].osisID.split('.')
+              const verseId = utils.padWithZeros(bookId, 2) + utils.padWithZeros(osisIDParts[1], 3) + utils.padWithZeros(osisIDParts[2], 3)
+
               let verseUsfm = ""
+              let number = 0
+
               verse.group.forEach(wordOrSomethingElse => {
                 if(wordOrSomethingElse['='] == 'w') {
 
-                  let wordText = wordOrSomethingElse['#'] || ''
+                  ++number
+
+                  let word = wordOrSomethingElse['#'] || ''
                   ;(wordOrSomethingElse.group || []).forEach(wordPart => {
-                    wordText += wordPart['#'] || wordPart
+                    word += wordPart['#'] || wordPart
                   })
 
                   const strongs = wordOrSomethingElse['@'].lemma
                     .replace(/\//g, ':')
                     .replace(/([0-9]+)/, match => ('H' + utils.padWithZeros(match, 5)))
-                    .replace(/ ([a-e])$/, '$1')
+                    .replace(/ ([a-z])$/, '$1')
 
                   const morph = wordOrSomethingElse['@'].morph
 
-                  verseUsfm += `\\n\\\\w ${wordText}|strong="${strongs}" x-morph="${morph}" \\\\w*`
+                  verseUsfm += `\\n\\\\w ${word}|strong="${strongs}" x-morph="${morph}" \\\\w*`
+
+                  const strongsParts = strongs.split(':')
+
+                  wordInserts.push({
+                    bookId,
+                    chapter: osisIDParts[1],
+                    verse: osisIDParts[2],
+                    number,
+                    qere: 0,
+                    word,
+                    strongs: strongsParts.pop(),
+                    prefix: strongsParts.join(''),
+                    morph,
+                    append: "",
+                  })
                   
                 } else if(wordOrSomethingElse['='] == 'seg') {
                   verseUsfm += wordOrSomethingElse['#'].trim()
+
+                  wordInserts[wordInserts.length - 1].append += wordOrSomethingElse['#'].trim() 
 
                 } else if(wordOrSomethingElse['='] == 'note') {
                   // TODO
@@ -164,16 +191,18 @@ connection.connect(async (err) => {
                 }
 
               })
-
-              const osisIDParts = verse['@'].osisID.split('.')
-              const verseId = utils.padWithZeros(bookId, 2) + utils.padWithZeros(osisIDParts[1], 3) + utils.padWithZeros(osisIDParts[2], 3)
-
+              
               updates.push(`INSERT INTO oshbVerses (id, usfm) VALUES ('${verseId}', '${verseUsfm.replace(/^\\n/, '')}')`)
+
+              wordInserts.forEach(wordInsert => {
+                updates.push(`INSERT INTO oshbWords (${Object.keys(wordInsert).join(", ")}) VALUES ('${Object.values(wordInsert).join("', '")}')`)
+              })
+
             })
           })
 
           utils.doUpdatesInChunks(connection, { updates }, numRowsUpdated => {
-            console.log(`  Book #${bookId} done--${numRowsUpdated} row inserted.`)
+            console.log(`  Book #${bookId} done--${numRowsUpdated} rows inserted.`)
             bookId++ && exportBook()
           })
 

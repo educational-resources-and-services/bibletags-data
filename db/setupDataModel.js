@@ -131,20 +131,20 @@ const createConnection = () => {
     })
   }
 
-  const strongsVersionRegEx = /^[0-9]{8}-[a-z0-9]{2,9}$/
-  const strongsLangRegEx = /^[HAG][0-9]{1,4}[a-e]?-[a-z]{3}$/
-  const strongsAnythingRegEx = /^[HAG][0-9]{1,4}[a-e]?-\w+$/
+  const verseVersionRegEx = /^[0-9]{8}-[a-z0-9]{2,9}$/
+  const strongsLangRegEx = /^[HAG][0-9]{5}[a-z]?-[a-z]{3}$/
+  const strongsAnythingRegEx = /^[HAG][0-9]{5}[a-z]?-\w+$/
 
-  const strongsVersionId = {
+  const verseVersionId = {
     type: Sequelize.STRING(20),
     primaryKey: true,
     validate: {
-      is: strongsVersionRegEx,
+      is: verseVersionRegEx,
     },
   }
 
   const strongsLangId = {
-    type: Sequelize.STRING(10),
+    type: Sequelize.STRING(11),
     primaryKey: true,
     validate: {
       is: strongsLangRegEx,
@@ -197,18 +197,14 @@ const createConnection = () => {
       type: Sequelize.STRING(30),
       allowNull: false,
     },
-    accentlessword: {
-      type: Sequelize.STRING(30),
-      allowNull: false,
-    },
     append: {
-      type: Sequelize.STRING(1),
+      type: Sequelize.STRING(3),
     },
     prefix: {
       type: Sequelize.STRING(5),
     },
     strongs: {
-      type: Sequelize.STRING(6),
+      type: Sequelize.STRING(7),
       allowNull: false,
     },
     morph: {
@@ -232,9 +228,6 @@ const createConnection = () => {
         fields: ['qere'],
       },
       {
-        fields: ['accentlessword'],
-      },
-      {
         fields: ['prefix'],
       },
       {
@@ -249,7 +242,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const OSHBVerse = connection.define('oshbVerse', Object.assign({
-    id: strongsVersionId,
+    id: verseVersionId,
     usfm,
   }), Object.assign({
     indexes: [
@@ -259,7 +252,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const TagSet = connection.define('tagSet', Object.assign({
-    id: strongsVersionId,
+    id: verseVersionId,
     tags: {
       type: Sequelize.JSON,
       allowNull: false,
@@ -378,7 +371,7 @@ const createConnection = () => {
   // //////////////////////////////////////////////////////////////////
 
   const Translation = connection.define('translation', Object.assign({
-    id: strongsVersionId,
+    id: verseVersionId,
     tr: {
       type: Sequelize.JSON,
       allowNull: false,
