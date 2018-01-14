@@ -20,6 +20,7 @@ connection.connect(async (err) => {
 
   console.log(`\nSTARTING`)
 
+  const badStrongs = {}
   const bdbHasEntryByStrongs = {}
   const uniqueStateOfLemmas = {}
   let bdbOnlyCount = 0
@@ -42,6 +43,11 @@ connection.connect(async (err) => {
 
     const paddedStrongs = row.id.replace(/([0-9]+)/, match => utils.padWithZeros(match, 5))
 
+    if(!paddedStrongs.match(/^H[0-9]{5}[a-z]?$/)) {
+      badStrongs[paddedStrongs] = true
+      return
+    }
+      
     const statement2 = `SELECT morph FROM oshbWords WHERE strongs="${paddedStrongs}"`
 
     const result2 = await utils.queryAsync({ connection, statement: statement2 })
@@ -56,7 +62,7 @@ connection.connect(async (err) => {
         hits: result2.length,
         lxx: JSON.stringify([]),  // this info is not yet known
       }
-      
+
       updates.push(`INSERT INTO definitions (${Object.keys(defInsert).join(", ")}) VALUES ('${Object.values(defInsert).join("', '")}')`)
 
       const posInKeys = {}
@@ -83,15 +89,15 @@ connection.connect(async (err) => {
         updates.push(`INSERT INTO partOfSpeeches (${Object.keys(posInsert).join(", ")}) VALUES ('${Object.values(posInsert).join("', '")}')`)
 
       })
-  
+
     } else {
       bdbOnlyCount++
     }
 
-
   }))
 
   console.log(`  - ${bdbOnlyCount} words in bdb, but not in oshbWords.`)
+  console.log(`  - Strongs numbers skipped due to bad formation: ${Object.keys(badStrongs).join(', ')}`)
 
   const numRowsUpdated = await utils.doUpdatesInChunksAsync({ connection, updates })
   console.log(`\n  ${numRowsUpdated} rows inserted.\n`)
