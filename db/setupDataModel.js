@@ -169,7 +169,7 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const OSHBWord = connection.define('oshbWord', Object.assign({
+  const oshbWord = connection.define('oshbWord', Object.assign({
     bookId: {
       type: Sequelize.INTEGER(7).UNSIGNED,
       allowNull: false,
@@ -250,7 +250,7 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const OSHBVerse = connection.define('oshbVerse', Object.assign({
+  const oshbVerse = connection.define('oshbVerse', Object.assign({
     id: verseVersionId,
     usfm,
   }), Object.assign({
