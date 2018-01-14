@@ -1,8 +1,6 @@
 require('dotenv').config()
 require('console-stamp')(console, {
-  metadata: function () {
-      return ('[' + Math.round(process.memoryUsage().rss / 1000000) + 'MB]');
-  },
+  metadata: () => ('[' + Math.round(process.memoryUsage().rss / 1000000) + 'MB]'),
   colors: {
     stamp: 'yellow',
     label: 'white',
@@ -13,7 +11,7 @@ require('console-stamp')(console, {
 const express = require('express')
 
 const dev = process.env.NODE_ENV === 'development'
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser')
 
 const { createConnection, nullLikeDate } = require('./db/setupDataModel')
 const { graphqlExpress, graphiqlExpress } = require('graphql-server-express')
@@ -25,22 +23,22 @@ let connection = createConnection()
 let reestablishingConnection = false
 
 connection.sync().then(() => {
-  console.log('Connection has been established successfully.');
+  console.log('Connection has been established successfully.')
 
   const server = express()
 
   // force HTTPS and strip www
   server.use('*', function(req, res, next) {  
     if(!req.secure && req.headers['x-forwarded-proto'] !== 'https' && process.env.REQUIRE_HTTPS) {
-      var secureUrl = "https://" + req.headers.host + req.url; 
-      res.redirect(secureUrl);
+      var secureUrl = "https://" + req.headers.host + req.url 
+      res.redirect(secureUrl)
     } else if(req.headers.host.match(/^www\./)) {
-      var noWWWUrl = "https://" + req.headers.host.replace(/^www\./, '') + req.url; 
-      res.redirect(noWWWUrl);
+      var noWWWUrl = "https://" + req.headers.host.replace(/^www\./, '') + req.url 
+      res.redirect(noWWWUrl)
     } else {
-      next();
+      next()
     }
-  });
+  })
 
   //stop blacklisted ips
   server.use((req, res, next) => {
@@ -80,6 +78,19 @@ connection.sync().then(() => {
   server.use(bodyParser.json())
   server.use(bodyParser.urlencoded({ extended: true }))
 
+  // allow cors
+  server.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", dev ? "*" : "https://widget.bibletags.org")
+    res.header("Access-Control-Allow-Headers", "*")
+    res.header('Access-Control-Allow-Methods', "*")
+
+    if(req.method === 'OPTIONS') {
+      return res.sendStatus(200)
+    }
+
+    next()
+  })
+
   // graphql middleware
   server.use(bodyParser.text({ type: 'application/graphql' }))
   server.use((req, res, next) => {
@@ -92,7 +103,7 @@ connection.sync().then(() => {
   if(dev) {
     server.use('/graphiql', graphiqlExpress({
       endpointURL: '/graphql',
-    }));
+    }))
   }
 
   server.use('/graphql', graphqlExpress(req => ({
