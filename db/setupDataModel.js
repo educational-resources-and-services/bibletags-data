@@ -132,6 +132,7 @@ const createConnection = () => {
   }
 
   const verseVersionRegEx = /^[0-9]{8}-[a-z0-9]{2,9}$/
+  const strongsRegEx = /^[HAG][0-9]{5}[a-z]?$/
   const strongsLangRegEx = /^[HAG][0-9]{5}[a-z]?-[a-z]{3}$/
   const strongsAnythingRegEx = /^[HAG][0-9]{5}[a-z]?-\w+$/
 
@@ -140,6 +141,14 @@ const createConnection = () => {
     primaryKey: true,
     validate: {
       is: verseVersionRegEx,
+    },
+  }
+
+  const strongsId = {
+    type: Sequelize.STRING(11),
+    primaryKey: true,
+    validate: {
+      is: strongsRegEx,
     },
   }
 
@@ -265,7 +274,7 @@ const createConnection = () => {
   ////////////////////////////////////////////////////////////////////
 
   const Definition = connection.define('definition', Object.assign({
-    id: strongsLangId,
+    id: strongsId,
     lemma: {
       type: Sequelize.STRING(50),
       allowNull: false,
@@ -281,24 +290,6 @@ const createConnection = () => {
     hits: {
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
-    },
-    gloss: {
-      type: Sequelize.STRING(100),
-      allowNull: false,
-    },
-    syn: {
-      type: Sequelize.JSON,
-      allowNull: false,
-      validate: {
-        isArrayOfWordObjs,
-      },
-    },
-    rel: {
-      type: Sequelize.JSON,
-      allowNull: false,
-      validate: {
-        isArrayOfWordObjs,
-      },
     },
     lxx: {
       type: Sequelize.JSON,
@@ -318,6 +309,37 @@ const createConnection = () => {
       {
         fields: ['hits'],
       },
+    ],
+  }, noTimestampsOptions))
+
+  // TODO: I need a many-to-may relationship here, indicating synonyms and related words in a language agnostic way
+  // This relationship will be used for producing the language-specific definition rows each time these relationships
+  // or a gloss is updated.
+
+  ////////////////////////////////////////////////////////////////////
+
+  const EngDefinition = connection.define('engDefinition', Object.assign({
+    id: strongsLangId,
+    gloss: {
+      type: Sequelize.STRING(100),
+      allowNull: false,
+    },
+    syn: {
+      type: Sequelize.JSON,
+      allowNull: false,
+      validate: {
+        isArrayOfWordObjs,
+      },
+    },
+    rel: {
+      type: Sequelize.JSON,
+      allowNull: false,
+      validate: {
+        isArrayOfWordObjs,
+      },
+    },
+  }), Object.assign({
+    indexes: [
       {
         fields: ['gloss'],
       },

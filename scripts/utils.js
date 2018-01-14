@@ -80,9 +80,26 @@ const utils = {
 
   },
 
+  doUpdatesInChunksAsync: ({ connection, updates }) => {
+    return new Promise(resolve => {
+      utils.doUpdatesInChunks(connection, { updates }, numRowsUpdated => {
+        resolve(numRowsUpdated)
+      })
+    })
+  },
+  
+  queryAsync: ({ connection, statement }) => {
+    return new Promise(resolve => {
+      connection.query(statement, (err, result) => {
+        if(err) throw err
+        resolve(result)
+      })
+    })
+  },
+
   padWithZeros: (num, desiredNumDigits) => {
     return ('000000000000000000000000' + num).substr(desiredNumDigits*-1)
-  }
+  },
   
 }
   

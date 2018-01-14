@@ -154,6 +154,7 @@ connection.connect(async (err) => {
                   })
 
                   const strongs = wordOrSomethingElse['@'].lemma
+                    .replace(/\+/g, '')  // TODO: this will need to be handled differently once we decide how to do multi-word lemmas
                     .replace(/\//g, ':')
                     .replace(/([0-9]+)/, match => ('H' + utils.padWithZeros(match, 5)))
                     .replace(/ ([a-z])$/, '$1')
