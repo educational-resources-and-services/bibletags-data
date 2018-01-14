@@ -1,9 +1,6 @@
 require('dotenv').config()
 
 const mysql = require('mysql2')
-const xml2js = require('xml2js')
-const js2xmlparser = require("js2xmlparser")
-const fs = require('fs')
 
 const utils = require('./utils')
 
