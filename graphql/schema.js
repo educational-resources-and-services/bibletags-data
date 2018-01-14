@@ -1,6 +1,12 @@
 // tagSets:version = [translationVersionCode] (eg. esv)
 
-// Most of the time, wordsByPosition will return a single word, but in the event that multiple orig language words
+// definitionsByPosition:version = (eg. wlc, esv)
+// definitionsByPosition:verseLoc = (eg. 01001001)
+// definitionsByPosition:wordNum = (eg. 3)
+// definitionsByPosition:language = (eg. eng)
+// translationsByPosition has same params
+
+// Most of the time, definitionsByPosition will return a single word, but in the event that multiple orig language words
 // connect to a single translation word, more than one word might need to be sent back. Same goes for translationsByPosition.
 
 /*
@@ -53,10 +59,10 @@ module.exports = ({ connection, nullLikeDate }) => {
       tagSets(bookId: Int!, chapter: Int!, version: String!): [TagSet]
       tagSet(id: ID!): TagSet
       definition(id: ID!): Definition
-      definitionByPosition(verseId: String!, wordNum: Int!): [Definition]
+      definitionsByPosition(version: String!, verseLoc: String!, wordNum: Int!, language: String!): [Definition]
       hits(id: ID!): Hits
       translations(id: ID!): Translations
-      translationsByPosition(verseId: String!, wordNum: Int!): [Translations]
+      translationsByPosition(version: String!, verseLoc: String!, wordNum: Int!, language: String!): [Translations]
       search(query: String!, offset: Int, limit: Int, tagVersions: [String]): SearchResult
     }
     
