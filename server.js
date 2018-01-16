@@ -80,7 +80,7 @@ connection.sync().then(() => {
 
   // allow cors
   server.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", dev ? "*" : "https://widget.bibletags.org")
+    res.header("Access-Control-Allow-Origin", dev ? "*" : "https://cdn.bibletags.org")
     res.header("Access-Control-Allow-Headers", "*")
     res.header('Access-Control-Allow-Methods', "*")
 
