@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "setup": "node db/setup.js",
+    "zip": "rm -f build.zip && zip build.zip -qr --exclude=package.json --exclude=scripts* *",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

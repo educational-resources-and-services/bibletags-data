@@ -11,6 +11,7 @@ require('console-stamp')(console, {
 const express = require('express')
 
 const dev = process.env.NODE_ENV === 'development'
+const staging = process.env.NODE_ENV === 'staging'
 const bodyParser = require('body-parser')
 
 const { createConnection, nullLikeDate } = require('./db/setupDataModel')
@@ -80,7 +81,7 @@ connection.sync().then(() => {
 
   // allow cors
   server.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", dev ? "*" : "https://cdn.bibletags.org")
+    res.header("Access-Control-Allow-Origin", dev ? "*" : (staging ? "https://cdn.staging.bibletags.org" : "https://cdn.bibletags.org"))
     res.header("Access-Control-Allow-Headers", "*")
     res.header('Access-Control-Allow-Methods', "*")
 
