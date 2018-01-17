@@ -61,4 +61,10 @@ module.exports = `
     tagSets: [TagSet]
   }
 
+  type UIWord {
+    str: String
+    desc: String
+    translation: String
+  }
+
 `

@@ -64,6 +64,7 @@ module.exports = ({ connection, nullLikeDate }) => {
       translations(id: ID!): Translations
       translationsByPosition(version: String!, verseLoc: String!, wordNum: Int!, language: String!): [Translations]
       search(query: String!, offset: Int, limit: Int, tagVersions: [String]): SearchResult
+      uiWords(language: String!): [UIWord]
     }
     
     type Mutation {
