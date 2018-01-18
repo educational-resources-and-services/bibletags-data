@@ -161,7 +161,11 @@ connection.connect(async (err) => {
 
                   const morph = wordOrSomethingElse['@'].morph
 
-                  verseUsfm += `\\n\\\\w ${word}|strong="${strongs}" x-morph="${morph}" \\\\w*`
+                  verseUsfm += (
+                    morph
+                      ? `\\n\\\\w ${word}|strong="${strongs}" x-morph="${morph}" \\\\w*`
+                      : `\\n\\\\w ${word}|strong="${strongs}" \\\\w*`
+                  )
 
                   const strongsParts = strongs.split(':')
 
