@@ -83,7 +83,8 @@ connection.sync().then(() => {
   server.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", dev ? "*" : (staging ? "https://cdn.staging.bibletags.org" : "https://cdn.bibletags.org"))
     res.header("Access-Control-Allow-Headers", "*")
-    res.header('Access-Control-Allow-Methods', "*")
+    res.header('Access-Control-Allow-Methods', "POST, GET, OPTIONS, DELETE, PUT, HEAD")
+    res.header('Access-Control-Max-Age', "3600")
 
     if(req.method === 'OPTIONS') {
       return res.sendStatus(200)
