@@ -159,15 +159,21 @@ connection.connect(async (err) => {
                     .replace(/([0-9]+)/, match => ('H' + utils.padWithZeros(match, 5)))
                     .replace(/ ([a-z])$/, '$1')
 
+                  const strongsParts = strongs.split(':')
+                  if(!strongsParts[strongsParts.length - 1].match(/^[HA]/)) {
+                    strongsParts.push("")
+                  }
+                  const strongsWithoutPrefixes = strongsParts.pop()
+                  const strongsPrefixes = strongsParts.join('')
+                  const strongsWithPrefixes = (strongsPrefixes ? strongsPrefixes + ':' : '') + strongsWithoutPrefixes
+
                   const morph = wordOrSomethingElse['@'].morph
 
                   verseUsfm += (
                     morph
-                      ? `\\n\\\\w ${word}|strong="${strongs}" x-morph="${morph}" \\\\w*`
-                      : `\\n\\\\w ${word}|strong="${strongs}" \\\\w*`
+                      ? `\\n\\\\w ${word}|strong="${strongsWithPrefixes}" x-morph="${morph}" \\\\w*`
+                      : `\\n\\\\w ${word}|strong="${strongsWithPrefixes}" \\\\w*`
                   )
-
-                  const strongsParts = strongs.split(':')
 
                   wordInserts.push({
                     bookId,
@@ -176,8 +182,8 @@ connection.connect(async (err) => {
                     number,
                     qere: 0,
                     word,
-                    strongs: strongsParts.pop(),
-                    prefix: strongsParts.join(''),
+                    strongs: strongsWithoutPrefixes,
+                    prefix: strongsPrefixes,
                     morph,
                     append: "",
                   })
