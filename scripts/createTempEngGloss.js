@@ -1,3 +1,5 @@
+process.exit()  // I have modified these by hand and so cannot run this again
+
 require('dotenv').config()
 
 const mysql = require('mysql2')
