@@ -163,7 +163,13 @@ connection.connect(async (err) => {
                   if(!strongsParts[strongsParts.length - 1].match(/^[HA]/)) {
                     strongsParts.push("")
                   }
-                  const strongsWithoutPrefixes = strongsParts.pop()
+                  let strongsWithoutPrefixes = strongsParts.pop()
+
+                  // change ילך lemma to הלך
+                  if(strongsWithoutPrefixes === "H03212") {
+                    strongsWithoutPrefixes = "H01980"
+                  }
+
                   const strongsPrefixes = strongsParts.join('')
                   const strongsWithPrefixes = (strongsPrefixes ? strongsPrefixes + ':' : '') + strongsWithoutPrefixes
 
