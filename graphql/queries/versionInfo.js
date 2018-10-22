@@ -3,12 +3,12 @@ module.exports = ({ models }) => {
   return (
     queries,
     {
-      version,
+      id,
     },
     { req }
   ) => {
 
-    return models.versionInfo.findById(version).then(versionInfo => versionInfo)
+    return models.versionInfo.findById(id).then(versionInfo => versionInfo)
 
   }
 }

@@ -1,6 +1,6 @@
-// tagSets:version = [translationVersionCode] (eg. esv)
+// tagSets:versionId = [translationVersionId] (eg. esv)
 
-// definitionsByPosition:version = (eg. wlc, esv)
+// definitionsByPosition:versionId = (eg. wlc, esv)
 // definitionsByPosition:verseLoc = (eg. 01001001)
 // definitionsByPosition:wordNum = (eg. 3)
 // definitionsByPosition:language = (eg. eng)
@@ -54,17 +54,17 @@ module.exports = ({ connection, nullLikeDate }) => {
     ${schemaInputs}
     
     type Query {
-      chapter(bookId: Int!, chapter: Int!, version: String!): [Verse]
+      chapter(bookId: Int!, chapter: Int!, versionId: String!): [Verse]
       verse(id: ID!): Verse
-      tagSets(bookId: Int!, chapter: Int!, version: String!): [TagSet]
+      tagSets(bookId: Int!, chapter: Int!, versionId: String!): [TagSet]
       tagSet(id: ID!): TagSet
       definition(id: ID!): Definition
-      definitionsByPosition(version: String!, verseLoc: String!, wordNum: Int!, language: String!): [Definition]
+      definitionsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, language: String!): [Definition]
       hits(id: ID!): Hits
       translations(id: ID!): Translations
-      translationsByPosition(version: String!, verseLoc: String!, wordNum: Int!, language: String!): [Translations]
+      translationsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, language: String!): [Translations]
       search(query: String!, offset: Int, limit: Int, tagVersions: [String]): SearchResult
-      versionInfo(version: String!): VersionInfo
+      versionInfo(id: ID!): VersionInfo
       uiWords(language: String!): [UIWord]
     }
     

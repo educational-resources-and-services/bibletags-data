@@ -5,7 +5,7 @@ module.exports = ({ models }) => {
     {
       bookId,
       chapter,
-      version,
+      versionId,
     },
     { req }
   ) => {

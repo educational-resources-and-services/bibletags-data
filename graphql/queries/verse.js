@@ -8,15 +8,15 @@ module.exports = ({ models }) => {
     { req }
   ) => {
 
-    const [ verseLoc, version, invalidExtra ] = id.split('-')
-    const model = models[`${version}Verse`]
+    const [ verseLoc, versionId, invalidExtra ] = id.split('-')
+    const model = models[`${versionId}Verse`]
 
     if(invalidExtra !== undefined) {
       throw(new Error('Invalid id.'))
     }
 
     if(!model) {
-      throw(new Error('Invalid version indicated in id.'))
+      throw(new Error('Invalid versionId indicated in id.'))
     }
 
     if(!verseLoc.match(/^[0-9]{8}$/)) {
@@ -24,7 +24,7 @@ module.exports = ({ models }) => {
     }
 
     return model.findById(verseLoc).then(verse => !verse ? null : ({
-      id: `${verse.id}-${version}`,
+      id: `${verse.id}-${versionId}`,
       usfm: verse.usfm,
     }))
 

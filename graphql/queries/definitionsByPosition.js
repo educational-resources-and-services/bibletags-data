@@ -7,7 +7,7 @@ module.exports = ({ models }) => {
   return (
     queries,
     {
-      version,
+      versionId,
       verseLoc,
       wordNum,
       language,
@@ -17,8 +17,8 @@ module.exports = ({ models }) => {
 
     // validate everything
 
-    if(!version.match(/^[a-z0-9]{2,9}$/)) {
-      throw(new Error('Invalid version.'))
+    if(!versionId.match(/^[a-z0-9]{2,9}$/)) {
+      throw(new Error('Invalid versionId.'))
     }
 
     if(!verseLoc.match(/^[0-9]{8}$/)) {
@@ -38,7 +38,7 @@ module.exports = ({ models }) => {
 
     // if not parsed Hebrew or Greek text, then go to tagSets table to get the orig language word position
 
-    if(!studyVersions.includes(version)) {
+    if(!studyVersions.includes(versionId)) {
       // TODO
       throw(new Error('Functionality not yet implemented.'))
 
@@ -50,7 +50,7 @@ module.exports = ({ models }) => {
       })
     }
     
-    const model = models[`${version}Word`]
+    const model = models[`${versionId}Word`]
 
     if(!model) {
       throw(new Error('Invalid language.'))
