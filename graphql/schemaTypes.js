@@ -67,4 +67,12 @@ module.exports = `
     translation: String
   }
 
+  type VersionInfo {
+    name: String
+    language: String
+    wordDividerRegex: String
+    versificationModel: Int
+    exceptionalVersificationMappings: JSON
+  }
+
 `

@@ -131,8 +131,49 @@ const createConnection = () => {
     })
   }
 
+  const isObjOfVersificationMappings = obj => {
+    if(typeof obj !== 'object') {
+      throw new Error('Must be an object.')
+    }
+
+    const mappingRegEx = /^(?:[0-9]{8}(?::[0-9]{1,3})?)?(?:-(?:[0-9]{8}(?::[0-9]{1,3})?)?)?$/
+    
+    Object.keys(obj).forEach(key => {
+      if(!mappingRegEx.test(key)) {
+        throw new Error('Invalid versification mapping key.')
+      }
+      if(typeof obj[key] !== "number" && !mappingRegEx.test(obj[key])) {
+        throw new Error('Invalid versification mapping value.')
+      }
+    })
+  }
+
+  const isJSONArrayWithTwoStrings = jsonText => {
+    let jsonObj
+
+    try {
+      jsonObj = JSON.parse(jsonText)
+    } catch(e) {
+      throw new Error('Must be in JSON format.')
+    }
+
+    if(!(jsonObj instanceof Array)) {
+      throw new Error('Must be JSON array.')
+    }
+
+    if(jsonObj.length !== 2) {
+      throw new Error('Must be JSON array with two items.')
+    }
+
+    if(jsonObj.some(item => typeof item !== 'string')) {
+      throw new Error('Must be JSON array of two strings.')
+    }
+  }
+
+  const versionRegEx = /^[a-z0-9]{2,9}$/
   const verseVersionRegEx = /^[0-9]{8}-[a-z0-9]{2,9}$/
   const strongsRegEx = /^[HAG][0-9]{5}[a-z]?$/
+  const langRegEx = /^[a-z]{3}$/
   const strongsLangRegEx = /^[HAG][0-9]{5}[a-z]?-[a-z]{3}$/
   const strongsAnythingRegEx = /^[HAG][0-9]{5}[a-z]?-\w+$/
 
@@ -163,6 +204,14 @@ const createConnection = () => {
   const usfm = {
     type: Sequelize.TEXT,
     allowNull: false,
+  }
+
+  const language = {
+    type: Sequelize.STRING(3),
+    allowNull: false,
+    validate: {
+      is: langRegEx,
+    },
   }
 
   const required = { foreignKey: { allowNull: false } };
@@ -346,7 +395,7 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  // //////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////
 
   const PartOfSpeech = connection.define('partOfSpeech', Object.assign({
     pos: {
@@ -364,7 +413,7 @@ const createConnection = () => {
   PartOfSpeech.belongsTo(Definition, required)
   Definition.hasMany(PartOfSpeech)
 
-  // //////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////
 
   const Hits = connection.define('hits', Object.assign({
     id: {
@@ -390,7 +439,7 @@ const createConnection = () => {
   // BlackedListedEmail.belongsTo(Tenant, required);
   // Tenant.hasMany(BlackedListedEmail);
 
-  // //////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////
 
   const Translation = connection.define('translation', Object.assign({
     id: verseVersionId,
@@ -406,7 +455,7 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  // //////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////
 
   const LexEntry = connection.define('lexEntry', Object.assign({
     id: strongsLangId,
@@ -415,6 +464,76 @@ const createConnection = () => {
     indexes: [
     ],
   }, noTimestampsOptions))
+
+  //////////////////////////////////////////////////////////////////
+
+  const Version = connection.define('version', Object.assign({
+    id: {
+      type: Sequelize.STRING(9),
+      primaryKey: true,
+      validate: {
+        is: versionRegEx,
+      },
+    },
+    name: {
+      type: Sequelize.STRING(150),
+      allowNull: false,
+      notEmpty: true,
+    },
+    language,
+    wordDividerRegex: {
+      type: Sequelize.STRING(100),
+    },
+    versificationModel: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+      },
+    },
+    exceptionalVersificationMappings: {
+      type: Sequelize.JSON,
+      validate: {
+        isObjOfVersificationMappings,
+      },
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['name', 'language', 'versificationModel'],
+      },
+    ],
+  }))
+
+  //////////////////////////////////////////////////////////////////
+
+  const UiWord = connection.define('uiWord', Object.assign({
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    str: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      notEmpty: true,
+    },
+    desc: {
+      type: Sequelize.STRING,
+      notEmpty: true,
+    },
+    language,
+    translation: {
+      type: Sequelize.TEXT,
+      allowNull: false,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['str', 'desc', 'language'],
+      },
+    ],
+  }))
 
   //////////////////////////////////////////////////////////////////
 

@@ -21,7 +21,8 @@ connection.connect(async (err) => {
   console.log(`\nSTARTING`)
 
   const bookURIsByBookId = {}
-  const importDir = '../morphhb/wlc'
+  // const importDir = '../morphhb/wlc'
+  const importDir = '../morphhb-parsing/morphhb-scripts/morphhb'
 
   await new Promise(resolve => {
 
