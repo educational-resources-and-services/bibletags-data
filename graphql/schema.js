@@ -63,7 +63,7 @@ module.exports = ({ connection, nullLikeDate }) => {
       hits(id: ID!): Hits
       translations(id: ID!): Translations
       translationsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, language: String!): [Translations]
-      search(query: String!, offset: Int, limit: Int, tagVersions: [String]): SearchResult
+      search(query: String!, offset: Int, limit: Int, tagVersionIds: [String]): SearchResult
       versionInfo(id: ID!): VersionInfo
       uiWords(language: String!): [UIWord]
     }

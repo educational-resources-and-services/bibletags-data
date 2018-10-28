@@ -170,8 +170,8 @@ const createConnection = () => {
     }
   }
 
-  const versionRegEx = /^[a-z0-9]{2,9}$/
-  const verseVersionRegEx = /^[0-9]{8}-[a-z0-9]{2,9}$/
+  const versionIdRegEx = /^[a-z0-9]{2,9}$/
+  const verseVersionIdRegEx = /^[0-9]{8}-[a-z0-9]{2,9}$/
   const strongsRegEx = /^[HAG][0-9]{5}[a-z]?$/
   const langRegEx = /^[a-z]{3}$/
   const strongsLangRegEx = /^[HAG][0-9]{5}[a-z]?-[a-z]{3}$/
@@ -181,7 +181,7 @@ const createConnection = () => {
     type: Sequelize.STRING(20),
     primaryKey: true,
     validate: {
-      is: verseVersionRegEx,
+      is: verseVersionIdRegEx,
     },
   }
 
@@ -467,12 +467,12 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const Version = connection.define('version', Object.assign({
+  const VersionInfo = connection.define('versionInfo', Object.assign({
     id: {
       type: Sequelize.STRING(9),
       primaryKey: true,
       validate: {
-        is: versionRegEx,
+        is: versionIdRegEx,
       },
     },
     name: {
