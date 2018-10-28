@@ -73,8 +73,10 @@ module.exports = `
     name: String
     language: String
     wordDividerRegex: String
-    versificationModel: Int
-    exceptionalVersificationMappings: JSON
+    partialScope: String
+    versificationModel: String
+    skipsUnlikelyOriginals: Boolean
+    extraVerseMappings: JSON
   }
 
 `

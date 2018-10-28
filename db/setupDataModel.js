@@ -131,19 +131,30 @@ const createConnection = () => {
     })
   }
 
-  const isObjOfVersificationMappings = obj => {
+  const isVerseMappings = obj => {
+
     if(typeof obj !== 'object') {
       throw new Error('Must be an object.')
     }
 
-    const mappingRegEx = /^(?:[0-9]{8}(?::[0-9]{1,3})?)?(?:-(?:[0-9]{8}(?::[0-9]{1,3})?)?)?$/
+    const singleVerseRegEx = /^[0-9]{8}(?::[0-9]{1,3}(?:-[0-9]{1,3})?)?$/
+    const rangeRegEx = /^[0-9]{8}(?:-[0-9]{3})?$/
     
     Object.keys(obj).forEach(key => {
-      if(!mappingRegEx.test(key)) {
-        throw new Error('Invalid versification mapping key.')
-      }
-      if(typeof obj[key] !== "number" && !mappingRegEx.test(obj[key])) {
-        throw new Error('Invalid versification mapping value.')
+      if(singleVerseRegEx.test(key) && singleVerseRegEx.test(obj[key])) {
+        // Valid option. Examples:
+        // "02011030": "02012001",
+        // "05022005:1-5": "05022005",
+        // "05022005:6-10": "05022006",
+        // "08002009:5-10": "08002009:1-7",
+        // "08002010:1-2": "08002009:8-9",
+        
+      } else if(rangeRegEx.test(key) && typeof obj[key] === "number") {
+        // Valid option. Example:
+        // "02012001-021": -1,
+
+      } else {
+        throw new Error(`Invalid versification rule. ${key}: ${obj[key]}`)
       }
     })
   }
@@ -484,23 +495,39 @@ const createConnection = () => {
     wordDividerRegex: {
       type: Sequelize.STRING(100),
     },
-    versificationModel: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-      },
+    partialScope: {
+      type: Sequelize.ENUM('ot', 'nt'),  // null indicates this version covers the entire (canonical) Bible
     },
-    exceptionalVersificationMappings: {
+    versificationModel: {
+      type: Sequelize.ENUM('original', 'kjv', 'synodal', 'lxx'),
+      allowNull: false,
+    },
+    skipsUnlikelyOriginals: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    extraVerseMappings: {
       type: Sequelize.JSON,
       validate: {
-        isObjOfVersificationMappings,
+        isVerseMappings,
       },
     },
   }), Object.assign({
     indexes: [
       {
-        fields: ['name', 'language', 'versificationModel'],
+        fields: ['name'],
+      },
+      {
+        fields: ['language'],
+      },
+      {
+        fields: ['partialScope'],
+      },
+      {
+        fields: ['versificationModel'],
+      },
+      {
+        fields: ['skipsUnlikelyOriginals'],
       },
     ],
   }))
@@ -530,7 +557,13 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
-        fields: ['str', 'desc', 'language'],
+        fields: ['str'],
+      },
+      {
+        fields: ['desc'],
+      },
+      {
+        fields: ['language'],
       },
     ],
   }))
