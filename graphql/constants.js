@@ -1,6 +1,6 @@
 module.exports = {
 
-  studyVersions: [
+  origLangAndLXXVersionIds: [
     'oshb',
     'bhp',
     'lxx',

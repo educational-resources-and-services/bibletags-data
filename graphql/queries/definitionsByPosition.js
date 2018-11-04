@@ -1,4 +1,4 @@
-const { studyVersions } = require('../constants')
+const { origLangAndLXXVersionIds } = require('../constants')
 
 module.exports = ({ models }) => {
   
@@ -38,7 +38,7 @@ module.exports = ({ models }) => {
 
     // if not parsed Hebrew or Greek text, then go to tagSets table to get the orig language word position
 
-    if(!studyVersions.includes(versionId)) {
+    if(!origLangAndLXXVersionIds.includes(versionId)) {
       // TODO
       throw(new Error('Functionality not yet implemented.'))
 
