@@ -225,6 +225,14 @@ const createConnection = () => {
     },
   }
 
+  const languageId = {
+    type: Sequelize.STRING(3),
+    primaryKey: true,
+    validate: {
+      is: langRegEx,
+    },
+  }
+
   const required = { foreignKey: { allowNull: false } };
 
   //////////////////////////////////////////////////////////////////
@@ -393,6 +401,29 @@ const createConnection = () => {
     usfm,
   }), Object.assign({
     indexes: [
+    ],
+  }, noTimestampsOptions))
+
+  //////////////////////////////////////////////////////////////////
+
+  const Language = connection.define('language', Object.assign({
+    id: languageId,
+    name: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    englishName: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['name'],
+      },
+      {
+        fields: ['englishName'],
+      },
     ],
   }, noTimestampsOptions))
 
