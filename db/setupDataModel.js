@@ -320,6 +320,84 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
+  const bhpWord = connection.define('bhpWord', Object.assign({
+    bookId: {
+      type: Sequelize.INTEGER(7).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 40,
+        max: 66,
+      },
+    },
+    chapter: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 28,
+      },
+    },
+    verse: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 80,
+      },
+    },
+    number: {
+      type: Sequelize.INTEGER(5).UNSIGNED,
+      allowNull: false,
+    },
+    word: {
+      type: Sequelize.STRING(30),
+      allowNull: false,
+    },
+    append: {
+      type: Sequelize.STRING(3),
+    },
+    strongs: {
+      type: Sequelize.STRING(7),
+      allowNull: false,
+    },
+    morph: {
+      type: Sequelize.STRING(20),
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['bookId'],
+      },
+      {
+        fields: ['chapter'],
+      },
+      {
+        fields: ['verse'],
+      },
+      {
+        fields: ['number'],
+      },
+      {
+        fields: ['strongs'],
+      },
+      {
+        fields: ['morph'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  //////////////////////////////////////////////////////////////////
+
+  const bhpVerse = connection.define('bhpVerse', Object.assign({
+    id: verseVersionId,
+    usfm,
+  }), Object.assign({
+    indexes: [
+    ],
+  }, noTimestampsOptions))
+
+  //////////////////////////////////////////////////////////////////
+
   const TagSet = connection.define('tagSet', Object.assign({
     id: verseVersionId,
     tags: {
@@ -378,8 +456,9 @@ const createConnection = () => {
 
   ////////////////////////////////////////////////////////////////////
 
-  const EngDefinition = connection.define('engDefinition', Object.assign({
+  const DefinitionByLanguage = connection.define('definitionByLanguage', Object.assign({
     id: strongsLangId,
+    language,
     gloss: {
       type: Sequelize.STRING(100),
       allowNull: false,
@@ -400,6 +479,9 @@ const createConnection = () => {
     },
   }), Object.assign({
     indexes: [
+      {
+        fields: ['language'],
+      },
       {
         fields: ['gloss'],
       },
@@ -470,6 +552,7 @@ const createConnection = () => {
 
   const LexEntry = connection.define('lexEntry', Object.assign({
     id: strongsLangId,
+    language,
     usfm,
   }), Object.assign({
     indexes: [
