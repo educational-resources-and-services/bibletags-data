@@ -75,7 +75,7 @@ const createConnection = () => {
 
     const wordObjStructure = {
       lemma: "string",
-      strongs: "string",
+      id: "string",
       hits: "number",
       gloss: "string",
     }
@@ -101,9 +101,9 @@ const createConnection = () => {
     const lxxObjStructure = {
       w: "string",
       lemma: "string",
-      strongs: "string",
+      id: "string",
       hits: "number",
-      bhpHits: "number",
+      ugntHits: "number",
     }
 
     ary.forEach(wordObj => {
@@ -181,35 +181,40 @@ const createConnection = () => {
     }
   }
 
+  const wordIdRegEx = /^[0-9a-z]{4}$/i
+  const verseIdRegEx = /^[0-9]{8}$/
   const versionIdRegEx = /^[a-z0-9]{2,9}$/
-  const verseVersionIdRegEx = /^[0-9]{8}-[a-z0-9]{2,9}$/
-  const strongsRegEx = /^[HAG][0-9]{5}[a-z]?$/
-  const langRegEx = /^[a-z]{3}$/
-  const strongsLangRegEx = /^[HAG][0-9]{5}[a-z]?-[a-z]{3}$/
-  const strongsAnythingRegEx = /^[HAG][0-9]{5}[a-z]?-\w+$/
+  const definitionIdRegEx = /^[HAG][0-9]{5}[a-z]?$/  // strongs number
+  const languageIdRegEx = /^[a-z]{3}$/
+  const scopeRegEx = /^[a-z]{1,2}|[0-9]{2}$/
 
-  const verseVersionId = {
-    type: Sequelize.STRING(20),
+  const wordId = {
+    type: Sequelize.STRING(4),
     primaryKey: true,
     validate: {
-      is: verseVersionIdRegEx,
+      is: wordIdRegEx,
     },
   }
 
-  const strongsId = {
-    type: Sequelize.STRING(11),
+  const verseId = {
+    type: Sequelize.STRING(8),
     primaryKey: true,
     validate: {
-      is: strongsRegEx,
+      is: verseIdRegEx,
     },
   }
 
-  const strongsLangId = {
-    type: Sequelize.STRING(11),
+  const scope = {
+    type: Sequelize.STRING(2),
     primaryKey: true,
     validate: {
-      is: strongsLangRegEx,
+      is: scopeRegEx,
     },
+  }
+
+  const hits = {
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
   }
 
   const usfm = {
@@ -217,184 +222,26 @@ const createConnection = () => {
     allowNull: false,
   }
 
-  const language = {
-    type: Sequelize.STRING(3),
+  const nakedWord = {  // no capitalization, accents, vowels or diacritical marks
+    type: Sequelize.STRING(30),
     allowNull: false,
-    validate: {
-      is: langRegEx,
-    },
+  }
+
+  const append = {
+    type: Sequelize.STRING(3),
+  }
+
+  const morph = {
+    type: Sequelize.STRING(20),
+  }
+
+  const wordNumberInVerse = {  // null if it is a variant
+    type: Sequelize.INTEGER(8).UNSIGNED,
   }
 
   const required = { foreignKey: { allowNull: false } };
+  const primaryKey = { foreignKey: { allowNull: false, primaryKey: true } };
 
-  //////////////////////////////////////////////////////////////////
-
-  const oshbWord = connection.define('oshbWord', Object.assign({
-    bookId: {
-      type: Sequelize.INTEGER(7).UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 39,
-      },
-    },
-    chapter: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 150,
-      },
-    },
-    verse: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 176,
-      },
-    },
-    number: {
-      type: Sequelize.INTEGER(5).UNSIGNED,
-      allowNull: false,
-    },
-    qere: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false,
-    },
-    word: {
-      type: Sequelize.STRING(30),
-      allowNull: false,
-    },
-    append: {
-      type: Sequelize.STRING(3),
-    },
-    prefix: {
-      type: Sequelize.STRING(5),
-    },
-    strongs: {
-      type: Sequelize.STRING(7),
-      allowNull: false,
-    },
-    morph: {
-      type: Sequelize.STRING(20),
-    },
-  }), Object.assign({
-    indexes: [
-      {
-        fields: ['bookId'],
-      },
-      {
-        fields: ['chapter'],
-      },
-      {
-        fields: ['verse'],
-      },
-      {
-        fields: ['number'],
-      },
-      {
-        fields: ['qere'],
-      },
-      {
-        fields: ['prefix'],
-      },
-      {
-        fields: ['strongs'],
-      },
-      {
-        fields: ['morph'],
-      },
-    ],
-  }, noTimestampsOptions))
-
-  //////////////////////////////////////////////////////////////////
-
-  const oshbVerse = connection.define('oshbVerse', Object.assign({
-    id: verseVersionId,
-    usfm,
-  }), Object.assign({
-    indexes: [
-    ],
-  }, noTimestampsOptions))
-
-  //////////////////////////////////////////////////////////////////
-
-  const bhpWord = connection.define('bhpWord', Object.assign({
-    bookId: {
-      type: Sequelize.INTEGER(7).UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 40,
-        max: 66,
-      },
-    },
-    chapter: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 28,
-      },
-    },
-    verse: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 80,
-      },
-    },
-    number: {
-      type: Sequelize.INTEGER(5).UNSIGNED,
-      allowNull: false,
-    },
-    word: {
-      type: Sequelize.STRING(30),
-      allowNull: false,
-    },
-    append: {
-      type: Sequelize.STRING(3),
-    },
-    strongs: {
-      type: Sequelize.STRING(7),
-      allowNull: false,
-    },
-    morph: {
-      type: Sequelize.STRING(20),
-    },
-  }), Object.assign({
-    indexes: [
-      {
-        fields: ['bookId'],
-      },
-      {
-        fields: ['chapter'],
-      },
-      {
-        fields: ['verse'],
-      },
-      {
-        fields: ['number'],
-      },
-      {
-        fields: ['strongs'],
-      },
-      {
-        fields: ['morph'],
-      },
-    ],
-  }, noTimestampsOptions))
-
-  //////////////////////////////////////////////////////////////////
-
-  const bhpVerse = connection.define('bhpVerse', Object.assign({
-    id: verseVersionId,
-    usfm,
-  }), Object.assign({
-    indexes: [
-    ],
-  }, noTimestampsOptions))
 
   //////////////////////////////////////////////////////////////////
 
@@ -403,7 +250,7 @@ const createConnection = () => {
       type: Sequelize.STRING(3),
       primaryKey: true,
       validate: {
-        is: langRegEx,
+        is: languageIdRegEx,
       },
     },
     name: {
@@ -425,23 +272,16 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  //////////////////////////////////////////////////////////////////
-
-  const TagSet = connection.define('tagSet', Object.assign({
-    id: verseVersionId,
-    tags: {
-      type: Sequelize.JSON,
-      allowNull: false,
-    },
-  }), Object.assign({
-    indexes: [
-    ],
-  }, noTimestampsOptions))
-
   ////////////////////////////////////////////////////////////////////
 
   const Definition = connection.define('definition', Object.assign({
-    id: strongsId,
+    id: {
+      type: Sequelize.STRING(11),
+      primaryKey: true,
+      validate: {
+        is: definitionIdRegEx,
+      },
+    },
     lemma: {
       type: Sequelize.STRING(50),
       allowNull: false,
@@ -454,10 +294,7 @@ const createConnection = () => {
       type: Sequelize.STRING(50),
       allowNull: false,
     },
-    hits: {
-      type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-    },
+    hits,
     lxx: {
       type: Sequelize.JSON,
       allowNull: false,
@@ -485,9 +322,7 @@ const createConnection = () => {
 
   ////////////////////////////////////////////////////////////////////
 
-  const DefinitionByLanguage = connection.define('definitionByLanguage', Object.assign({
-    id: strongsLangId,
-    language,
+  const DefinitionByLangauge = connection.define('definitionByLangauge', Object.assign({
     gloss: {
       type: Sequelize.STRING(100),
       allowNull: false,
@@ -506,10 +341,14 @@ const createConnection = () => {
         isArrayOfWordObjs,
       },
     },
+    lexEntryUsfm: { ...usfm },
   }), Object.assign({
     indexes: [
       {
-        fields: ['language'],
+        fields: ['definitionId'],
+      },
+      {
+        fields: ['languageId'],
       },
       {
         fields: ['gloss'],
@@ -517,12 +356,18 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
+  Language.belongsToMany(Definition, { through: DefinitionByLangauge });
+  Definition.belongsToMany(Language, { through: DefinitionByLangauge });
+
   //////////////////////////////////////////////////////////////////
 
   const PartOfSpeech = connection.define('partOfSpeech', Object.assign({
     pos: {
       type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V'),
-      allowNull: false,
+      // Note: these part-of-speech codes mean different things depending
+      // on whether they are Hebrew or Greek. But we leave it to the widget
+      // to worry about this.
+      primaryKey: true,
     },
   }), Object.assign({
     indexes: [
@@ -532,65 +377,12 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  PartOfSpeech.belongsTo(Definition, required)
+  PartOfSpeech.belongsTo(Definition, primaryKey)
   Definition.hasMany(PartOfSpeech)
 
   //////////////////////////////////////////////////////////////////
 
-  const Hits = connection.define('hits', Object.assign({
-    id: {
-      type: Sequelize.STRING,
-      primaryKey: true,
-      validate: {
-        is: strongsAnythingRegEx,
-      },
-    },
-    hits: {
-      type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-    },
-  }), Object.assign({
-    indexes: [
-      {
-        fields: ['hits'],
-      },
-    ],
-  }, noTimestampsOptions))
-
-  // lxxHits: Hits   -- need to create a relationship so as to enable this item in the Definition object?
-  // BlackedListedEmail.belongsTo(Tenant, required);
-  // Tenant.hasMany(BlackedListedEmail);
-
-  //////////////////////////////////////////////////////////////////
-
-  const Translation = connection.define('translation', Object.assign({
-    id: verseVersionId,
-    tr: {
-      type: Sequelize.JSON,
-      allowNull: false,
-      validate: {
-        isObjOfHits,
-      },
-    },
-  }), Object.assign({
-    indexes: [
-    ],
-  }, noTimestampsOptions))
-
-  //////////////////////////////////////////////////////////////////
-
-  const LexEntry = connection.define('lexEntry', Object.assign({
-    id: strongsLangId,
-    language,
-    usfm,
-  }), Object.assign({
-    indexes: [
-    ],
-  }, noTimestampsOptions))
-
-  //////////////////////////////////////////////////////////////////
-
-  const VersionInfo = connection.define('versionInfo', Object.assign({
+  const Version = connection.define('version', Object.assign({
     id: {
       type: Sequelize.STRING(9),
       primaryKey: true,
@@ -603,12 +395,14 @@ const createConnection = () => {
       allowNull: false,
       notEmpty: true,
     },
-    language,
     wordDividerRegex: {
       type: Sequelize.STRING(100),
     },
-    partialScope: {
-      type: Sequelize.ENUM('ot', 'nt'),  // null indicates this version covers the entire (canonical) Bible
+    scope: {  // typically nt, ot, or null; null indicates this version covers the entire (canonical) Bible
+      type: Sequelize.STRING(2),
+      validate: {
+        is: scopeRegEx,
+      },
     },
     versificationModel: {
       type: Sequelize.ENUM('original', 'kjv', 'synodal', 'lxx'),
@@ -630,10 +424,10 @@ const createConnection = () => {
         fields: ['name'],
       },
       {
-        fields: ['language'],
+        fields: ['languageId'],
       },
       {
-        fields: ['partialScope'],
+        fields: ['scope'],
       },
       {
         fields: ['versificationModel'],
@@ -644,14 +438,468 @@ const createConnection = () => {
     ],
   }))
 
+  Version.belongsTo(Language, required)
+  Language.hasMany(Version)
+
+  //////////////////////////////////////////////////////////////////
+
+  // Built off the assumption that alternative lemma or morphological
+  // interpretations will NOT be considered in search. However, this
+  // does not mean that such things could not be indicated as footnotes
+  // in the text.
+
+  const uhbWord = connection.define('uhbWord', Object.assign({
+    id: wordId,
+    bookId: {
+      type: Sequelize.INTEGER(7).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 39,
+      },
+    },
+    chapter: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 150,
+      },
+    },
+    verse: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 176,
+      },
+    },
+    sectionNumber: {  // sections separated by ס or פ (or chapter?)
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+    },
+    wordNumberInVerse,
+    nakedWord,
+    isAramaic: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    b: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    l: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    k: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    m: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    sh: {  // ש
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    v: {  // ו
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    h1: {  // definite article
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    h2: {  // inseparable definite article in preposition
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    h3: {  // interrogative particle
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    pos: {
+      type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V'),
+      allowNull: false,
+    },
+    stem: {  // includes the language to remove ambiguity
+      type: Sequelize.ENUM(
+        'Hq', 'HN', 'Hp', 'HP', 'Hh', 'HH', 'Ht', 'Ho',
+        'HO', 'Hr', 'Hm', 'HM', 'Hk', 'HK', 'HQ', 'Hl',
+        'HL', 'Hf', 'HD', 'Hj', 'Hi', 'Hu', 'Hc', 'Hv',
+        'Hw', 'Hy', 'Hz', 'Aq', 'AQ', 'Au', 'AN', 'Ap',
+        'AP', 'AM', 'Aa', 'Ah', 'As', 'Ae', 'AH', 'Ai',
+        'At', 'Av', 'Aw', 'Ao', 'Az', 'Ar', 'Af', 'Ab',
+        'Ac', 'Am', 'Al', 'AL', 'AO', 'AG'
+      ),
+    },
+    aspect: {
+      type: Sequelize.ENUM('p', 'q', 'i', 'w', 'h', 'j', 'v', 'r', 's', 'a', 'c'),
+    },
+    type: {  // includes the pos to remove ambiguity
+      type: Sequelize.ENUM(
+        'Ac', 'Ao', 'Ng', 'Np', 'Pd', 'Pf', 'Pi', 'Pp',
+        'Pr', 'Rd', 'Ta', 'Td', 'Te', 'Ti', 'Tj', 'Tm',
+        'Tn', 'To', 'Tr'
+      ),
+    },
+    person: {
+      type: Sequelize.ENUM('1', '2', '3'),
+    },
+    gender: {
+      type: Sequelize.ENUM('m', 'f', 'b', 'c'),
+    },
+    number: {
+      type: Sequelize.ENUM('s', 'p', 'd'),
+    },
+    state: {
+      type: Sequelize.ENUM('a', 'c', 'd'),
+    },
+    h4: {  // directional ה
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    h5: {  // paragogic ה
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    n: {  // paragogic ן
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    suffixPerson: {
+      type: Sequelize.ENUM('1', '2', '3'),
+    },
+    suffixGender: {
+      type: Sequelize.ENUM('m', 'f', 'c'),
+    },
+    suffixNumber: {
+      type: Sequelize.ENUM('s', 'p'),
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['bookId'],
+      },
+      {
+        fields: ['chapter'],
+      },
+      {
+        fields: ['verse'],
+      },
+      {
+        fields: ['sectionNumber'],
+      },
+      {
+        fields: ['wordNumberInVerse'],
+      },
+      {
+        fields: ['nakedWord'],
+      },
+      {
+        fields: ['isAramaic'],
+      },
+      {
+        fields: ['b'],
+      },
+      {
+        fields: ['l'],
+      },
+      {
+        fields: ['k'],
+      },
+      {
+        fields: ['m'],
+      },
+      {
+        fields: ['sh'],
+      },
+      {
+        fields: ['v'],
+      },
+      {
+        fields: ['h1'],
+      },
+      {
+        fields: ['h2'],
+      },
+      {
+        fields: ['h3'],
+      },
+      {
+        fields: ['pos'],
+      },
+      {
+        fields: ['stem'],
+      },
+      {
+        fields: ['aspect'],
+      },
+      {
+        fields: ['type'],
+      },
+      {
+        fields: ['person'],
+      },
+      {
+        fields: ['gender'],
+      },
+      {
+        fields: ['number'],
+      },
+      {
+        fields: ['state'],
+      },
+      {
+        fields: ['h4'],
+      },
+      {
+        fields: ['h5'],
+      },
+      {
+        fields: ['n'],
+      },
+      {
+        fields: ['suffixPerson'],
+      },
+      {
+        fields: ['suffixGender'],
+      },
+      {
+        fields: ['suffixNumber'],
+      },
+      {
+        fields: ['definitionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  uhbWord.belongsTo(Definition, required)
+  Definition.hasMany(uhbWord)
+
+  //////////////////////////////////////////////////////////////////
+
+  const uhbVerse = connection.define('uhbVerse', Object.assign({
+    id: verseId,
+    usfm,
+  }), Object.assign({
+    indexes: [
+    ],
+  }, noTimestampsOptions))
+
+  //////////////////////////////////////////////////////////////////
+
+  const uhbTagSet = connection.define('uhbTagSet', Object.assign({
+    tags: {
+      type: Sequelize.JSON,
+      allowNull: false,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['uhbVerseId'],
+      },
+      {
+        fields: ['versionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  uhbVerse.belongsToMany(Version, { through: uhbTagSet });
+  Version.belongsToMany(uhbVerse, { through: uhbTagSet });
+
+  //////////////////////////////////////////////////////////////////
+
+  const uhbTranslation = connection.define('uhbTranslation', Object.assign({
+    tr: {
+      type: Sequelize.JSON,
+      allowNull: false,
+      validate: {
+        isObjOfHits,
+      },
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['uhbVerseId'],
+      },
+      {
+        fields: ['versionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  uhbVerse.belongsToMany(Version, { through: uhbTranslation });
+  Version.belongsToMany(uhbVerse, { through: uhbTranslation });
+
+  //////////////////////////////////////////////////////////////////
+
+  const ugntWord = connection.define('ugntWord', Object.assign({
+    bookId: {
+      type: Sequelize.INTEGER(7).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 40,
+        max: 66,
+      },
+    },
+    chapter: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 28,
+      },
+    },
+    verse: {
+      type: Sequelize.INTEGER(8).UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 80,
+      },
+    },
+    wordNumberInVerse,
+    nakedWord,
+    append,
+    morph,
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['bookId'],
+      },
+      {
+        fields: ['chapter'],
+      },
+      {
+        fields: ['verse'],
+      },
+      {
+        fields: ['wordNumberInVerse'],
+      },
+      {
+        fields: ['morph'],
+      },
+      {
+        fields: ['definitionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  ugntWord.belongsTo(Definition, required)
+  Definition.hasMany(ugntWord)
+
+  //////////////////////////////////////////////////////////////////
+
+  const ugntVerse = connection.define('ugntVerse', Object.assign({
+    id: verseId,
+    usfm,
+  }), Object.assign({
+    indexes: [
+    ],
+  }, noTimestampsOptions))
+
+  //////////////////////////////////////////////////////////////////
+
+  const ugntTagSet = connection.define('ugntTagSet', Object.assign({
+    tags: {
+      type: Sequelize.JSON,
+      allowNull: false,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['ugntVerseId'],
+      },
+      {
+        fields: ['versionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  ugntVerse.belongsToMany(Version, { through: ugntTagSet });
+  Version.belongsToMany(ugntVerse, { through: ugntTagSet });
+
+  //////////////////////////////////////////////////////////////////
+
+  const ugntTranslation = connection.define('ugntTranslation', Object.assign({
+    tr: {
+      type: Sequelize.JSON,
+      allowNull: false,
+      validate: {
+        isObjOfHits,
+      },
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['ugntVerseId'],
+      },
+      {
+        fields: ['versionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  ugntVerse.belongsToMany(Version, { through: ugntTranslation });
+  Version.belongsToMany(ugntVerse, { through: ugntTranslation });
+
+  //////////////////////////////////////////////////////////////////
+
+  const HitsByScope = connection.define('hitsByScope', Object.assign({
+    scope,
+    hits,
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['hits'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  HitsByScope.belongsTo(Definition, primaryKey);
+  Definition.hasMany(HitsByScope);
+
+  //////////////////////////////////////////////////////////////////
+
+  const HitsByForm = connection.define('hitsByForm', Object.assign({
+    form: {
+      type: Sequelize.STRING(30),
+      primaryKey: true,
+    },
+    hits,
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['hits'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  HitsByForm.belongsTo(Definition, primaryKey);
+  Definition.hasMany(HitsByForm);
+
+  //////////////////////////////////////////////////////////////////
+
+  const HitsInLXXByScope = connection.define('hitsInLXXByScope', Object.assign({
+    scope,
+    hits,
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['hits'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  HitsInLXXByScope.belongsTo(Definition, primaryKey);
+  Definition.hasMany(HitsInLXXByScope);
+
   //////////////////////////////////////////////////////////////////
 
   const UiWord = connection.define('uiWord', Object.assign({
-    id: {
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
     str: {
       type: Sequelize.STRING,
       allowNull: false,
@@ -661,7 +909,6 @@ const createConnection = () => {
       type: Sequelize.STRING,
       notEmpty: true,
     },
-    language,
     translation: {
       type: Sequelize.TEXT,
       allowNull: false,
@@ -675,10 +922,13 @@ const createConnection = () => {
         fields: ['desc'],
       },
       {
-        fields: ['language'],
+        fields: ['languageId'],
       },
     ],
   }))
+
+  UiWord.belongsTo(Language, required)
+  Language.hasMany(UiWord)
 
   //////////////////////////////////////////////////////////////////
 

@@ -8,7 +8,7 @@
 // Definition:pos = an array of parts of speech abbreviations (N, V, etc) that this lemma is found in
 // Definition:syn and Definition:rel = arrays of synonym/related word objects (eg. [{"lemma":"τέκνον","strongs":"G5043","hits":99,"gloss":"child"},...])
 // Definition:lxx = an object with info on the lxx translation of this word (eg. [{"w":"ἀρχῇ","lemma":"ἀρχή","strongs":"G746","hits":236,"bhpHits":55}]); only relevant for Hebrew
-// Hits:id = [extended strongs number]-[context abbreviation] (eg. H323-T for this word in the Torah, G822-40 for this word in Matthew as the 40th book, G873-LXX for this word in the LXX, G3025-ληνῶν for this word inflected in this way, etc)
+// Hits:id = [extended strongs number]-[context abbreviation] (eg. H323-t for this word in the Torah, G822-40 for this word in Matthew as the 40th book, G873-lxx for this word in the LXX, G3025-ληνῶν for this word inflected in this way, etc)
 // Translations:id = [extended strongs number]-[versionId] (eg. H8873-esv for the different translations of the word in the esv)
 // Translations:tr = an object mapping word translations to hits (eg. {"son":299,"sons":56,...})
 // LexEntry:id = [extended strongs number]-[language] (eg. H234a-eng, G8289-esp)
