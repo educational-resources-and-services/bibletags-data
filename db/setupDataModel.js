@@ -4,7 +4,7 @@ const MAX_CONNECTION_AGE = 1000 * 60 * 60 * 7.5
 
 // To make UNIQUE indexes work as desired (i.e. only allowing one null column), this
 // value is used instead of NULL.
-const nullLikeDate = new Date('0000-01-01');
+const nullLikeDate = new Date('0000-01-01')
 
 const createConnection = () => {
 
@@ -231,8 +231,8 @@ const createConnection = () => {
     type: Sequelize.INTEGER.UNSIGNED,
   }
 
-  const required = { foreignKey: { allowNull: false } };
-  const primaryKey = { foreignKey: { allowNull: false, primaryKey: true } };
+  const required = { foreignKey: { allowNull: false } }
+  const primaryKey = { foreignKey: { allowNull: false, primaryKey: true } }
 
 
   //////////////////////////////////////////////////////////////////
@@ -344,8 +344,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  Language.belongsToMany(Definition, { through: DefinitionByLangauge });
-  Definition.belongsToMany(Language, { through: DefinitionByLangauge });
+  Language.belongsToMany(Definition, { through: DefinitionByLangauge })
+  Definition.belongsToMany(Language, { through: DefinitionByLangauge })
 
   //////////////////////////////////////////////////////////////////
 
@@ -698,8 +698,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  uhbVerse.belongsToMany(Version, { through: uhbTagSet });
-  Version.belongsToMany(uhbVerse, { through: uhbTagSet });
+  uhbVerse.belongsToMany(Version, { through: uhbTagSet })
+  Version.belongsToMany(uhbVerse, { through: uhbTagSet })
 
   //////////////////////////////////////////////////////////////////
 
@@ -722,8 +722,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  uhbVerse.belongsToMany(Version, { through: uhbTranslation });
-  Version.belongsToMany(uhbVerse, { through: uhbTranslation });
+  uhbVerse.belongsToMany(Version, { through: uhbTranslation })
+  Version.belongsToMany(uhbVerse, { through: uhbTranslation })
 
   //////////////////////////////////////////////////////////////////
 
@@ -894,8 +894,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  ugntVerse.belongsToMany(Version, { through: ugntTagSet });
-  Version.belongsToMany(ugntVerse, { through: ugntTagSet });
+  ugntVerse.belongsToMany(Version, { through: ugntTagSet })
+  Version.belongsToMany(ugntVerse, { through: ugntTagSet })
 
   //////////////////////////////////////////////////////////////////
 
@@ -918,8 +918,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  ugntVerse.belongsToMany(Version, { through: ugntTranslation });
-  Version.belongsToMany(ugntVerse, { through: ugntTranslation });
+  ugntVerse.belongsToMany(Version, { through: ugntTranslation })
+  Version.belongsToMany(ugntVerse, { through: ugntTranslation })
 
   //////////////////////////////////////////////////////////////////
 
@@ -937,8 +937,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  HitsByScope.belongsTo(Definition, primaryKey);
-  Definition.hasMany(HitsByScope);
+  HitsByScope.belongsTo(Definition, primaryKey)
+  Definition.hasMany(HitsByScope)
 
   //////////////////////////////////////////////////////////////////
 
@@ -959,8 +959,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  HitsByForm.belongsTo(Definition, primaryKey);
-  Definition.hasMany(HitsByForm);
+  HitsByForm.belongsTo(Definition, primaryKey)
+  Definition.hasMany(HitsByForm)
 
   //////////////////////////////////////////////////////////////////
 
@@ -978,8 +978,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  HitsInLXXByScope.belongsTo(Definition, primaryKey);
-  Definition.hasMany(HitsInLXXByScope);
+  HitsInLXXByScope.belongsTo(Definition, primaryKey)
+  Definition.hasMany(HitsInLXXByScope)
 
   //////////////////////////////////////////////////////////////////
 
