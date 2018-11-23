@@ -308,10 +308,6 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  // TODO: I need a many-to-may relationship here, indicating synonyms and related words in a language agnostic way
-  // This relationship will be used for producing the language-specific definition rows each time these relationships
-  // or a gloss is updated.
-
   ////////////////////////////////////////////////////////////////////
 
   const DefinitionByLangauge = connection.define('definitionByLangauge', Object.assign({
@@ -337,13 +333,13 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
+        fields: ['gloss'],
+      },
+      {
         fields: ['definitionId'],
       },
       {
         fields: ['languageId'],
-      },
-      {
-        fields: ['gloss'],
       },
     ],
   }, noTimestampsOptions))
@@ -355,7 +351,7 @@ const createConnection = () => {
 
   const PartOfSpeech = connection.define('partOfSpeech', Object.assign({
     pos: {
-      type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V'),
+      type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V', 'E', 'I'),
       // Note: these part-of-speech codes mean different things depending
       // on whether they are Hebrew or Greek. But we leave it to the widget
       // to worry about this.
@@ -365,6 +361,9 @@ const createConnection = () => {
     indexes: [
       {
         fields: ['pos'],
+      },
+      {
+        fields: ['definitionId'],
       },
     ],
   }, noTimestampsOptions))
@@ -416,9 +415,6 @@ const createConnection = () => {
         fields: ['name'],
       },
       {
-        fields: ['languageId'],
-      },
-      {
         fields: ['scope'],
       },
       {
@@ -426,6 +422,9 @@ const createConnection = () => {
       },
       {
         fields: ['skipsUnlikelyOriginals'],
+      },
+      {
+        fields: ['languageId'],
       },
     ],
   }))
@@ -932,6 +931,9 @@ const createConnection = () => {
       {
         fields: ['hits'],
       },
+      {
+        fields: ['definitionId'],
+      },
     ],
   }, noTimestampsOptions))
 
@@ -951,6 +953,9 @@ const createConnection = () => {
       {
         fields: ['hits'],
       },
+      {
+        fields: ['definitionId'],
+      },
     ],
   }, noTimestampsOptions))
 
@@ -966,6 +971,9 @@ const createConnection = () => {
     indexes: [
       {
         fields: ['hits'],
+      },
+      {
+        fields: ['definitionId'],
       },
     ],
   }, noTimestampsOptions))
