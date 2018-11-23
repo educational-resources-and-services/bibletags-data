@@ -210,10 +210,10 @@ connection.connect(async (err) => {
 
               })
               
-              updates.push(`INSERT INTO oshbVerses (id, usfm) VALUES ('${verseId}', '${verseUsfm.replace(/^\\n/, '')}')`)
+              updates.push(`INSERT INTO uhbVerses (id, usfm) VALUES ('${verseId}', '${verseUsfm.replace(/^\\n/, '')}')`)
 
               wordInserts.forEach(wordInsert => {
-                updates.push(`INSERT INTO oshbWords (${Object.keys(wordInsert).join(", ")}) VALUES ('${Object.values(wordInsert).join("', '")}')`)
+                updates.push(`INSERT INTO uhbWords (${Object.keys(wordInsert).join(", ")}) VALUES ('${Object.values(wordInsert).join("', '")}')`)
               })
 
             })

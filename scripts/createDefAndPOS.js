@@ -45,7 +45,7 @@ connection.connect(async (err) => {
       return
     }
       
-    const statement2 = `SELECT morph FROM oshbWords WHERE strongs="${paddedStrongs}"`
+    const statement2 = `SELECT morph FROM uhbWords WHERE strongs="${paddedStrongs}"`
 
     const result2 = await utils.queryAsync({ connection, statement: statement2 })
 
@@ -93,22 +93,22 @@ connection.connect(async (err) => {
 
   }))
 
-  console.log(`  - ${bdbOnlyCount} words in bdb, but not in oshbWords.`)
+  console.log(`  - ${bdbOnlyCount} words in bdb, but not in uhbWords.`)
   console.log(`  - Strongs numbers skipped due to bad formation: ${Object.keys(badStrongs).join(', ')}`)
 
   const numRowsUpdated = await utils.doUpdatesInChunksAsync({ connection, updates })
   console.log(`\n  ${numRowsUpdated} rows inserted.\n`)
 
 
-  // get all distinct strongs from oshbWords and see if there are any not in bdbHasEntryByStrongs
+  // get all distinct strongs from uhbWords and see if there are any not in bdbHasEntryByStrongs
   
-  const statement3 = `SELECT DISTINCT strongs FROM oshbWords`
+  const statement3 = `SELECT DISTINCT strongs FROM uhbWords`
 
   const result3 = await utils.queryAsync({ connection, statement: statement3 })
 
   result3.forEach(row3 => {
     if(!bdbHasEntryByStrongs[row3.strongs]) {
-      console.log(`  - ${row3.strongs} in oshbWords, but not in bdb.`)
+      console.log(`  - ${row3.strongs} in uhbWords, but not in bdb.`)
     }
   })
 

@@ -1,6 +1,6 @@
 // tagSets:versionId = [translationVersionId] (eg. esv)
 
-// definitionsByPosition:versionId = (eg. wlc, esv)
+// definitionsByPosition:versionId = (eg. uhb, esv)
 // definitionsByPosition:verseLoc = (eg. 01001001)
 // definitionsByPosition:wordNum = (eg. 3)
 // definitionsByPosition:language = (eg. eng)

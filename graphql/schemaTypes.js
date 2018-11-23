@@ -1,4 +1,4 @@
-// Verse:id = [2-digit book][3-digit chapter][3-digit verse]-[original language or lxx versionId] (eg. 01001001-wlc for Gen 1:1)
+// Verse:id = [2-digit book][3-digit chapter][3-digit verse]-[original language or lxx versionId] (eg. 01001001-uhb for Gen 1:1)
 // Verse:usfm - every word MUST be in a /w enclosure
 // TagSet:id = [2-digit book][3-digit chapter][3-digit verse]-[versionId] (eg. 01001001-esv)
 // TagSet:tags = an array of the original language word numbers (including chapter and verse, if different; including word part number, if multi-part) and translation word numbers
@@ -7,7 +7,7 @@
 // Definition:id = [extended strongs number]-[language] (eg. H234a-eng, G8289-esp; language is needed for the gloss)
 // Definition:pos = an array of parts of speech abbreviations (N, V, etc) that this lemma is found in
 // Definition:syn and Definition:rel = arrays of synonym/related word objects (eg. [{"lemma":"τέκνον","strongs":"G5043","hits":99,"gloss":"child"},...])
-// Definition:lxx = an object with info on the lxx translation of this word (eg. [{"w":"ἀρχῇ","lemma":"ἀρχή","strongs":"G746","hits":236,"bhpHits":55}]); only relevant for Hebrew
+// Definition:lxx = an object with info on the lxx translation of this word (eg. [{"w":"ἀρχῇ","lemma":"ἀρχή","strongs":"G746","hits":236,"ugntHits":55}]); only relevant for Hebrew
 // Hits:id = [extended strongs number]-[context abbreviation] (eg. H323-t for this word in the Torah, G822-40 for this word in Matthew as the 40th book, G873-lxx for this word in the LXX, G3025-ληνῶν for this word inflected in this way, etc)
 // Translations:id = [extended strongs number]-[versionId] (eg. H8873-esv for the different translations of the word in the esv)
 // Translations:tr = an object mapping word translations to hits (eg. {"son":299,"sons":56,...})

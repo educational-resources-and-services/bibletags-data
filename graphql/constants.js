@@ -1,8 +1,8 @@
 module.exports = {
 
   origLangAndLXXVersionIds: [
-    'oshb',
-    'bhp',
+    'uhb',
+    'ugnt',
     'lxx',
   ],
 
