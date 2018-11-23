@@ -247,20 +247,16 @@ const createConnection = () => {
     },
     name: {
       type: Sequelize.STRING,
+      unique: 'name',
       allowNull: false,
     },
     englishName: {
       type: Sequelize.STRING,
+      unique: 'englishName',
       allowNull: false,
     },
   }), Object.assign({
     indexes: [
-      {
-        fields: ['name'],
-      },
-      {
-        fields: ['englishName'],
-      },
     ],
   }, noTimestampsOptions))
 
@@ -383,6 +379,7 @@ const createConnection = () => {
     },
     name: {
       type: Sequelize.STRING(150),
+      unique: 'name',
       allowNull: false,
       notEmpty: true,
     },
@@ -411,9 +408,6 @@ const createConnection = () => {
     },
   }), Object.assign({
     indexes: [
-      {
-        fields: ['name'],
-      },
       {
         fields: ['scope'],
       },
