@@ -227,14 +227,6 @@ const createConnection = () => {
     allowNull: false,
   }
 
-  const append = {
-    type: Sequelize.STRING(3),
-  }
-
-  const morph = {
-    type: Sequelize.STRING(20),
-  }
-
   const wordNumberInVerse = {  // null if it is a variant
     type: Sequelize.INTEGER.UNSIGNED,
   }
@@ -775,8 +767,41 @@ const createConnection = () => {
     },
     wordNumberInVerse,
     nakedWord,
-    append,
-    morph,
+    pos: {
+      type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T'),
+      allowNull: false,
+    },
+    type: {  // includes the pos to remove ambiguity
+      type: Sequelize.ENUM(
+        'NS', 'NP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER',
+        'ET', 'RD', 'RE', 'RP', 'RC', 'RI', 'RR', 'RT', 'VT', 'VI', 'VL', 'VM',
+        'VP', 'IE', 'ID', 'IR', 'PI', 'DO', 'CC', 'CS', 'CO', 'TF'
+      ),
+    },
+    mood: {
+      type: Sequelize.ENUM('I', 'M', 'S', 'O', 'N', 'P'),
+    },
+    aspect: {
+      type: Sequelize.ENUM('P', 'I', 'F', 'A', 'E', 'L'),
+    },
+    voice: {
+      type: Sequelize.ENUM('A', 'M', 'P'),
+    },
+    person: {
+      type: Sequelize.ENUM('1', '2', '3'),
+    },
+    case: {
+      type: Sequelize.ENUM('N', 'D', 'G', 'A', 'V'),
+    },
+    gender: {
+      type: Sequelize.ENUM('M', 'F', 'N'),
+    },
+    number: {
+      type: Sequelize.ENUM('S', 'P'),
+    },
+    attribute: {
+      type: Sequelize.ENUM('C', 'S', 'D', 'I'),
+    },
   }), Object.assign({
     indexes: [
       {
@@ -789,10 +814,49 @@ const createConnection = () => {
         fields: ['verse'],
       },
       {
+        fields: ['phraseNumber'],
+      },
+      {
+        fields: ['sentenceNumber'],
+      },
+      {
+        fields: ['paragraphNumber'],
+      },
+      {
         fields: ['wordNumberInVerse'],
       },
       {
-        fields: ['morph'],
+        fields: ['nakedWord'],
+      },
+      {
+        fields: ['pos'],
+      },
+      {
+        fields: ['type'],
+      },
+      {
+        fields: ['mood'],
+      },
+      {
+        fields: ['aspect'],
+      },
+      {
+        fields: ['voice'],
+      },
+      {
+        fields: ['person'],
+      },
+      {
+        fields: ['case'],
+      },
+      {
+        fields: ['gender'],
+      },
+      {
+        fields: ['number'],
+      },
+      {
+        fields: ['attribute'],
       },
       {
         fields: ['definitionId'],
