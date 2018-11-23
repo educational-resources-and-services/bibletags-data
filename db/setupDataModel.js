@@ -236,7 +236,7 @@ const createConnection = () => {
   }
 
   const wordNumberInVerse = {  // null if it is a variant
-    type: Sequelize.INTEGER(8).UNSIGNED,
+    type: Sequelize.INTEGER.UNSIGNED,
   }
 
   const required = { foreignKey: { allowNull: false } };
@@ -451,7 +451,7 @@ const createConnection = () => {
   const uhbWord = connection.define('uhbWord', Object.assign({
     id: wordId,
     bookId: {
-      type: Sequelize.INTEGER(7).UNSIGNED,
+      type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
       validate: {
         min: 1,
@@ -459,7 +459,7 @@ const createConnection = () => {
       },
     },
     chapter: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
+      type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
       validate: {
         min: 1,
@@ -467,7 +467,7 @@ const createConnection = () => {
       },
     },
     verse: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
+      type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
       validate: {
         min: 1,
@@ -475,7 +475,7 @@ const createConnection = () => {
       },
     },
     sectionNumber: {  // sections separated by ס or פ (or chapter?)
-      type: Sequelize.INTEGER(8).UNSIGNED,
+      type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
     },
     wordNumberInVerse,
@@ -738,7 +738,7 @@ const createConnection = () => {
 
   const ugntWord = connection.define('ugntWord', Object.assign({
     bookId: {
-      type: Sequelize.INTEGER(7).UNSIGNED,
+      type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
       validate: {
         min: 40,
@@ -746,7 +746,7 @@ const createConnection = () => {
       },
     },
     chapter: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
+      type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
       validate: {
         min: 1,
@@ -754,12 +754,24 @@ const createConnection = () => {
       },
     },
     verse: {
-      type: Sequelize.INTEGER(8).UNSIGNED,
+      type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
       validate: {
         min: 1,
         max: 80,
       },
+    },
+    phraseNumber: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+    },
+    sentenceNumber: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+    },
+    paragraphNumber: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
     },
     wordNumberInVerse,
     nakedWord,
