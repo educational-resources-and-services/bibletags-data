@@ -119,18 +119,6 @@ const createConnection = () => {
     })
   }
 
-  const isObjOfHits = obj => {
-    if(typeof obj !== 'object') {
-      throw new Error('Must be an object.')
-    }
-    
-    Object.keys(obj).forEach(key => {
-      if(typeof obj[key] !== "number") {
-        throw new Error('Each object value must be a number.')
-      }
-    })
-  }
-
   const isVerseMappings = obj => {
 
     if(typeof obj !== 'object') {
@@ -157,28 +145,6 @@ const createConnection = () => {
         throw new Error(`Invalid versification rule. ${key}: ${obj[key]}`)
       }
     })
-  }
-
-  const isJSONArrayWithTwoStrings = jsonText => {
-    let jsonObj
-
-    try {
-      jsonObj = JSON.parse(jsonText)
-    } catch(e) {
-      throw new Error('Must be in JSON format.')
-    }
-
-    if(!(jsonObj instanceof Array)) {
-      throw new Error('Must be JSON array.')
-    }
-
-    if(jsonObj.length !== 2) {
-      throw new Error('Must be JSON array with two items.')
-    }
-
-    if(jsonObj.some(item => typeof item !== 'string')) {
-      throw new Error('Must be JSON array of two strings.')
-    }
   }
 
   const wordIdRegEx = /^[0-9a-z]{4}$/i
@@ -697,30 +663,6 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const uhbTranslation = connection.define('uhbTranslation', Object.assign({
-    tr: {
-      type: Sequelize.JSON,
-      allowNull: false,
-      validate: {
-        isObjOfHits,
-      },
-    },
-  }), Object.assign({
-    indexes: [
-      {
-        fields: ['uhbVerseId'],
-      },
-      {
-        fields: ['versionId'],
-      },
-    ],
-  }, noTimestampsOptions))
-
-  uhbVerse.belongsToMany(Version, { through: uhbTranslation })
-  Version.belongsToMany(uhbVerse, { through: uhbTranslation })
-
-  //////////////////////////////////////////////////////////////////
-
   const ugntWord = connection.define('ugntWord', Object.assign({
     bookId: {
       type: Sequelize.INTEGER.UNSIGNED,
@@ -893,27 +835,34 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const ugntTranslation = connection.define('ugntTranslation', Object.assign({
-    tr: {
-      type: Sequelize.JSON,
-      allowNull: false,
-      validate: {
-        isObjOfHits,
-      },
+  const WordTranslation = connection.define('wordTranslation', Object.assign({
+    translation: {
+      type: Sequelize.STRING(200),  // TODO: when inserting to this, make sure the translation string is not too long.
+      primaryKey: true,
+      notEmpty: true,
     },
+    hits,
   }), Object.assign({
     indexes: [
       {
-        fields: ['ugntVerseId'],
+        fields: ['translation'],
+      },
+      {
+        fields: ['definitionId'],
       },
       {
         fields: ['versionId'],
       },
+      {
+        fields: ['hits'],
+      },
     ],
   }, noTimestampsOptions))
 
-  ugntVerse.belongsToMany(Version, { through: ugntTranslation })
-  Version.belongsToMany(ugntVerse, { through: ugntTranslation })
+  WordTranslation.belongsTo(Definition, primaryKey)
+  Definition.hasMany(WordTranslation)
+  WordTranslation.belongsTo(Version, primaryKey)
+  Version.hasMany(WordTranslation)
 
   //////////////////////////////////////////////////////////////////
 
