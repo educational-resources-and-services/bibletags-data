@@ -74,7 +74,7 @@ const createConnection = () => {
     }
 
     const wordObjStructure = {
-      lemma: "string",
+      lex: "string",
       id: "string",
       hits: "number",
       gloss: "string",
@@ -100,7 +100,7 @@ const createConnection = () => {
 
     const lxxObjStructure = {
       w: "string",
-      lemma: "string",
+      lex: "string",
       id: "string",
       hits: "number",
       ugntHits: "number",
@@ -193,6 +193,11 @@ const createConnection = () => {
     allowNull: false,
   }
 
+  const lemma = {
+    type: Sequelize.STRING(50),
+    allowNull: false,
+  }
+
   const wordNumberInVerse = {  // null if it is a variant
     type: Sequelize.INTEGER.UNSIGNED,
   }
@@ -236,11 +241,11 @@ const createConnection = () => {
         is: definitionIdRegEx,
       },
     },
-    lemma: {
+    lex: {
       type: Sequelize.STRING(50),
       allowNull: false,
     },
-    lemmaUnique: {
+    lexUnique: {  // i.e. Is the lexeme's form unique?
       type: Sequelize.BOOLEAN,
       allowNull: false,
     },
@@ -259,10 +264,10 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
-        fields: ['lemma'],
+        fields: ['lex'],
       },
       {
-        fields: ['lemmaUnique'],
+        fields: ['lexUnique'],
       },
       {
         fields: ['hits'],
@@ -431,6 +436,7 @@ const createConnection = () => {
     },
     wordNumberInVerse,
     nakedWord,
+    lemma,
     isAramaic: {
       type: Sequelize.BOOLEAN,
       allowNull: false,
@@ -702,6 +708,7 @@ const createConnection = () => {
     },
     wordNumberInVerse,
     nakedWord,
+    lemma,
     pos: {
       type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T'),
       allowNull: false,

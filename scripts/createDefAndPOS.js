@@ -19,7 +19,7 @@ connection.connect(async (err) => {
 
   const badStrongs = {}
   const bdbHasEntryByStrongs = {}
-  const uniqueStateOfLemmas = {}
+  const uniqueStateOfLexemes = {}
   let bdbOnlyCount = 0
   const updates = []
   
@@ -33,7 +33,7 @@ connection.connect(async (err) => {
   result.forEach(row => {
     const paddedStrongs = row.id.replace(/([0-9]+)/, match => utils.padWithZeros(match, 5))
     bdbHasEntryByStrongs[paddedStrongs] = true
-    uniqueStateOfLemmas[row.word] = uniqueStateOfLemmas[row.word] ? 0 : 1
+    uniqueStateOfLexemes[row.word] = uniqueStateOfLexemes[row.word] ? 0 : 1
   })
       
   await Promise.all(result.map(async row => {
@@ -53,8 +53,8 @@ connection.connect(async (err) => {
 
       const defInsert = {
         id: paddedStrongs,
-        lemma: row.word,
-        lemmaUnique: uniqueStateOfLemmas[row.word],
+        lex: row.word,
+        lexUnique: uniqueStateOfLexemes[row.word],
         vocal: row.xlit,
         hits: result2.length,
         lxx: JSON.stringify([]),  // this info is not yet known
