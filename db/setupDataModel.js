@@ -93,6 +93,36 @@ const createConnection = () => {
     })
   }
 
+  const isLexEntry = obj => {
+    if(typeof obj !== 'object') {
+      throw new Error('Must be an object.')
+    }
+
+    // Eg.
+    // const obj = {
+    //   lemmas: ["string"],
+    //   poss: [
+    //     {
+    //       pos: "verb",
+    //       types: [
+    //         {
+    //           type: "transitive",
+    //           meaning: [
+    //             {
+    //               text: "transitive def",
+    //               perc: "88",
+    //             },
+    //           ],
+    //         },
+    //         {
+    //           ...
+    //         },
+    //       ]
+    //     }
+    //   ],
+    // }
+  }
+
   const isArrayOfLXXObjs = ary => {
     if(!(ary instanceof Array)) {
       throw new Error('Must be an array.')
@@ -296,7 +326,13 @@ const createConnection = () => {
         isArrayOfWordObjs,
       },
     },
-    lexEntryUsfm: { ...usfm },
+    lexEntry: {
+      type: Sequelize.JSON,
+      allowNull: false,
+      validate: {
+        isLexEntry,
+      },
+    },
   }), Object.assign({
     indexes: [
       {
