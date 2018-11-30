@@ -393,7 +393,7 @@ const createConnection = () => {
     wordDividerRegex: {
       type: Sequelize.STRING(100),
     },
-    scope: {  // typically nt, ot, or null; null indicates this version covers the entire (canonical) Bible
+    partialScope: {  // typically nt, ot, or null; null indicates this version covers the entire (canonical) Bible
       type: Sequelize.STRING(2),
       validate: {
         is: scopeRegEx,
@@ -416,7 +416,7 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
-        fields: ['scope'],
+        fields: ['partialScope'],
       },
       {
         fields: ['versificationModel'],
