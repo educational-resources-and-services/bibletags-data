@@ -308,7 +308,7 @@ const createConnection = () => {
 
   ////////////////////////////////////////////////////////////////////
 
-  const DefinitionByLangauge = connection.define('definitionByLangauge', Object.assign({
+  const DefinitionByLanguage = connection.define('definitionByLanguage', Object.assign({
     gloss: {
       type: Sequelize.STRING(100),
       allowNull: false,
@@ -348,8 +348,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  Language.belongsToMany(Definition, { through: DefinitionByLangauge })
-  Definition.belongsToMany(Language, { through: DefinitionByLangauge })
+  Language.belongsToMany(Definition, { through: DefinitionByLanguage })
+  Definition.belongsToMany(Language, { through: DefinitionByLanguage })
 
   //////////////////////////////////////////////////////////////////
 

@@ -44,13 +44,13 @@ module.exports = ({ models }) => {
         languageId,
       }
 
-      return models.definitionByLangauge.findOne({
+      return models.definitionByLanguage.findOne({
         where,
-      }).then(definitionByLangauge => {
+      }).then(definitionByLanguage => {
 
         return Object.assign(
           definition.dataValues,
-          (definitionByLangauge ? definitionByLangauge.dataValues : {}),
+          (definitionByLanguage ? definitionByLanguage.dataValues : {}),
           {
             id,
             pos: (definition.partOfSpeeches || []).map(partOfSpeech => partOfSpeech.pos)
