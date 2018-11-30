@@ -1,3 +1,7 @@
+const {
+  versionIdRegEx,
+} = require('../utils')
+
 module.exports = ({ models }) => {
 
   return (
@@ -8,7 +12,11 @@ module.exports = ({ models }) => {
     { req }
   ) => {
 
-    return models.versionInfo.findById(id).then(versionInfo => versionInfo)
+    if(!id.match(versionIdRegEx)) {
+      throw(new Error(`Invalid id (${id}).`))
+    }
+
+    return models.version.findById(id).then(version => version)
 
   }
 }

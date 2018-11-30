@@ -1,3 +1,8 @@
+const {
+  definitionIdRegEx,
+  languageIdRegEx,
+} = require('../utils')
+
 module.exports = ({ models }) => {
 
   return (
@@ -8,19 +13,18 @@ module.exports = ({ models }) => {
     { req }
   ) => {
 
-    const [ strongs, lang, invalidExtra ] = id.split('-')
-    const langModel = models[`${lang}Definition`]
+    const [ definitionId, languageId, invalidExtra ] = id.split('-')
 
     if(invalidExtra !== undefined) {
-      throw(new Error('Invalid id.'))
+      throw(new Error(`Invalid id (${id}).`))
     }
 
-    if(!strongs.match(/^H[0-9]{5}[a-z]?$/)) {
-      throw(new Error('Invalid strongs number indicated in id.'))
+    if(!definitionId.match(definitionIdRegEx)) {
+      throw(new Error(`Invalid definitionId (${definitionId}) indicated in id (${id}).`))
     }
 
-    if(!lang.match(/^[a-z]{3}$/) || !langModel) {
-      throw(new Error('Invalid language code indicated in id.'))
+    if(!languageId.match(languageIdRegEx)) {
+      throw(new Error(`Invalid languageId (${languageId}) indicated in id (${id}).`))
     }
 
     const include = [
@@ -29,20 +33,28 @@ module.exports = ({ models }) => {
         attributes: [ 'pos' ],
       },
     ]
-
-    return models.definition.findById(strongs, {
+  
+    return models.definition.findById(definitionId, {
       include,
     }).then(definition => {
       if(!definition) return null
 
-      definition.dataValues.pos = (definition.partOfSpeeches || []).map(partOfSpeech => partOfSpeech.pos)
+      const where = {
+        definitionId,
+        languageId,
+      }
 
-      return langModel.findById(strongs).then(langDefinition => {
+      return models.definitionByLangauge.findOne({
+        where,
+      }).then(definitionByLangauge => {
 
         return Object.assign(
           definition.dataValues,
-          (langDefinition ? langDefinition.dataValues : {}),
-          { id }
+          (definitionByLangauge ? definitionByLangauge.dataValues : {}),
+          {
+            id,
+            pos: (definition.partOfSpeeches || []).map(partOfSpeech => partOfSpeech.pos)
+          }
         )
 
       })

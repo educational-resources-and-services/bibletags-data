@@ -1,4 +1,12 @@
 const Sequelize = require('sequelize')
+const {
+  wordIdRegEx,
+  verseIdRegEx,
+  versionIdRegEx,
+  definitionIdRegEx,
+  languageIdRegEx,
+  scopeRegEx,
+} = require('../graphql/utils')
 
 const MAX_CONNECTION_AGE = 1000 * 60 * 60 * 7.5
 
@@ -176,13 +184,6 @@ const createConnection = () => {
       }
     })
   }
-
-  const wordIdRegEx = /^[0-9a-z]{4}$/i
-  const verseIdRegEx = /^[0-9]{8}$/
-  const versionIdRegEx = /^[a-z0-9]{2,9}$/
-  const definitionIdRegEx = /^[HAG][0-9]{5}[a-z]?$/  // strongs number
-  const languageIdRegEx = /^[a-z]{3}$/
-  const scopeRegEx = /^[a-z]{1,2}|[0-9]{2}$/
 
   const wordId = {
     type: Sequelize.STRING(4),

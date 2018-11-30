@@ -1,4 +1,9 @@
-const { origLangAndLXXVersionIds } = require('../constants')
+const {
+  origLangAndLXXVersionIds,
+  versionIdRegEx,
+  verseIdRegEx,
+  languageIdRegEx,
+} = require('../utils')
 
 module.exports = ({ models }) => {
   
@@ -8,29 +13,31 @@ module.exports = ({ models }) => {
     queries,
     {
       versionId,
-      verseLoc,
+      verseId,
       wordNum,
-      language,
+      languageId,
     },
     { req }
   ) => {
 
+    // THIS FILE HAS NOT BEEN TESTED YET AND PROBABLY DOESN'T WORK
+
     // validate everything
 
-    if(!versionId.match(/^[a-z0-9]{2,9}$/)) {
-      throw(new Error('Invalid versionId.'))
+    if(!versionId.match(versionIdRegEx)) {
+      throw(new Error(`Invalid versionId (${versionId}).`))
     }
 
-    if(!verseLoc.match(/^[0-9]{8}$/)) {
-      throw(new Error('Invalid verseLoc.'))
+    if(!verseId.match(verseIdRegEx)) {
+      throw(new Error(`Invalid verseId (${verseId}).`))
     }
 
-    if(wordNum <= 0) {
-      throw(new Error('Invalid wordNum.'))
+    if(typeof wordNum !== 'number' && wordNum <= 0) {
+      throw(new Error(`Invalid wordNum (${wordNum}).`))
     }
 
-    if(!language.match(/^[a-z]{3}$/)) {
-      throw(new Error('Invalid language.'))
+    if(!languageId.match(languageIdRegEx)) {
+      throw(new Error(`Invalid languageId (${languageId}).`))
     }
 
     const wordLocs = []
@@ -44,8 +51,8 @@ module.exports = ({ models }) => {
 
     } else {
       wordLocs.push({
-        chapter: parseInt(verseLoc.substr(2,3)),
-        verse: parseInt(verseLoc.substr(5,3)),
+        chapter: parseInt(verseId.substr(2,3)),
+        verse: parseInt(verseId.substr(5,3)),
         number: wordNum,
       })
     }
@@ -57,13 +64,13 @@ module.exports = ({ models }) => {
     }
 
 
-    // use verseLoc and wordNum to get the strongs
+    // use verseId and wordNum to get the strongs
 
     const attributes = [ 'strongs' ]
 
     const where = {
       $or: wordLocs.map(wordLoc => Object.assign({
-        bookId: parseInt(verseLoc.substr(0,2)),
+        bookId: parseInt(verseId.substr(0,2)),
         qere: 0,
       }, wordLoc)),
     }
@@ -75,7 +82,7 @@ module.exports = ({ models }) => {
 
       // use strongs and language to get the definition
       return words.map(word => (
-        definition(queries, { id: `${word.strongs}-${language}` }, { req })
+        definition(queries, { id: `${word.strongs}-${languageId}` }, { req })
       ))
 
     })

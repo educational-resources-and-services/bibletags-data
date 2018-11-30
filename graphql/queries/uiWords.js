@@ -1,15 +1,23 @@
+const {
+  languageIdRegEx,
+} = require('../utils')
+
 module.exports = ({ models }) => {
 
   return (
     queries,
     {
-      language,
+      languageId,
     },
     { req }
   ) => {
 
+    if(!languageId.match(languageIdRegEx)) {
+      throw(new Error(`Invalid languageId (${languageId}).`))
+    }
+
     const where = {
-      language,
+      languageId,
     }
 
     return models.uiWord.find({
