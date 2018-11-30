@@ -3,7 +3,7 @@
 // definitionsByPosition:versionId = (eg. uhb, esv)
 // definitionsByPosition:verseLoc = (eg. 01001001)
 // definitionsByPosition:wordNum = (eg. 3)
-// definitionsByPosition:language = (eg. eng)
+// definitionsByPosition:languageId = (eg. eng)
 // translationsByPosition has same params
 
 // Most of the time, definitionsByPosition will return a single word, but in the event that multiple orig language words
@@ -59,10 +59,10 @@ module.exports = ({ connection, nullLikeDate }) => {
       tagSets(bookId: Int!, chapter: Int!, versionId: String!): [TagSet]
       tagSet(id: ID!): TagSet
       definition(id: ID!): Definition
-      definitionsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, language: String!): [Definition]
+      definitionsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, languageId: String!): [Definition]
       hits(id: ID!): Hits
       translations(id: ID!): Translations
-      translationsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, language: String!): [Translations]
+      translationsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, languageId: String!): [Translations]
       search(query: String!, offset: Int, limit: Int, tagVersionIds: [String]): SearchResult
       versionInfo(id: ID!): VersionInfo
       uiWords(languageId: String!): [UIWord]

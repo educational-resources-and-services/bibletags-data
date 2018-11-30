@@ -6,7 +6,7 @@
     firstname: String
     lastname: String
     gender: String
-    language: String
+    languageId: String
     onVacationUntil: Date
     adminLevel: String
   }

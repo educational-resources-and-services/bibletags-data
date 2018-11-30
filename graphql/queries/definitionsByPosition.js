@@ -60,7 +60,7 @@ module.exports = ({ models }) => {
     const model = models[`${versionId}Word`]
 
     if(!model) {
-      throw(new Error('Invalid language.'))
+      throw(new Error('Invalid languageId.'))
     }
 
 
