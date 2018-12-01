@@ -229,8 +229,76 @@ const createConnection = () => {
     allowNull: false,
   }
 
-  const wordNumberInVerse = {  // null if it is a variant
+  const chapter = {
     type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
+    validate: {
+      min: 1,
+      max: 150,
+    },
+  }
+  
+  const verse = {
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
+    validate: {
+      min: 1,
+      max: 176,
+    },
+  }
+
+  const wordNumber = {  // in a book (not in a verse); null if it is a variant; used for quoted searches
+    type: Sequelize.INTEGER.UNSIGNED,
+  }
+
+  const verseNumber = {  // in a book (not in a chapter); used by same:verses:# tag
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
+  }
+
+  const greekPos = {
+    type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T'),
+    allowNull: false,
+  }
+
+  const greekType = {  // includes the pos to remove ambiguity
+    type: Sequelize.ENUM(
+      'NS', 'NP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER',
+      'ET', 'RD', 'RE', 'RP', 'RC', 'RI', 'RR', 'RT', 'VT', 'VI', 'VL', 'VM',
+      'VP', 'IE', 'ID', 'IR', 'PI', 'DO', 'CC', 'CS', 'CO', 'TF'
+    ),
+  }
+
+  const greekMood = {
+    type: Sequelize.ENUM('I', 'M', 'S', 'O', 'N', 'P'),
+  }
+
+  const greekAspect = {
+    type: Sequelize.ENUM('P', 'I', 'F', 'A', 'E', 'L'),
+  }
+
+  const greekVoice = {
+    type: Sequelize.ENUM('A', 'M', 'P'),
+  }
+
+  const greekPerson = {
+    type: Sequelize.ENUM('1', '2', '3'),
+  }
+
+  const greekCase = {
+    type: Sequelize.ENUM('N', 'D', 'G', 'A', 'V'),
+  }
+
+  const greekGender = {
+    type: Sequelize.ENUM('M', 'F', 'N'),
+  }
+
+  const greekNumber = {
+    type: Sequelize.ENUM('S', 'P'),
+  }
+
+  const greekAttribute = {
+    type: Sequelize.ENUM('C', 'S', 'D', 'I'),
   }
 
   const required = { foreignKey: { allowNull: false } }
@@ -451,27 +519,14 @@ const createConnection = () => {
         max: 39,
       },
     },
-    chapter: {
-      type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 150,
-      },
-    },
-    verse: {
-      type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 176,
-      },
-    },
+    chapter,
+    verse,
+    wordNumber,
+    verseNumber,
     sectionNumber: {  // sections separated by ס or פ (or chapter?)
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
     },
-    wordNumberInVerse,
     nakedWord,
     lemma,
     isAramaic: {
@@ -584,10 +639,13 @@ const createConnection = () => {
         fields: ['verse'],
       },
       {
-        fields: ['sectionNumber'],
+        fields: ['wordNumber'],
       },
       {
-        fields: ['wordNumberInVerse'],
+        fields: ['verseNumber'],
+      },
+      {
+        fields: ['sectionNumber'],
       },
       {
         fields: ['nakedWord'],
@@ -715,22 +773,10 @@ const createConnection = () => {
         max: 66,
       },
     },
-    chapter: {
-      type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 28,
-      },
-    },
-    verse: {
-      type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 80,
-      },
-    },
+    chapter,
+    verse,
+    wordNumber,
+    verseNumber,
     phraseNumber: {
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
@@ -743,44 +789,18 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
     },
-    wordNumberInVerse,
     nakedWord,
     lemma,
-    pos: {
-      type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T'),
-      allowNull: false,
-    },
-    type: {  // includes the pos to remove ambiguity
-      type: Sequelize.ENUM(
-        'NS', 'NP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER',
-        'ET', 'RD', 'RE', 'RP', 'RC', 'RI', 'RR', 'RT', 'VT', 'VI', 'VL', 'VM',
-        'VP', 'IE', 'ID', 'IR', 'PI', 'DO', 'CC', 'CS', 'CO', 'TF'
-      ),
-    },
-    mood: {
-      type: Sequelize.ENUM('I', 'M', 'S', 'O', 'N', 'P'),
-    },
-    aspect: {
-      type: Sequelize.ENUM('P', 'I', 'F', 'A', 'E', 'L'),
-    },
-    voice: {
-      type: Sequelize.ENUM('A', 'M', 'P'),
-    },
-    person: {
-      type: Sequelize.ENUM('1', '2', '3'),
-    },
-    case: {
-      type: Sequelize.ENUM('N', 'D', 'G', 'A', 'V'),
-    },
-    gender: {
-      type: Sequelize.ENUM('M', 'F', 'N'),
-    },
-    number: {
-      type: Sequelize.ENUM('S', 'P'),
-    },
-    attribute: {
-      type: Sequelize.ENUM('C', 'S', 'D', 'I'),
-    },
+    pos: greekPos,
+    type: greekType,
+    mood: greekMood,
+    aspect: greekAspect,
+    voice: greekVoice,
+    person: greekPerson,
+    case: greekCase,
+    gender: greekGender,
+    number: greekNumber,
+    attribute: greekAttribute,
   }), Object.assign({
     indexes: [
       {
@@ -793,6 +813,12 @@ const createConnection = () => {
         fields: ['verse'],
       },
       {
+        fields: ['wordNumber'],
+      },
+      {
+        fields: ['verseNumber'],
+      },
+      {
         fields: ['phraseNumber'],
       },
       {
@@ -800,9 +826,6 @@ const createConnection = () => {
       },
       {
         fields: ['paragraphNumber'],
-      },
-      {
-        fields: ['wordNumberInVerse'],
       },
       {
         fields: ['nakedWord'],
@@ -876,6 +899,106 @@ const createConnection = () => {
 
   ugntVerse.belongsToMany(Version, { through: ugntTagSet })
   Version.belongsToMany(ugntVerse, { through: ugntTagSet })
+
+  //////////////////////////////////////////////////////////////////
+
+  const lxxWord = connection.define('lxxWord', Object.assign({
+    bookId: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 87,
+        // Includes deuterocanonical books, though these are not included
+        // in default Bible Tags searches, nor in statistics.
+      },
+    },
+    chapter,
+    verse,
+    wordNumber,
+    verseNumber,
+    nakedWord,
+    lemma,
+    pos: greekPos,
+    type: greekType,
+    mood: greekMood,
+    aspect: greekAspect,
+    voice: greekVoice,
+    person: greekPerson,
+    case: greekCase,
+    gender: greekGender,
+    number: greekNumber,
+    attribute: greekAttribute,
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['bookId'],
+      },
+      {
+        fields: ['chapter'],
+      },
+      {
+        fields: ['verse'],
+      },
+      {
+        fields: ['wordNumber'],
+      },
+      {
+        fields: ['verseNumber'],
+      },
+      {
+        fields: ['nakedWord'],
+      },
+      {
+        fields: ['pos'],
+      },
+      {
+        fields: ['type'],
+      },
+      {
+        fields: ['mood'],
+      },
+      {
+        fields: ['aspect'],
+      },
+      {
+        fields: ['voice'],
+      },
+      {
+        fields: ['person'],
+      },
+      {
+        fields: ['case'],
+      },
+      {
+        fields: ['gender'],
+      },
+      {
+        fields: ['number'],
+      },
+      {
+        fields: ['attribute'],
+      },
+      {
+        fields: ['definitionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  lxxWord.belongsTo(Definition, required)
+  Definition.hasMany(lxxWord)
+
+  //////////////////////////////////////////////////////////////////
+
+  const lxxVerse = connection.define('lxxVerse', Object.assign({
+    id: verseId,
+    // Includes deuterocanonical books, though these are not included
+    // in default Bible Tags searches, nor in statistics.
+    usfm,
+  }), Object.assign({
+    indexes: [
+    ],
+  }, noTimestampsOptions))
 
   //////////////////////////////////////////////////////////////////
 
