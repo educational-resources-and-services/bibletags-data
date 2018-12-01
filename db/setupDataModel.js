@@ -229,12 +229,21 @@ const createConnection = () => {
     allowNull: false,
   }
 
+  const bookId = {
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
+    validate: {
+      min: 1,
+      max: 87,  // 67+ are deuterocanonical (for the LXX)
+    },
+  }
+
   const chapter = {
     type: Sequelize.INTEGER.UNSIGNED,
     allowNull: false,
     validate: {
       min: 1,
-      max: 150,
+      max: 151,
     },
   }
   
@@ -511,14 +520,7 @@ const createConnection = () => {
 
   const uhbWord = connection.define('uhbWord', Object.assign({
     id: wordId,
-    bookId: {
-      type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 39,
-      },
-    },
+    bookId,
     chapter,
     verse,
     wordNumber,
@@ -764,15 +766,42 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const ugntWord = connection.define('ugntWord', Object.assign({
-    bookId: {
+  const uhbTag = connection.define('uhbTag', Object.assign({
+    wordPartNumber: {
       type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 40,
-        max: 66,
-      },
+      primaryKey: true,
     },
+    translationWordNumberInVerse: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      primaryKey: true,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['versionId'],
+      },
+      {
+        fields: ['uhbWordId'],
+      },
+      {
+        fields: ['wordPartNumber'],
+      },
+      {
+        fields: ['translationWordNumberInVerse'],
+      },
+    ],
+  }))
+
+  uhbTag.belongsTo(Version, primaryKey)
+  Version.hasMany(uhbTag)
+
+  uhbTag.belongsTo(uhbWord, primaryKey)
+  uhbWord.hasMany(uhbTag)
+
+  //////////////////////////////////////////////////////////////////
+
+  const ugntWord = connection.define('ugntWord', Object.assign({
+    bookId,
     chapter,
     verse,
     wordNumber,
@@ -902,17 +931,37 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const lxxWord = connection.define('lxxWord', Object.assign({
-    bookId: {
+  const ugntTag = connection.define('ugntTag', Object.assign({
+    translationWordNumberInVerse: {
       type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 87,
-        // Includes deuterocanonical books, though these are not included
-        // in default Bible Tags searches, nor in statistics.
-      },
+      primaryKey: true,
     },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['versionId'],
+      },
+      {
+        fields: ['ugntWordId'],
+      },
+      {
+        fields: ['translationWordNumberInVerse'],
+      },
+    ],
+  }))
+
+  ugntTag.belongsTo(Version, primaryKey)
+  Version.hasMany(ugntTag)
+
+  ugntTag.belongsTo(ugntWord, primaryKey)
+  ugntWord.hasMany(ugntTag)
+
+  //////////////////////////////////////////////////////////////////
+
+  const lxxWord = connection.define('lxxWord', Object.assign({
+    bookId,
+    // Includes deuterocanonical books, though these are not included
+    // in default Bible Tags searches, nor in statistics.
     chapter,
     verse,
     wordNumber,
