@@ -337,7 +337,7 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
     ],
-  }, noTimestampsOptions))
+  }))
 
   ////////////////////////////////////////////////////////////////////
 
@@ -775,6 +775,10 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       primaryKey: true,
     },
+    confirmed: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
   }), Object.assign({
     indexes: [
       {
@@ -789,8 +793,11 @@ const createConnection = () => {
       {
         fields: ['translationWordNumberInVerse'],
       },
+      {
+        fields: ['confirmed'],
+      },
     ],
-  }))
+  }, noTimestampsOptions))
 
   uhbTag.belongsTo(Version, primaryKey)
   Version.hasMany(uhbTag)
@@ -936,6 +943,10 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       primaryKey: true,
     },
+    confirmed: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
   }), Object.assign({
     indexes: [
       {
@@ -947,8 +958,11 @@ const createConnection = () => {
       {
         fields: ['translationWordNumberInVerse'],
       },
+      {
+        fields: ['confirmed'],
+      },
     ],
-  }))
+  }, noTimestampsOptions))
 
   ugntTag.belongsTo(Version, primaryKey)
   Version.hasMany(ugntTag)
@@ -1168,7 +1182,7 @@ const createConnection = () => {
         fields: ['languageId'],
       },
     ],
-  }))
+  }, noTimestampsOptions))
 
   UiWord.belongsTo(Language, required)
   Language.hasMany(UiWord)
