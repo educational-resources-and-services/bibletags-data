@@ -930,6 +930,9 @@ const createConnection = () => {
   uhbTagSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(uhbTagSubmission)
 
+  User.belongsToMany(EmbeddingApp, { through: uhbTagSubmission })
+  EmbeddingApp.belongsToMany(User, { through: uhbTagSubmission })
+
   //////////////////////////////////////////////////////////////////
 
   const ugntWord = connection.define('ugntWord', Object.assign({
@@ -1130,6 +1133,9 @@ const createConnection = () => {
 
   ugntTagSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(ugntTagSubmission)
+
+  User.belongsToMany(EmbeddingApp, { through: ugntTagSubmission })
+  EmbeddingApp.belongsToMany(User, { through: ugntTagSubmission })
 
   //////////////////////////////////////////////////////////////////
 
