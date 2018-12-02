@@ -323,6 +323,7 @@ const createConnection = () => {
 
   const required = { foreignKey: { allowNull: false } }
   const primaryKey = { foreignKey: { allowNull: false, primaryKey: true } }
+  const unique = unique => ({ foreignKey: { allowNull: false, unique } })
 
 
   //////////////////////////////////////////////////////////////////
@@ -620,6 +621,29 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
+  const UserEmbeddingApp = connection.define('userEmbeddingApp', Object.assign({
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['userId'],
+      },
+      {
+        fields: ['embeddingAppId'],
+      },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
+      },
+    ],
+  }))
+
+  User.belongsToMany(EmbeddingApp, { through: UserEmbeddingApp })
+  EmbeddingApp.belongsToMany(User, { through: UserEmbeddingApp })
+
+  //////////////////////////////////////////////////////////////////
+
   const UserRatingAdjustment = connection.define('userRatingAdjustment', Object.assign({
     adjustment: {
       type: Sequelize.INTEGER,
@@ -647,6 +671,81 @@ const createConnection = () => {
 
   UserRatingAdjustment.belongsTo(User, required)
   User.hasMany(UserRatingAdjustment)
+
+  //////////////////////////////////////////////////////////////////
+
+  const TagSet = connection.define('tagSet', Object.assign({
+    verseId,
+    tags: {
+      type: Sequelize.JSON,
+      allowNull: false,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['verseId'],
+      },
+      {
+        fields: ['versionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  TagSet.belongsTo(Version, primaryKey)
+  Version.hasMany(TagSet)
+
+  //////////////////////////////////////////////////////////////////
+
+  const TagSetSubmission = connection.define('tagSetSubmission', Object.assign({
+    verseId: {
+      type: Sequelize.STRING(8),
+      unique: 'userId-versionId-verseId',
+      validate: {
+        is: verseIdRegEx,
+      },
+    },
+    miniHashWords: {  // eg. "i8e,eWq,iuD,iuf,AAl" for a five-word verse
+      type: Sequelize.STRING(255),
+      allowNull: false,
+      notEmpty: true,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['userId'],
+      },
+      {
+        fields: ['versionId'],
+      },
+      {
+        fields: ['verseId'],
+      },
+      {
+        fields: ['miniHashWords'],
+      },
+      {
+        fields: ['embeddingAppId'],
+      },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
+      },
+    ],
+  }))
+
+  TagSetSubmission.belongsTo(User, unique('userId-versionId-verseId'))
+  User.hasMany(TagSetSubmission)
+
+  TagSetSubmission.belongsTo(Version, unique('userId-versionId-verseId'))
+  Version.hasMany(TagSetSubmission)
+
+  TagSetSubmission.belongsTo(EmbeddingApp, required)
+  EmbeddingApp.hasMany(TagSetSubmission)
+
+  // User.belongsToMany(EmbeddingApp, { through: { model: TagSetSubmission, unique: false } })
+  // EmbeddingApp.belongsToMany(User, { through: { model: TagSetSubmission, unique: false } })
 
   //////////////////////////////////////////////////////////////////
 
@@ -882,28 +981,6 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const uhbTagSet = connection.define('uhbTagSet', Object.assign({
-    verseId,
-    tags: {
-      type: Sequelize.JSON,
-      allowNull: false,
-    },
-  }), Object.assign({
-    indexes: [
-      {
-        fields: ['verseId'],
-      },
-      {
-        fields: ['versionId'],
-      },
-    ],
-  }, noTimestampsOptions))
-
-  uhbTagSet.belongsTo(Version, primaryKey)
-  Version.hasMany(uhbTagSet)
-
-  //////////////////////////////////////////////////////////////////
-
   const uhbTag = connection.define('uhbTag', Object.assign({
     wordPartNumber: {
       type: Sequelize.INTEGER.UNSIGNED,
@@ -972,6 +1049,9 @@ const createConnection = () => {
         fields: ['embeddingAppId'],
       },
       {
+        fields: ['tagSetSubmissionId'],
+      },
+      {
         fields: ['createdAt'],
       },
       {
@@ -992,8 +1072,8 @@ const createConnection = () => {
   uhbTagSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(uhbTagSubmission)
 
-  User.belongsToMany(EmbeddingApp, { through: { model: uhbTagSubmission, unique: false } })
-  EmbeddingApp.belongsToMany(User, { through: { model: uhbTagSubmission, unique: false } })
+  uhbTagSubmission.belongsTo(TagSetSubmission, required)
+  TagSetSubmission.hasMany(uhbTagSubmission)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1107,28 +1187,6 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const ugntTagSet = connection.define('ugntTagSet', Object.assign({
-    verseId,
-    tags: {
-      type: Sequelize.JSON,
-      allowNull: false,
-    },
-  }), Object.assign({
-    indexes: [
-      {
-        fields: ['verseId'],
-      },
-      {
-        fields: ['versionId'],
-      },
-    ],
-  }, noTimestampsOptions))
-
-  ugntTagSet.belongsTo(Version, primaryKey)
-  Version.hasMany(ugntTagSet)
-
-  //////////////////////////////////////////////////////////////////
-
   const ugntTag = connection.define('ugntTag', Object.assign({
     translationWordNumberInVerse: {
       type: Sequelize.INTEGER.UNSIGNED,
@@ -1183,6 +1241,9 @@ const createConnection = () => {
         fields: ['embeddingAppId'],
       },
       {
+        fields: ['tagSetSubmissionId'],
+      },
+      {
         fields: ['createdAt'],
       },
       {
@@ -1202,9 +1263,9 @@ const createConnection = () => {
 
   ugntTagSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(ugntTagSubmission)
-
-  User.belongsToMany(EmbeddingApp, { through: { model: ugntTagSubmission, unique: false } })
-  EmbeddingApp.belongsToMany(User, { through: { model: ugntTagSubmission, unique: false } })
+  
+  ugntTagSubmission.belongsTo(TagSetSubmission, required)
+  TagSetSubmission.hasMany(ugntTagSubmission)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1505,9 +1566,6 @@ const createConnection = () => {
 
   UiWordSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(UiWordSubmission)
-
-  User.belongsToMany(EmbeddingApp, { through: { model: UiWordSubmission, unique: false } })
-  EmbeddingApp.belongsToMany(User, { through: { model: UiWordSubmission, unique: false } })
 
   //////////////////////////////////////////////////////////////////
 
