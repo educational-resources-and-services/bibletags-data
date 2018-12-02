@@ -6,6 +6,12 @@ const {
   definitionIdRegEx,
   languageIdRegEx,
   scopeRegEx,
+  translationLength,
+  translationWordLength,
+  languageNameLength,
+  glossLength,
+  versionNameLength,
+  miniHashWordsLength,
 } = require('../graphql/utils')
 
 const MAX_CONNECTION_AGE = 1000 * 60 * 60 * 7.5
@@ -337,12 +343,12 @@ const createConnection = () => {
       },
     },
     name: {
-      type: Sequelize.STRING(100),
+      type: Sequelize.STRING(languageNameLength),
       unique: 'name',
       allowNull: false,
     },
     englishName: {
-      type: Sequelize.STRING(100),
+      type: Sequelize.STRING(languageNameLength),
       unique: 'englishName',
       allowNull: false,
     },
@@ -405,7 +411,7 @@ const createConnection = () => {
 
   const DefinitionByLanguage = connection.define('definitionByLanguage', Object.assign({
     gloss: {
-      type: Sequelize.STRING(100),
+      type: Sequelize.STRING(glossLength),
       allowNull: false,
     },
     syn: {
@@ -481,7 +487,7 @@ const createConnection = () => {
       },
     },
     name: {
-      type: Sequelize.STRING(150),
+      type: Sequelize.STRING(versionNameLength),
       unique: 'name',
       allowNull: false,
       notEmpty: true,
@@ -705,7 +711,7 @@ const createConnection = () => {
       },
     },
     miniHashWords: {  // eg. "i8e,eWq,iuD,iuf,AAl" for a five-word verse
-      type: Sequelize.STRING(255),
+      type: Sequelize.STRING(miniHashWordsLength),
       allowNull: false,
       notEmpty: true,
     },
@@ -1025,6 +1031,11 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       primaryKey: true,
     },
+    translationWord: {
+      type: Sequelize.STRING(translationWordLength),  // TODO: when inserting to this, make sure the translation string is not too long.
+      allowNull: false,
+      notEmpty: true,
+    },
   }), Object.assign({
     indexes: [
       {
@@ -1041,6 +1052,9 @@ const createConnection = () => {
       },
       {
         fields: ['translationWordNumberInVerse'],
+      },
+      {
+        fields: ['translationWord'],
       },
       {
         fields: ['embeddingAppId'],
@@ -1220,6 +1234,11 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       primaryKey: true,
     },
+    translationWord: {
+      type: Sequelize.STRING(translationWordLength),  // TODO: when inserting to this, make sure the translation string is not too long.
+      allowNull: false,
+      notEmpty: true,
+    },
   }), Object.assign({
     indexes: [
       {
@@ -1233,6 +1252,9 @@ const createConnection = () => {
       },
       {
         fields: ['translationWordNumberInVerse'],
+      },
+      {
+        fields: ['translationWord'],
       },
       {
         fields: ['embeddingAppId'],
@@ -1361,7 +1383,7 @@ const createConnection = () => {
 
   const WordTranslation = connection.define('wordTranslation', Object.assign({
     translation: {
-      type: Sequelize.STRING(200),  // TODO: when inserting to this, make sure the translation string is not too long.
+      type: Sequelize.STRING(translationLength),  // TODO: when inserting to this, make sure the translation string is not too long.
       primaryKey: true,
       notEmpty: true,
     },

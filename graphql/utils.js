@@ -13,6 +13,13 @@ module.exports = {
   languageIdRegEx: /^[a-z]{3}$/,
   scopeRegEx: /^[a-z]{1,2}|[0-9]{2}$/,
 
+  translationLength: 300,
+  translationWordLength: 200,
+  languageNameLength: 100,
+  glossLength: 100,
+  versionNameLength: 150,
+  miniHashWordsLength: 255,
+
   getOrigLangVersionIdFromVerseId: verseId => (
     parseInt(verseId.substr(0,2), 10) <= 39 ? 'uhb' : 'ugnt'
   ),
