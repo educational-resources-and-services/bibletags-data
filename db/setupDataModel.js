@@ -566,6 +566,10 @@ const createConnection = () => {
       allowNull: false,
       defaultValue: 0,
     },
+    ratingHistory: {  // each adjustment (with description) on a separate line
+      type: Sequelize.TEXT,
+      allowNull: false,
+    },
     flaggedForAbuse: {
       type: Sequelize.BOOLEAN,
       allowNull: false,
