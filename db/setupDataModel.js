@@ -744,9 +744,6 @@ const createConnection = () => {
   TagSetSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(TagSetSubmission)
 
-  // User.belongsToMany(EmbeddingApp, { through: { model: TagSetSubmission, unique: false } })
-  // EmbeddingApp.belongsToMany(User, { through: { model: TagSetSubmission, unique: false } })
-
   //////////////////////////////////////////////////////////////////
 
   // Built off the assumption that alternative lemma or morphological
