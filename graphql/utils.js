@@ -18,7 +18,7 @@ module.exports = {
   languageNameLength: 100,
   glossLength: 100,
   versionNameLength: 150,
-  miniHashWordsLength: 255,
+  wordsHashLength: 255,
 
   getOrigLangVersionIdFromVerseId: verseId => (
     parseInt(verseId.substr(0,2), 10) <= 39 ? 'uhb' : 'ugnt'

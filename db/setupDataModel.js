@@ -11,7 +11,7 @@ const {
   languageNameLength,
   glossLength,
   versionNameLength,
-  miniHashWordsLength,
+  wordsHashLength,
 } = require('../graphql/utils')
 
 const MAX_CONNECTION_AGE = 1000 * 60 * 60 * 7.5
@@ -206,6 +206,20 @@ const createConnection = () => {
     validate: {
       is: verseIdRegEx,
     },
+  }
+
+  const wordsHash = {
+    // eg. "i8eeWqiuDiufAA" for a seven-word verse (2 letters per word)
+    // Effectively works to distiguish verses which differ due to being
+    // from two different editions of a single Bible version.
+    type: Sequelize.STRING(wordsHashLength),
+    primaryKey: true,
+  }
+
+  const wordComboHash = {
+    type: Sequelize.STRING(24),
+    allowNull: false,
+    notEmpty: true,
   }
 
   const scope = {
@@ -694,6 +708,7 @@ const createConnection = () => {
       type: Sequelize.JSON,
       allowNull: false,
     },
+    wordsHash,
   }), Object.assign({
     indexes: [
       {
@@ -701,6 +716,12 @@ const createConnection = () => {
       },
       {
         fields: ['versionId'],
+      },
+      {
+        fields: ['verseId', 'versionId'],
+      },
+      {
+        fields: ['wordsHash'],
       },
     ],
   }, noTimestampsOptions))
@@ -713,13 +734,14 @@ const createConnection = () => {
   const TagSetSubmission = connection.define('tagSetSubmission', Object.assign({
     verseId: {
       type: Sequelize.STRING(8),
-      unique: 'userId-versionId-verseId',
+      unique: 'userId-versionId-verseId-wordsHash',
       validate: {
         is: verseIdRegEx,
       },
     },
-    miniHashWords: {  // eg. "i8e,eWq,iuD,iuf,AAl" for a five-word verse
-      type: Sequelize.STRING(miniHashWordsLength),
+    wordsHash: {  // See the notes on wordsHash column above.
+      type: Sequelize.STRING(wordsHashLength),
+      unique: 'userId-versionId-verseId-wordsHash',
       allowNull: false,
       notEmpty: true,
     },
@@ -735,7 +757,7 @@ const createConnection = () => {
         fields: ['verseId'],
       },
       {
-        fields: ['miniHashWords'],
+        fields: ['wordsHash'],
       },
       {
         fields: ['embeddingAppId'],
@@ -749,14 +771,96 @@ const createConnection = () => {
     ],
   }))
 
-  TagSetSubmission.belongsTo(User, unique('userId-versionId-verseId'))
+  TagSetSubmission.belongsTo(User, unique('userId-versionId-verseId-wordsHash'))
   User.hasMany(TagSetSubmission)
 
-  TagSetSubmission.belongsTo(Version, unique('userId-versionId-verseId'))
+  TagSetSubmission.belongsTo(Version, unique('userId-versionId-verseId-wordsHash'))
   Version.hasMany(TagSetSubmission)
 
   TagSetSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(TagSetSubmission)
+
+  //////////////////////////////////////////////////////////////////
+
+  const WordHashesSetSubmission = connection.define('wordHashesSetSubmission', Object.assign({
+    verseId: {
+      type: Sequelize.STRING(8),
+      unique: 'versionId-verseId-wordsHash',
+      validate: {
+        is: verseIdRegEx,
+      },
+    },
+    wordsHash: {  // See the notes on wordsHash column above.
+      type: Sequelize.STRING(wordsHashLength),
+      unique: 'versionId-verseId-wordsHash',
+      allowNull: false,
+      notEmpty: true,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['versionId'],
+      },
+      {
+        fields: ['verseId'],
+      },
+      {
+        fields: ['wordsHash'],
+      },
+      {
+        fields: ['embeddingAppId'],
+      },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
+      },
+    ],
+  }))
+
+  WordHashesSetSubmission.belongsTo(Version, unique('versionId-verseId-wordsHash'))
+  Version.hasMany(WordHashesSetSubmission)
+
+  WordHashesSetSubmission.belongsTo(EmbeddingApp, required)
+  EmbeddingApp.hasMany(WordHashesSetSubmission)
+
+  //////////////////////////////////////////////////////////////////
+
+  const WordHashesSubmission = connection.define('wordHashesSubmission', Object.assign({
+    wordNumberInVerse: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      primaryKey: true,
+    },
+    hash: { ...wordComboHash },
+    withBeforeHash: { ...wordComboHash },
+    withAfterHash: { ...wordComboHash },
+    withBeforeAndAfterHash: { ...wordComboHash },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['wordNumberInVerse'],
+      },
+      {
+        fields: ['hash'],
+      },
+      {
+        fields: ['withBeforeHash'],
+      },
+      {
+        fields: ['withAfterHash'],
+      },
+      {
+        fields: ['withBeforeAndAfterHash'],
+      },
+      {
+        fields: ['wordHashesSetSubmissionId'],
+      },
+    ],
+  }, noTimestampsOptions))
+
+  WordHashesSubmission.belongsTo(WordHashesSetSubmission, primaryKey)
+  WordHashesSetSubmission.hasMany(WordHashesSubmission)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1008,6 +1112,7 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       primaryKey: true,
     },
+    wordsHash,
     type,
   }), Object.assign({
     indexes: [
@@ -1022,6 +1127,9 @@ const createConnection = () => {
       },
       {
         fields: ['translationWordNumberInVerse'],
+      },
+      {
+        fields: ['wordsHash'],
       },
       {
         fields: ['type'],
@@ -1047,17 +1155,14 @@ const createConnection = () => {
       primaryKey: true,
     },
     translationWord: {
-      type: Sequelize.STRING(translationWordLength),  // TODO: when inserting to this, make sure the translation string is not too long.
+      type: Sequelize.STRING(translationWordLength),
       allowNull: false,
       notEmpty: true,
     },
   }), Object.assign({
     indexes: [
       {
-        fields: ['userId'],
-      },
-      {
-        fields: ['versionId'],
+        fields: ['tagSetSubmissionId'],
       },
       {
         fields: ['uhbWordId'],
@@ -1074,32 +1179,17 @@ const createConnection = () => {
       {
         fields: ['embeddingAppId'],
       },
-      {
-        fields: ['tagSetSubmissionId'],
-      },
-      {
-        fields: ['createdAt'],
-      },
-      {
-        fields: ['updatedAt'],
-      },
     ],
-  }))
+  }, noTimestampsOptions))
 
-  uhbTagSubmission.belongsTo(User, primaryKey)
-  User.hasMany(uhbTagSubmission)
-
-  uhbTagSubmission.belongsTo(Version, primaryKey)
-  Version.hasMany(uhbTagSubmission)
+  uhbTagSubmission.belongsTo(TagSetSubmission, primaryKey)
+  TagSetSubmission.hasMany(uhbTagSubmission)
 
   uhbTagSubmission.belongsTo(uhbWord, primaryKey)
   uhbWord.hasMany(uhbTagSubmission)
 
   uhbTagSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(uhbTagSubmission)
-
-  uhbTagSubmission.belongsTo(TagSetSubmission, required)
-  TagSetSubmission.hasMany(uhbTagSubmission)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1225,6 +1315,7 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       primaryKey: true,
     },
+    wordsHash,
     type,
   }), Object.assign({
     indexes: [
@@ -1236,6 +1327,9 @@ const createConnection = () => {
       },
       {
         fields: ['translationWordNumberInVerse'],
+      },
+      {
+        fields: ['wordsHash'],
       },
       {
         fields: ['type'],
@@ -1257,17 +1351,14 @@ const createConnection = () => {
       primaryKey: true,
     },
     translationWord: {
-      type: Sequelize.STRING(translationWordLength),  // TODO: when inserting to this, make sure the translation string is not too long.
+      type: Sequelize.STRING(translationWordLength),
       allowNull: false,
       notEmpty: true,
     },
   }), Object.assign({
     indexes: [
       {
-        fields: ['userId'],
-      },
-      {
-        fields: ['versionId'],
+        fields: ['tagSetSubmissionId'],
       },
       {
         fields: ['ugntWordId'],
@@ -1281,23 +1372,11 @@ const createConnection = () => {
       {
         fields: ['embeddingAppId'],
       },
-      {
-        fields: ['tagSetSubmissionId'],
-      },
-      {
-        fields: ['createdAt'],
-      },
-      {
-        fields: ['updatedAt'],
-      },
     ],
-  }))
+  }, noTimestampsOptions))
 
-  ugntTagSubmission.belongsTo(User, primaryKey)
-  User.hasMany(ugntTagSubmission)
-
-  ugntTagSubmission.belongsTo(Version, primaryKey)
-  Version.hasMany(ugntTagSubmission)
+  ugntTagSubmission.belongsTo(TagSetSubmission, primaryKey)
+  TagSetSubmission.hasMany(ugntTagSubmission)
 
   ugntTagSubmission.belongsTo(ugntWord, primaryKey)
   ugntWord.hasMany(ugntTagSubmission)
@@ -1305,9 +1384,6 @@ const createConnection = () => {
   ugntTagSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(ugntTagSubmission)
   
-  ugntTagSubmission.belongsTo(TagSetSubmission, required)
-  TagSetSubmission.hasMany(ugntTagSubmission)
-
   //////////////////////////////////////////////////////////////////
 
   const lxxWord = connection.define('lxxWord', Object.assign({
@@ -1405,7 +1481,7 @@ const createConnection = () => {
 
   const WordTranslation = connection.define('wordTranslation', Object.assign({
     translation: {
-      type: Sequelize.STRING(translationLength),  // TODO: when inserting to this, make sure the translation string is not too long.
+      type: Sequelize.STRING(translationLength),
       primaryKey: true,
       notEmpty: true,
     },
