@@ -310,6 +310,16 @@ const createConnection = () => {
     type: Sequelize.ENUM('C', 'S', 'D', 'I'),
   }
 
+  const type = {
+    type: Sequelize.ENUM(
+      'imported',  // i.e. imported from some data set, without very strong rating or secondary confirmation
+      'submitted',  // i.e. submitted by user, without very strong rating or secondary confirmation
+      'deduced',  // i.e. determined by user submissions in other verses, without secondary confirmation
+      'confirmed'  // i.e. cross-checked in 2+ ways, or submitted by user/import with very strong rating
+    ),
+    allowNull: false,
+  }
+
   const required = { foreignKey: { allowNull: false } }
   const primaryKey = { foreignKey: { allowNull: false, primaryKey: true } }
 
@@ -514,28 +524,11 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const EmbeddingApp = connection.define('embeddingApp', Object.assign({
-    appURL: {  // for default row (id=1), appURL=email
-      type: Sequelize.STRING(100),
-      unique: 'appURL',
-      allowNull: false,
-      validate: {
-        isUrl: true,
-      },
-    },
-    contactEmail: {
+    // will need a default row (id=1) where uri=import
+    uri: {
       type: Sequelize.STRING(255),
+      unique: 'uri',
       allowNull: false,
-      validate: {
-        isEmail: true,
-      },
-    },
-    appId: {
-      type: Sequelize.STRING(30),
-      unique: 'appId',
-      allowNull: false,
-      validate: {
-        len: [30, 30],
-      },
     },
     notes: {
       type: Sequelize.TEXT,
@@ -543,7 +536,7 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
-        fields: ['contactEmail'],
+        fields: ['uri'],
       },
     ],
   }))
@@ -551,9 +544,12 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const User = connection.define('user', Object.assign({
-    id: {  // will be an email address when embeddingAppId=1
+    email: {
       type: Sequelize.STRING(255),
-      primaryKey: true,
+      allowNull: false,
+      validate: {
+        isEmail: true,
+      },
     },
     google: {
       type: Sequelize.STRING(50),
@@ -580,10 +576,7 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
-        fields: ['embeddingAppId'],
-      },
-      {
-        fields: ['id'],
+        fields: ['email'],
       },
       {
         fields: ['google'],
@@ -599,9 +592,6 @@ const createConnection = () => {
       },
     ],
   }))
-
-  User.belongsTo(EmbeddingApp, primaryKey)
-  EmbeddingApp.hasMany(User)
 
   //////////////////////////////////////////////////////////////////
 
@@ -867,10 +857,7 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       primaryKey: true,
     },
-    confirmed: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false,
-    },
+    type,
   }), Object.assign({
     indexes: [
       {
@@ -886,7 +873,7 @@ const createConnection = () => {
         fields: ['translationWordNumberInVerse'],
       },
       {
-        fields: ['confirmed'],
+        fields: ['type'],
       },
     ],
   }, noTimestampsOptions))
@@ -925,6 +912,9 @@ const createConnection = () => {
       {
         fields: ['translationWordNumberInVerse'],
       },
+      {
+        fields: ['embeddingAppId'],
+      },
     ],
   }))
 
@@ -936,6 +926,9 @@ const createConnection = () => {
 
   uhbTagSubmission.belongsTo(uhbWord, primaryKey)
   uhbWord.hasMany(uhbTagSubmission)
+
+  uhbTagSubmission.belongsTo(EmbeddingApp, required)
+  EmbeddingApp.hasMany(uhbTagSubmission)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1075,10 +1068,7 @@ const createConnection = () => {
       type: Sequelize.INTEGER.UNSIGNED,
       primaryKey: true,
     },
-    confirmed: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false,
-    },
+    type,
   }), Object.assign({
     indexes: [
       {
@@ -1091,7 +1081,7 @@ const createConnection = () => {
         fields: ['translationWordNumberInVerse'],
       },
       {
-        fields: ['confirmed'],
+        fields: ['type'],
       },
     ],
   }, noTimestampsOptions))
@@ -1123,6 +1113,9 @@ const createConnection = () => {
       {
         fields: ['translationWordNumberInVerse'],
       },
+      {
+        fields: ['embeddingAppId'],
+      },
     ],
   }))
 
@@ -1134,6 +1127,9 @@ const createConnection = () => {
 
   ugntTagSubmission.belongsTo(ugntWord, primaryKey)
   ugntWord.hasMany(ugntTagSubmission)
+
+  ugntTagSubmission.belongsTo(EmbeddingApp, required)
+  EmbeddingApp.hasMany(ugntTagSubmission)
 
   //////////////////////////////////////////////////////////////////
 
