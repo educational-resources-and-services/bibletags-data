@@ -73,6 +73,7 @@ const createConnection = () => {
   ]
 
   const noTimestampsOptions = {
+    // Used in tables which can be completed derived from other tables and base import files.
     timestamps: false,
   }
 
@@ -335,12 +336,12 @@ const createConnection = () => {
       },
     },
     name: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING(100),
       unique: 'name',
       allowNull: false,
     },
     englishName: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING(100),
       unique: 'englishName',
       allowNull: false,
     },
@@ -954,8 +955,8 @@ const createConnection = () => {
   uhbTagSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(uhbTagSubmission)
 
-  User.belongsToMany(EmbeddingApp, { through: uhbTagSubmission })
-  EmbeddingApp.belongsToMany(User, { through: uhbTagSubmission })
+  User.belongsToMany(EmbeddingApp, { through: { model: uhbTagSubmission, unique: false } })
+  EmbeddingApp.belongsToMany(User, { through: { model: uhbTagSubmission, unique: false } })
 
   //////////////////////////////////////////////////////////////////
 
@@ -1158,8 +1159,8 @@ const createConnection = () => {
   ugntTagSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(ugntTagSubmission)
 
-  User.belongsToMany(EmbeddingApp, { through: ugntTagSubmission })
-  EmbeddingApp.belongsToMany(User, { through: ugntTagSubmission })
+  User.belongsToMany(EmbeddingApp, { through: { model: ugntTagSubmission, unique: false } })
+  EmbeddingApp.belongsToMany(User, { through: { model: ugntTagSubmission, unique: false } })
 
   //////////////////////////////////////////////////////////////////
 
@@ -1282,6 +1283,7 @@ const createConnection = () => {
 
   WordTranslation.belongsTo(Definition, primaryKey)
   Definition.hasMany(WordTranslation)
+
   WordTranslation.belongsTo(Version, primaryKey)
   Version.hasMany(WordTranslation)
 
@@ -1347,19 +1349,17 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
-  const UiWord = connection.define('uiWord', Object.assign({
+  const UiEnglishWord = connection.define('uiEnglishWord', Object.assign({
     str: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING(255),
+      unique: 'str-desc',
       allowNull: false,
       notEmpty: true,
     },
     desc: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING(255),
+      unique: 'str-desc',
       notEmpty: true,
-    },
-    translation: {
-      type: Sequelize.TEXT,
-      allowNull: false,
     },
   }), Object.assign({
     indexes: [
@@ -1369,14 +1369,89 @@ const createConnection = () => {
       {
         fields: ['desc'],
       },
+    ],
+  }))
+
+  //////////////////////////////////////////////////////////////////
+
+  const UiWord = connection.define('uiWord', Object.assign({
+    translation: {
+      type: Sequelize.STRING(255),
+      allowNull: false,
+    },
+    uiEnglishWordId: {
+      // One primaryKey column needs to be listed here to prevent sequelize
+      // from creating an id column.
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['translation'],
+      },
+      {
+        fields: ['uiEnglishWordId'],
+      },
       {
         fields: ['languageId'],
       },
     ],
   }, noTimestampsOptions))
 
-  UiWord.belongsTo(Language, required)
+  UiWord.belongsTo(UiEnglishWord, primaryKey)
+  UiEnglishWord.hasMany(UiWord)
+
+  UiWord.belongsTo(Language, primaryKey)
   Language.hasMany(UiWord)
+
+  //////////////////////////////////////////////////////////////////
+
+  const UiWordSubmission = connection.define('uiWordSubmission', Object.assign({
+    translation: {
+      type: Sequelize.STRING(255),
+      allowNull: false,
+    },
+    uiEnglishWordId: {
+      // One primaryKey column needs to be listed here to prevent sequelize
+      // from creating an id column.
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['userId'],
+      },
+      {
+        fields: ['uiEnglishWordId'],
+      },
+      {
+        fields: ['languageId'],
+      },
+      {
+        fields: ['embeddingAppId'],
+      },
+      {
+        fields: ['translation'],
+      },
+    ],
+  }))
+
+  UiWordSubmission.belongsTo(User, primaryKey)
+  User.hasMany(UiWordSubmission)
+
+  UiWordSubmission.belongsTo(UiEnglishWord, primaryKey)
+  UiEnglishWord.hasMany(UiWordSubmission)
+
+  UiWordSubmission.belongsTo(Language, primaryKey)
+  Language.hasMany(UiWordSubmission)
+
+  UiWordSubmission.belongsTo(EmbeddingApp, required)
+  EmbeddingApp.hasMany(UiWordSubmission)
+
+  User.belongsToMany(EmbeddingApp, { through: { model: UiWordSubmission, unique: false } })
+  EmbeddingApp.belongsToMany(User, { through: { model: UiWordSubmission, unique: false } })
 
   //////////////////////////////////////////////////////////////////
 
