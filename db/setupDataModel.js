@@ -347,6 +347,12 @@ const createConnection = () => {
     },
   }), Object.assign({
     indexes: [
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
+      },
     ],
   }))
 
@@ -516,6 +522,12 @@ const createConnection = () => {
       {
         fields: ['languageId'],
       },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
+      },
     ],
   }))
 
@@ -538,6 +550,12 @@ const createConnection = () => {
     indexes: [
       {
         fields: ['uri'],
+      },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
       },
     ],
   }))
@@ -591,6 +609,12 @@ const createConnection = () => {
       {
         fields: ['flaggedForAbuse'],
       },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
+      },
     ],
   }))
 
@@ -611,6 +635,12 @@ const createConnection = () => {
       },
       {
         fields: ['userId'],
+      },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
       },
     ],
   }))
@@ -940,6 +970,12 @@ const createConnection = () => {
       {
         fields: ['embeddingAppId'],
       },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
+      },
     ],
   }))
 
@@ -1143,6 +1179,12 @@ const createConnection = () => {
       },
       {
         fields: ['embeddingAppId'],
+      },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
       },
     ],
   }))
@@ -1369,6 +1411,12 @@ const createConnection = () => {
       {
         fields: ['desc'],
       },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
+      },
     ],
   }))
 
@@ -1434,6 +1482,12 @@ const createConnection = () => {
       },
       {
         fields: ['translation'],
+      },
+      {
+        fields: ['createdAt'],
+      },
+      {
+        fields: ['updatedAt'],
       },
     ],
   }))
