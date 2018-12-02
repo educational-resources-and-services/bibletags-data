@@ -592,7 +592,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const User = connection.define('user', Object.assign({
-    email: {
+    email: {  // for non-authenticated users: [uuid]@bibletags.org
       type: Sequelize.STRING(255),
       allowNull: false,
       validate: {
