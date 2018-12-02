@@ -595,6 +595,30 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
+  const UserRatingAdjustment = connection.define('userRatingAdjustment', Object.assign({
+    adjustment: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
+    notes: {
+      type: Sequelize.TEXT,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['adjustment'],
+      },
+      {
+        fields: ['userId'],
+      },
+    ],
+  }))
+
+  UserRatingAdjustment.belongsTo(User, required)
+  User.hasMany(UserRatingAdjustment)
+
+  //////////////////////////////////////////////////////////////////
+
   // Built off the assumption that alternative lemma or morphological
   // interpretations will NOT be considered in search. However, this
   // does not mean that such things could not be indicated as footnotes
