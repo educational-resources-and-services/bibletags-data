@@ -873,7 +873,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const uhbVerse = connection.define('uhbVerse', Object.assign({
-    id: verseId,
+    id: { ...verseId },
     usfm,
   }), Object.assign({
     indexes: [
@@ -883,6 +883,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const uhbTagSet = connection.define('uhbTagSet', Object.assign({
+    verseId,
     tags: {
       type: Sequelize.JSON,
       allowNull: false,
@@ -890,7 +891,7 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
-        fields: ['uhbVerseId'],
+        fields: ['verseId'],
       },
       {
         fields: ['versionId'],
@@ -898,8 +899,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  uhbVerse.belongsToMany(Version, { through: uhbTagSet })
-  Version.belongsToMany(uhbVerse, { through: uhbTagSet })
+  uhbTagSet.belongsTo(Version, primaryKey)
+  Version.hasMany(uhbTagSet)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1097,7 +1098,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const ugntVerse = connection.define('ugntVerse', Object.assign({
-    id: verseId,
+    id: { ...verseId },
     usfm,
   }), Object.assign({
     indexes: [
@@ -1107,6 +1108,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const ugntTagSet = connection.define('ugntTagSet', Object.assign({
+    verseId,
     tags: {
       type: Sequelize.JSON,
       allowNull: false,
@@ -1114,7 +1116,7 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
-        fields: ['ugntVerseId'],
+        fields: ['verseId'],
       },
       {
         fields: ['versionId'],
@@ -1122,8 +1124,8 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  ugntVerse.belongsToMany(Version, { through: ugntTagSet })
-  Version.belongsToMany(ugntVerse, { through: ugntTagSet })
+  ugntTagSet.belongsTo(Version, primaryKey)
+  Version.hasMany(ugntTagSet)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1288,7 +1290,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const lxxVerse = connection.define('lxxVerse', Object.assign({
-    id: verseId,
+    id: { ...verseId },
     // Includes deuterocanonical books, though these are not included
     // in default Bible Tags searches, nor in statistics.
     usfm,
