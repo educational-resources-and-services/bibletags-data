@@ -229,11 +229,19 @@ const createConnection = () => {
   const nakedWord = {  // no capitalization, accents, vowels or diacritical marks
     type: Sequelize.STRING(30),
     allowNull: false,
+    notEmpty: true,
   }
 
   const lemma = {
     type: Sequelize.STRING(50),
     allowNull: false,
+    notEmpty: true,
+  }
+
+  const fullParsing = {
+    type: Sequelize.STRING(20),
+    allowNull: false,
+    notEmpty: true,
   }
 
   const bookId = {
@@ -770,6 +778,7 @@ const createConnection = () => {
     },
     nakedWord,
     lemma,
+    fullParsing,  // prefixes + parsing string
     isAramaic: {
       type: Sequelize.BOOLEAN,
       allowNull: false,
@@ -890,6 +899,12 @@ const createConnection = () => {
       },
       {
         fields: ['nakedWord'],
+      },
+      {
+        fields: ['lemma'],
+      },
+      {
+        fields: ['fullParsing'],
       },
       {
         fields: ['isAramaic'],
@@ -1108,6 +1123,7 @@ const createConnection = () => {
     },
     nakedWord,
     lemma,
+    fullParsing,
     pos: greekPos,
     type: greekType,
     mood: greekMood,
@@ -1146,6 +1162,12 @@ const createConnection = () => {
       },
       {
         fields: ['nakedWord'],
+      },
+      {
+        fields: ['lemma'],
+      },
+      {
+        fields: ['fullParsing'],
       },
       {
         fields: ['pos'],
