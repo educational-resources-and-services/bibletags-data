@@ -513,6 +513,94 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
+  const EmbeddingApp = connection.define('embeddingApp', Object.assign({
+    appURL: {  // for default row (id=1), appURL=email
+      type: Sequelize.STRING(100),
+      unique: 'appURL',
+      allowNull: false,
+      validate: {
+        isUrl: true,
+      },
+    },
+    contactEmail: {
+      type: Sequelize.STRING(255),
+      allowNull: false,
+      validate: {
+        isEmail: true,
+      },
+    },
+    appId: {
+      type: Sequelize.STRING(30),
+      unique: 'appId',
+      allowNull: false,
+      validate: {
+        len: [30, 30],
+      },
+    },
+    notes: {
+      type: Sequelize.TEXT,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['contactEmail'],
+      },
+    ],
+  }))
+
+  //////////////////////////////////////////////////////////////////
+
+  const User = connection.define('user', Object.assign({
+    id: {  // will be an email address when embeddingAppId=1
+      type: Sequelize.STRING(255),
+      primaryKey: true,
+    },
+    google: {
+      type: Sequelize.STRING(50),
+    },
+    facebook: {
+      type: Sequelize.STRING(50),
+    },
+    rating: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    flaggedForAbuse: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    notes: {
+      type: Sequelize.TEXT,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['embeddingAppId'],
+      },
+      {
+        fields: ['id'],
+      },
+      {
+        fields: ['google'],
+      },
+      {
+        fields: ['facebook'],
+      },
+      {
+        fields: ['rating'],
+      },
+      {
+        fields: ['flaggedForAbuse'],
+      },
+    ],
+  }))
+
+  User.belongsTo(EmbeddingApp, primaryKey)
+  EmbeddingApp.hasMany(User)
+
+  //////////////////////////////////////////////////////////////////
+
   // Built off the assumption that alternative lemma or morphological
   // interpretations will NOT be considered in search. However, this
   // does not mean that such things could not be indicated as footnotes
@@ -807,6 +895,46 @@ const createConnection = () => {
 
   //////////////////////////////////////////////////////////////////
 
+  const uhbTagSubmission = connection.define('uhbTagSubmission', Object.assign({
+    wordPartNumber: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      primaryKey: true,
+    },
+    translationWordNumberInVerse: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      primaryKey: true,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['userId'],
+      },
+      {
+        fields: ['versionId'],
+      },
+      {
+        fields: ['uhbWordId'],
+      },
+      {
+        fields: ['wordPartNumber'],
+      },
+      {
+        fields: ['translationWordNumberInVerse'],
+      },
+    ],
+  }))
+
+  uhbTagSubmission.belongsTo(User, primaryKey)
+  User.hasMany(uhbTagSubmission)
+
+  uhbTagSubmission.belongsTo(Version, primaryKey)
+  Version.hasMany(uhbTagSubmission)
+
+  uhbTagSubmission.belongsTo(uhbWord, primaryKey)
+  uhbWord.hasMany(uhbTagSubmission)
+
+  //////////////////////////////////////////////////////////////////
+
   const ugntWord = connection.define('ugntWord', Object.assign({
     bookId,
     chapter,
@@ -969,6 +1097,39 @@ const createConnection = () => {
 
   ugntTag.belongsTo(ugntWord, primaryKey)
   ugntWord.hasMany(ugntTag)
+
+  //////////////////////////////////////////////////////////////////
+
+  const ugntTagSubmission = connection.define('ugntTagSubmission', Object.assign({
+    translationWordNumberInVerse: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      primaryKey: true,
+    },
+  }), Object.assign({
+    indexes: [
+      {
+        fields: ['userId'],
+      },
+      {
+        fields: ['versionId'],
+      },
+      {
+        fields: ['ugntWordId'],
+      },
+      {
+        fields: ['translationWordNumberInVerse'],
+      },
+    ],
+  }))
+
+  ugntTagSubmission.belongsTo(User, primaryKey)
+  User.hasMany(ugntTagSubmission)
+
+  ugntTagSubmission.belongsTo(Version, primaryKey)
+  Version.hasMany(ugntTagSubmission)
+
+  ugntTagSubmission.belongsTo(ugntWord, primaryKey)
+  ugntWord.hasMany(ugntTagSubmission)
 
   //////////////////////////////////////////////////////////////////
 
