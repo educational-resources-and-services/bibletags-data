@@ -1486,6 +1486,9 @@ const createConnection = () => {
       notEmpty: true,
     },
     hits,
+    // The number of hits might exceed the number of [non-variant] instances of this word
+    // for two different reasons. (1) If there is a translation from a variant. (2) If
+    // the version has more than a single edition.
   }), Object.assign({
     indexes: [
       {
