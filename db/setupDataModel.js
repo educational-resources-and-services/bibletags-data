@@ -192,14 +192,6 @@ const createConnection = () => {
     })
   }
 
-  const wordId = {
-    type: Sequelize.STRING(4),
-    primaryKey: true,
-    validate: {
-      is: wordIdRegEx,
-    },
-  }
-
   const verseId = {
     type: Sequelize.STRING(8),
     primaryKey: true,
@@ -870,7 +862,13 @@ const createConnection = () => {
   // in the text.
 
   const uhbWord = connection.define('uhbWord', Object.assign({
-    id: wordId,
+    id: {
+      type: Sequelize.STRING(4),
+      primaryKey: true,
+      validate: {
+        is: wordIdRegEx,
+      },
+    },
     bookId,
     chapter,
     verse,
@@ -1094,7 +1092,13 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const uhbVerse = connection.define('uhbVerse', Object.assign({
-    id: { ...verseId },
+    id: {
+      type: Sequelize.STRING(8),
+      primaryKey: true,
+      validate: {
+        is: verseIdRegEx,
+      },
+    },
     usfm,
   }), Object.assign({
     indexes: [
@@ -1194,6 +1198,13 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const ugntWord = connection.define('ugntWord', Object.assign({
+    id: {
+      type: Sequelize.STRING(4),
+      primaryKey: true,
+      validate: {
+        is: wordIdRegEx,
+      },
+    },
     bookId,
     chapter,
     verse,
@@ -1301,7 +1312,13 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const ugntVerse = connection.define('ugntVerse', Object.assign({
-    id: { ...verseId },
+    id: {
+      type: Sequelize.STRING(8),
+      primaryKey: true,
+      validate: {
+        is: verseIdRegEx,
+      },
+    },
     usfm,
   }), Object.assign({
     indexes: [
@@ -1468,7 +1485,13 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const lxxVerse = connection.define('lxxVerse', Object.assign({
-    id: { ...verseId },
+    id: {
+      type: Sequelize.STRING(8),
+      primaryKey: true,
+      validate: {
+        is: verseIdRegEx,
+      },
+    },
     // Includes deuterocanonical books, though these are not included
     // in default Bible Tags searches, nor in statistics.
     usfm,
