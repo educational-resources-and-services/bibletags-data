@@ -1,5 +1,4 @@
 const {
-  getOrigLangVersionIdFromVerseId,
   verseIdRegEx,
   versionIdRegEx,
 } = require('../utils')
@@ -28,14 +27,13 @@ module.exports = ({ models }) => {
       throw(new Error(`Invalid versionId (${versionId}) indicated in id (${id}).`))
     }
 
-    const originalLanguageVersionId = getOrigLangVersionIdFromVerseId(verseId)
 
     const where = {
-      [`${originalLanguageVersionId}VerseId`]: verseId,
+      verseId,
       versionId,
     }
 
-    return models[`${originalLanguageVersionId}TagSet`].findOne({
+    return models.tagSet.findOne({
       where,
     }).then(tagSet => ({ id, tagSet }))
 
