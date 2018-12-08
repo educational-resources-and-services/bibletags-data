@@ -14,5 +14,21 @@
 */
 
 module.exports = `
-  
+
+  input WordHashesSetInput {
+    verseId: String!
+    versionId: String!
+    wordsHash: String!
+    embeddingAppId: Int!
+    wordHashes: [WordHashesInput]!
+  }
+
+  input WordHashesInput {
+    wordNumberInVerse: Int!
+    hash: String!
+    withBeforeHash: String!
+    withAfterHash: String!
+    withBeforeAndAfterHash: String!
+  }
+
 `
