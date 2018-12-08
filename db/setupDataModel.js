@@ -473,7 +473,8 @@ const createConnection = () => {
       type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V', 'E', 'I'),
       // Note: these part-of-speech codes mean different things depending
       // on whether they are Hebrew or Greek. But we leave it to the widget
-      // to worry about this.
+      // to worry about this. Also, see biblearc-widget's getNormalizedGreekPOSCode
+      // function for importing the Greek for this table properly.
       primaryKey: true,
     },
   }), Object.assign({
