@@ -56,7 +56,7 @@ module.exports = ({ connection, nullLikeDate }) => {
     type Query {
       chapter(bookId: Int!, chapter: Int!, versionId: String!): [Verse]
       verse(id: ID!): Verse
-      tagSets(bookId: Int!, chapter: Int!, versionId: String!): [TagSet]
+      tagSets(bookId: Int!, chapter: Int!, verse: Int, versionId: String!): [TagSet]
       tagSet(id: ID!): TagSet
       definition(id: ID!): Definition
       definitionsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, languageId: String!): [Definition]

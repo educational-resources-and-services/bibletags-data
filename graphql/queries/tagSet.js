@@ -1,6 +1,7 @@
 const {
   verseIdRegEx,
   versionIdRegEx,
+  wordsHashRegEx,
 } = require('../utils')
 
 module.exports = ({ models }) => {
@@ -13,7 +14,7 @@ module.exports = ({ models }) => {
     { req }
   ) => {
 
-    const [ verseId, versionId, invalidExtra ] = id.split('-')
+    const [ verseId, versionId, wordsHash, invalidExtra ] = id.split('-')
 
     if(invalidExtra !== undefined) {
       throw(new Error(`Invalid id (${id}).`))
@@ -27,15 +28,20 @@ module.exports = ({ models }) => {
       throw(new Error(`Invalid versionId (${versionId}) indicated in id (${id}).`))
     }
 
+    if(!wordsHash.match(wordsHashRegEx)) {
+      throw(new Error(`Invalid wordsHash (${wordsHash}) indicated in id (${id}).`))
+    }
+
 
     const where = {
       verseId,
       versionId,
+      wordsHash,
     }
 
     return models.tagSet.findOne({
       where,
-    }).then(tagSet => ({ id, tagSet }))
+    }).then(tagSet => ({ id, tags: tagSet.tags }))
 
   }
 }

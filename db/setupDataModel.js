@@ -12,6 +12,7 @@ const {
   glossLength,
   versionNameLength,
   wordsHashLength,
+  wordsHashRegEx,
 } = require('../graphql/utils')
 
 const MAX_CONNECTION_AGE = 1000 * 60 * 60 * 7.5
@@ -206,6 +207,9 @@ const createConnection = () => {
     // from two different editions of a single Bible version.
     type: Sequelize.STRING(wordsHashLength),
     primaryKey: true,
+    validate: {
+      is: wordsHashRegEx,
+    },
   }
 
   const wordComboHash = {
@@ -736,7 +740,9 @@ const createConnection = () => {
       type: Sequelize.STRING(wordsHashLength),
       unique: 'userId-versionId-verseId-wordsHash',
       allowNull: false,
-      notEmpty: true,
+      validate: {
+        is: wordsHashRegEx,
+      },
     },
   }), Object.assign({
     indexes: [
@@ -787,7 +793,9 @@ const createConnection = () => {
       type: Sequelize.STRING(wordsHashLength),
       unique: 'versionId-verseId-wordsHash',
       allowNull: false,
-      notEmpty: true,
+      validate: {
+        is: wordsHashRegEx,
+      },
     },
   }), Object.assign({
     indexes: [

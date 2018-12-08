@@ -16,6 +16,7 @@
     "zip": "rm -f build.zip && zip build.zip -qr --exclude=package.json --exclude=scripts* *"
   },
   "dependencies": {
+    "bibletags-versification": "github:educational-resources-and-services/bibletags-versification",
     "body-parser": "1.17.2",
     "console-stamp": "0.2.6",
     "dotenv": "4.0.0",
