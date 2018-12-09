@@ -14,9 +14,8 @@ module.exports = ({ models }) => {
   ) => {
 
     const [ verseId, versionId, invalidExtra ] = id.split('-')
-    const model = models[`${versionId}Verse`]
 
-    if(invalidExtra !== undefined) {
+    if(versionId === undefined || invalidExtra !== undefined) {
       throw(new Error(`Invalid id (${id}).`))
     }
 
@@ -27,6 +26,8 @@ module.exports = ({ models }) => {
     if(!versionId.match(versionIdRegEx)) {
       throw(new Error(`Invalid versionId (${versionId}) indicated in id (${id}).`))
     }
+
+    const model = models[`${versionId}Verse`]
 
     if(!model) {
       throw(new Error('Invalid versionId indicated in id.'))

@@ -16,7 +16,7 @@ module.exports = ({ models }) => {
 
     const [ verseId, versionId, wordsHash, invalidExtra ] = id.split('-')
 
-    if(invalidExtra !== undefined) {
+    if(wordsHash === undefined || invalidExtra !== undefined) {
       throw(new Error(`Invalid id (${id}).`))
     }
 

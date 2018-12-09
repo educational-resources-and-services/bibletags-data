@@ -15,7 +15,7 @@ module.exports = ({ models }) => {
 
     const [ definitionId, languageId, invalidExtra ] = id.split('-')
 
-    if(invalidExtra !== undefined) {
+    if(languageId === undefined || invalidExtra !== undefined) {
       throw(new Error(`Invalid id (${id}).`))
     }
 
