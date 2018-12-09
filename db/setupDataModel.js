@@ -705,6 +705,14 @@ const createConnection = () => {
       type: Sequelize.JSON,
       allowNull: false,
     },
+    status: {
+      type: Sequelize.ENUM(
+        'incomplete',
+        'unconfirmed',
+        'confirmed'
+      ),
+      allowNull: false,
+    },
     wordsHash,
   }), Object.assign({
     indexes: [
@@ -719,6 +727,9 @@ const createConnection = () => {
       },
       {
         fields: ['wordsHash'],
+      },
+      {
+        fields: ['status'],
       },
     ],
   }, noTimestampsOptions))

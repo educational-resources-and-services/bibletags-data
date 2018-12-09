@@ -32,7 +32,6 @@ module.exports = ({ models }) => {
       throw(new Error(`Invalid wordsHash (${wordsHash}) indicated in id (${id}).`))
     }
 
-
     const where = {
       verseId,
       versionId,
@@ -41,7 +40,11 @@ module.exports = ({ models }) => {
 
     return models.tagSet.findOne({
       where,
-    }).then(tagSet => ({ id, tags: tagSet.tags }))
+    }).then(tagSet => ({
+      id,
+      tags: tagSet ? tagSet.tags : [],
+      status: tagSet ? tagSet.status : 'incomplete',
+    }))
 
   }
 }
