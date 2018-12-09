@@ -24,6 +24,7 @@ module.exports = `
   type TagSet {
     id: ID
     tags: JSON
+    status: String
   }
 
   type Definition {
