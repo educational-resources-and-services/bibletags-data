@@ -70,6 +70,7 @@ module.exports = ({ connection, nullLikeDate }) => {
     
     type Mutation {
       submitWordHashesSet(input: WordHashesSetInput!): Boolean
+      submitTagSet(input: TagSetInput!): Boolean
     }
     
     schema {

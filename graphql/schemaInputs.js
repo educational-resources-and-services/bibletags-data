@@ -31,4 +31,19 @@ module.exports = `
     withBeforeAndAfterHash: String!
   }
 
+  input TagSetInput {
+    verseId: String!
+    versionId: String!
+    wordsHash: String!
+    userId: Int!
+    embeddingAppId: Int!
+    tagSubmissions: [TagInput]!
+  }
+
+  input TagInput {
+    translationWordNumberInVerse: Int!
+    translationWord: String!
+    ugntWordId: String!
+  }
+
 `

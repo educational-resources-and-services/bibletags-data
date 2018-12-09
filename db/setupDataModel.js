@@ -1200,9 +1200,6 @@ const createConnection = () => {
       {
         fields: ['translationWord'],
       },
-      {
-        fields: ['embeddingAppId'],
-      },
     ],
   }, noTimestampsOptions))
 
@@ -1211,9 +1208,6 @@ const createConnection = () => {
 
   uhbTagSubmission.belongsTo(uhbWord, primaryKey)
   uhbWord.hasMany(uhbTagSubmission)
-
-  uhbTagSubmission.belongsTo(EmbeddingApp, required)
-  EmbeddingApp.hasMany(uhbTagSubmission)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1406,9 +1400,6 @@ const createConnection = () => {
       {
         fields: ['translationWord'],
       },
-      {
-        fields: ['embeddingAppId'],
-      },
     ],
   }, noTimestampsOptions))
 
@@ -1417,9 +1408,6 @@ const createConnection = () => {
 
   ugntTagSubmission.belongsTo(ugntWord, primaryKey)
   ugntWord.hasMany(ugntTagSubmission)
-
-  ugntTagSubmission.belongsTo(EmbeddingApp, required)
-  EmbeddingApp.hasMany(ugntTagSubmission)
   
   //////////////////////////////////////////////////////////////////
 
