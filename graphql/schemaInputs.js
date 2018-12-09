@@ -46,4 +46,16 @@ module.exports = `
     ugntWordId: String!
   }
 
+  input UIWordsInput {
+    languageId: String!
+    userId: Int!
+    embeddingAppId: Int!
+    words: [UIWordInput]!
+  }
+
+  input UIWordInput {
+    uiEnglishWordId: Int!
+    translation: String!
+  }
+
 `
