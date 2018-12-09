@@ -8,7 +8,7 @@ module.exports = ({ connection, models }) => {
     { req }
   ) => {
 
-    const { wordHashes } = input
+    const { verseId, versionId, wordsHash, wordHashes } = input
     delete input.wordHashes
 
     return connection.transaction(t => {
@@ -17,7 +17,19 @@ module.exports = ({ connection, models }) => {
           wordHashGroup.wordHashesSetSubmissionId = wordHashesSetSubmission.id
         })
         return models.wordHashesSubmission.bulkCreate(wordHashes, {transaction: t})
+          // .then()  Recalculate tagSets here
       })
-    }).then(() => true)
+    }).then(() => {
+
+      const where = {
+        verseId,
+        versionId,
+        wordsHash,
+      }
+
+      return models.tagSet.findOne({
+        where,
+      })
+    })
   }
 }

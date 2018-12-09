@@ -1641,12 +1641,6 @@ const createConnection = () => {
       type: Sequelize.STRING(255),
       allowNull: false,
     },
-    uiEnglishWordId: {
-      // One primaryKey column needs to be listed here to prevent sequelize
-      // from creating an id column.
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-    },
   }), Object.assign({
     indexes: [
       {
@@ -1661,10 +1655,10 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  UiWord.belongsTo(UiEnglishWord, primaryKey)
+  UiWord.belongsTo(UiEnglishWord, unique('uiEnglishWordId-languageId'))
   UiEnglishWord.hasMany(UiWord)
 
-  UiWord.belongsTo(Language, primaryKey)
+  UiWord.belongsTo(Language, unique('uiEnglishWordId-languageId'))
   Language.hasMany(UiWord)
 
   //////////////////////////////////////////////////////////////////

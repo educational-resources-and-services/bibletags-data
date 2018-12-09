@@ -8,7 +8,7 @@ module.exports = ({ connection, models }) => {
     { req }
   ) => {
 
-    const { embeddingAppId, tagSubmissions } = input
+    const { verseId, versionId, wordsHash, embeddingAppId, tagSubmissions } = input
     let origLangVersion
 
     if(!tagSubmissions || tagSubmissions.length === 0) {
@@ -40,7 +40,19 @@ module.exports = ({ connection, models }) => {
           tagSubmission.embeddingAppId = embeddingAppId  // do I need this data repeated here?
         })
         return models[`${origLangVersion}TagSubmission`].bulkCreate(tagSubmissions, {transaction: t})
+          // .then()  Recalculate tagSets here
       })
-    }).then(() => true)
+    }).then(() => {
+
+      const where = {
+        verseId,
+        versionId,
+        wordsHash,
+      }
+
+      return models.tagSet.findOne({
+        where,
+      })
+    })
   }
 }

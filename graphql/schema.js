@@ -69,9 +69,9 @@ module.exports = ({ connection, nullLikeDate }) => {
     }
     
     type Mutation {
-      submitWordHashesSet(input: WordHashesSetInput!): Boolean
-      submitTagSet(input: TagSetInput!): Boolean
-      submitUIWords(input: UIWordsInput!): Boolean
+      submitWordHashesSet(input: WordHashesSetInput!): TagSet
+      submitTagSet(input: TagSetInput!): TagSet
+      submitUIWords(input: UIWordsInput!): [UIWord]
     }
     
     schema {

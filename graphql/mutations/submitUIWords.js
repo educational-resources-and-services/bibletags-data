@@ -24,6 +24,16 @@ module.exports = ({ connection, models }) => {
         ...input,
         ...word,
       })), {transaction: t})
-    }).then(() => true)
+        // .then()  Recalculate uiWords here
+    }).then(() => {
+
+      const where = {
+        languageId,
+      }
+
+      return models.uiWord.find({
+        where,
+      })
+    })
   }
 }
