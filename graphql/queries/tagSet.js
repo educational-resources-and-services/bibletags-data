@@ -43,7 +43,7 @@ module.exports = ({ models }) => {
     }).then(tagSet => ({
       id,
       tags: tagSet ? tagSet.tags : [],
-      status: tagSet ? tagSet.status : 'incomplete',
+      status: tagSet ? tagSet.status : 'none',
     }))
 
   }
