@@ -22,7 +22,7 @@ module.exports = ({ models }) => {
 
     return models.uiWord.find({
       where,
-    }).then(uiWords => uiWords)
+    })
 
   }
 }

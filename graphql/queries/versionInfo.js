@@ -16,7 +16,7 @@ module.exports = ({ models }) => {
       throw(new Error(`Invalid id (${id}).`))
     }
 
-    return models.version.findById(id).then(version => version)
+    return models.version.findById(id)
 
   }
 }
