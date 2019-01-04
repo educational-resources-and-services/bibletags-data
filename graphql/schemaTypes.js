@@ -81,4 +81,8 @@ module.exports = `
     extraVerseMappings: JSON
   }
 
+  type EmbeddingApp {
+    id: ID
+  }
+
 `

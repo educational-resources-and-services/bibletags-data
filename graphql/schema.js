@@ -65,6 +65,7 @@ module.exports = ({ connection, nullLikeDate }) => {
       translationsByPosition(versionId: String!, verseId: String!, wordNum: Int!, languageId: String!): [Translations]
       search(query: String!, offset: Int, limit: Int, tagVersionIds: [String]): SearchResult
       versionInfo(id: ID!): VersionInfo
+      embeddingApp(uri: String!): EmbeddingApp
       uiWords(languageId: String!): [UIWord]
     }
     
