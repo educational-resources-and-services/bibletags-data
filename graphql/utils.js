@@ -12,7 +12,7 @@ module.exports = {
   definitionIdRegEx: /^[HAG][0-9]{5}[a-z]?$/,  // strongs number
   languageIdRegEx: /^[a-z]{3}$/,
   scopeRegEx: /^[a-z]{1,2}|[0-9]{2}$/,
-  wordsHashRegEx: /^[a-zA-Z0-9]{2,}$/,
+  wordsHashRegEx: /^[a-zA-Z0-9\+\/=]{2,}$/,  // base 64 digits only
 
   translationLength: 300,
   translationWordLength: 200,

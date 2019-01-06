@@ -4,6 +4,10 @@ const {
   versionIdRegEx,
 } = require('../utils')
 
+// This query is only used by preload, when the verse and/or wordsHash is unknown.
+// Thus, even if the verse is known, it returns an array as there could be two 
+// editions of this verse for this version.
+
 module.exports = ({ models }) => {
 
   return (
