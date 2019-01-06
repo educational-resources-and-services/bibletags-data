@@ -9,6 +9,7 @@ module.exports = ({ connection, models }) => {
   ) => {
 
     const { verseId, versionId, wordsHash, embeddingAppId, tagSubmissions } = input
+    // look for auth, else use the id of the user with email = user-[deviceId]@bibletags.org
     let origLangVersion
 
     if(!tagSubmissions || tagSubmissions.length === 0) {
