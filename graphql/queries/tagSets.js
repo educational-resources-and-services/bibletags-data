@@ -25,19 +25,19 @@ module.exports = ({ models }) => {
       throw(new Error(`Invalid versionId (${versionId}).`))
     }
 
-    let verseId = getLocFromRef({
+    let loc = getLocFromRef({
       bookId,
       chapter,
       verse: verse || 0,
     })
 
     if(verse === undefined) {
-      verseId = `${verseId.substr(0,5)}%`
+      loc = `${loc.substr(0,5)}%`
     }
 
     const where = {
-      verseId: {
-        [Sequelize.Op.like]: verseId,
+      loc: {
+        [Sequelize.Op.like]: loc,
       },
       versionId,
     }
@@ -45,9 +45,9 @@ module.exports = ({ models }) => {
     return models.tagSet.find({
       where,
     }).then(tagSets => tagSets.map(tagSet => {
-      const { verseId, versionId, wordsHash, tags } = tagSet
+      const { loc, versionId, wordsHash, tags } = tagSet
       return {
-        id: `${verseId}-${versionId}-${wordsHash}`,
+        id: `${loc}-${versionId}-${wordsHash}`,
         tags,
       }
     }))

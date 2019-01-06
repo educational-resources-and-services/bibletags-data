@@ -139,7 +139,7 @@ connection.connect(async (err) => {
 
               const wordInserts = []
               const osisIDParts = verse['@'].osisID.split('.')
-              const verseId = utils.padWithZeros(bookId, 2) + utils.padWithZeros(osisIDParts[1], 3) + utils.padWithZeros(osisIDParts[2], 3)
+              const loc = utils.padWithZeros(bookId, 2) + utils.padWithZeros(osisIDParts[1], 3) + utils.padWithZeros(osisIDParts[2], 3)
 
               let verseUsfm = ""
               let number = 0
@@ -210,7 +210,7 @@ connection.connect(async (err) => {
 
               })
               
-              updates.push(`INSERT INTO uhbVerses (id, usfm) VALUES ('${verseId}', '${verseUsfm.replace(/^\\n/, '')}')`)
+              updates.push(`INSERT INTO uhbVerses (loc, usfm) VALUES ('${loc}', '${verseUsfm.replace(/^\\n/, '')}')`)
 
               wordInserts.forEach(wordInsert => {
                 updates.push(`INSERT INTO uhbWords (${Object.keys(wordInsert).join(", ")}) VALUES ('${Object.values(wordInsert).join("', '")}')`)

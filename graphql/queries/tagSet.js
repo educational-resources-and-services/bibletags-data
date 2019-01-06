@@ -1,5 +1,5 @@
 const {
-  verseIdRegEx,
+  locRegEx,
   versionIdRegEx,
   wordsHashRegEx,
 } = require('../utils')
@@ -14,14 +14,14 @@ module.exports = ({ models }) => {
     { req }
   ) => {
 
-    const [ verseId, versionId, wordsHash, invalidExtra ] = id.split('-')
+    const [ loc, versionId, wordsHash, invalidExtra ] = id.split('-')
 
     if(wordsHash === undefined || invalidExtra !== undefined) {
       throw(new Error(`Invalid id (${id}).`))
     }
 
-    if(!verseId.match(verseIdRegEx)) {
-      throw(new Error(`Invalid verseId (${verseId}) indicated in id (${id}).`))
+    if(!loc.match(locRegEx)) {
+      throw(new Error(`Invalid loc (${loc}) indicated in id (${id}).`))
     }
 
     if(!versionId.match(versionIdRegEx)) {
@@ -33,7 +33,7 @@ module.exports = ({ models }) => {
     }
 
     const where = {
-      verseId,
+      loc,
       versionId,
       wordsHash,
     }

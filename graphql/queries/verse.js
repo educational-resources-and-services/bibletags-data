@@ -1,6 +1,6 @@
 const {
   versionIdRegEx,
-  verseIdRegEx,
+  locRegEx,
 } = require('../utils')
 
 module.exports = ({ models }) => {
@@ -13,14 +13,14 @@ module.exports = ({ models }) => {
     { req }
   ) => {
 
-    const [ verseId, versionId, invalidExtra ] = id.split('-')
+    const [ loc, versionId, invalidExtra ] = id.split('-')
 
     if(versionId === undefined || invalidExtra !== undefined) {
       throw(new Error(`Invalid id (${id}).`))
     }
 
-    if(!verseId.match(verseIdRegEx)) {
-      throw(new Error(`Invalid verseId (${verseId}) indicated in id (${id}).`))
+    if(!loc.match(locRegEx)) {
+      throw(new Error(`Invalid loc (${loc}) indicated in id (${id}).`))
     }
 
     if(!versionId.match(versionIdRegEx)) {
@@ -33,8 +33,14 @@ module.exports = ({ models }) => {
       throw(new Error('Invalid versionId indicated in id.'))
     }
 
-    return model.findById(verseId).then(verse => !verse ? null : ({
-      id: `${verse.id}-${versionId}`,
+    const where = {
+      loc,
+    }
+
+    return model.findOne({
+      where
+    }).then(verse => !verse ? null : ({
+      id: `${verse.loc}-${versionId}`,
       usfm: verse.usfm,
     }))
 

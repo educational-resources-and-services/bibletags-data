@@ -16,7 +16,7 @@
 module.exports = `
 
   input WordHashesSetInput {
-    verseId: String!
+    loc: String!
     versionId: String!
     wordsHash: String!
     embeddingAppId: Int!
@@ -32,7 +32,7 @@ module.exports = `
   }
 
   input TagSetInput {
-    verseId: String!
+    loc: String!
     versionId: String!
     wordsHash: String!
     deviceId: String!

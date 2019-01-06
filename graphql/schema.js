@@ -1,7 +1,7 @@
 // tagSets:versionId = [translationVersionId] (eg. esv)
 
 // definitionsByPosition:versionId = (eg. uhb, esv)
-// definitionsByPosition:verseId = (eg. 01001001)
+// definitionsByPosition:loc = (eg. 01001001)
 // definitionsByPosition:wordNum = (eg. 3)
 // definitionsByPosition:languageId = (eg. eng)
 // translationsByPosition has same params
@@ -59,10 +59,10 @@ module.exports = ({ connection, nullLikeDate }) => {
       tagSets(bookId: Int!, chapter: Int!, verse: Int, versionId: String!): [TagSet]
       tagSet(id: ID!): TagSet
       definition(id: ID!): Definition
-      definitionsByPosition(versionId: String!, verseId: String!, wordNum: Int!, languageId: String!): [Definition]
+      definitionsByPosition(versionId: String!, loc: String!, wordNum: Int!, languageId: String!): [Definition]
       hits(id: ID!): Hits
       translations(id: ID!): Translations
-      translationsByPosition(versionId: String!, verseId: String!, wordNum: Int!, languageId: String!): [Translations]
+      translationsByPosition(versionId: String!, loc: String!, wordNum: Int!, languageId: String!): [Translations]
       search(query: String!, offset: Int, limit: Int, tagVersionIds: [String]): SearchResult
       versionInfo(id: ID!): VersionInfo
       embeddingApp(uri: String!): EmbeddingApp

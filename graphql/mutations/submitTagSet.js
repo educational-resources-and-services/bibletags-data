@@ -8,7 +8,7 @@ module.exports = ({ connection, models }) => {
     { req }
   ) => {
 
-    const { verseId, versionId, wordsHash, embeddingAppId, tagSubmissions } = input
+    const { loc, versionId, wordsHash, embeddingAppId, tagSubmissions } = input
     // look for auth, else use the id of the user with email = user-[deviceId]@bibletags.org
     let origLangVersion
 
@@ -46,7 +46,7 @@ module.exports = ({ connection, models }) => {
     }).then(() => {
 
       const where = {
-        verseId,
+        loc,
         versionId,
         wordsHash,
       }

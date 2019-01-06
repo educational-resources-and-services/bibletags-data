@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 const {
   wordIdRegEx,
-  verseIdRegEx,
+  locRegEx,
   versionIdRegEx,
   definitionIdRegEx,
   languageIdRegEx,
@@ -193,11 +193,11 @@ const createConnection = () => {
     })
   }
 
-  const verseId = {
+  const loc = {
     type: Sequelize.STRING(8),
     primaryKey: true,
     validate: {
-      is: verseIdRegEx,
+      is: locRegEx,
     },
   }
 
@@ -698,7 +698,7 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const TagSet = connection.define('tagSet', Object.assign({
-    verseId,
+    loc,
     tags: {
       type: Sequelize.JSON,
       allowNull: false,
@@ -715,13 +715,13 @@ const createConnection = () => {
   }), Object.assign({
     indexes: [
       {
-        fields: ['verseId'],
+        fields: ['loc'],
       },
       {
         fields: ['versionId'],
       },
       {
-        fields: ['verseId', 'versionId'],
+        fields: ['loc', 'versionId'],
       },
       {
         fields: ['wordsHash'],
@@ -738,16 +738,16 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const TagSetSubmission = connection.define('tagSetSubmission', Object.assign({
-    verseId: {
+    loc: {
       type: Sequelize.STRING(8),
-      unique: 'userId-versionId-verseId-wordsHash',
+      unique: 'userId-versionId-loc-wordsHash',
       validate: {
-        is: verseIdRegEx,
+        is: locRegEx,
       },
     },
     wordsHash: {  // See the notes on wordsHash column above.
       type: Sequelize.STRING(wordsHashLength),
-      unique: 'userId-versionId-verseId-wordsHash',
+      unique: 'userId-versionId-loc-wordsHash',
       allowNull: false,
       validate: {
         is: wordsHashRegEx,
@@ -762,7 +762,7 @@ const createConnection = () => {
         fields: ['versionId'],
       },
       {
-        fields: ['verseId'],
+        fields: ['loc'],
       },
       {
         fields: ['wordsHash'],
@@ -779,10 +779,10 @@ const createConnection = () => {
     ],
   }))
 
-  TagSetSubmission.belongsTo(User, unique('userId-versionId-verseId-wordsHash'))
+  TagSetSubmission.belongsTo(User, unique('userId-versionId-loc-wordsHash'))
   User.hasMany(TagSetSubmission)
 
-  TagSetSubmission.belongsTo(Version, unique('userId-versionId-verseId-wordsHash'))
+  TagSetSubmission.belongsTo(Version, unique('userId-versionId-loc-wordsHash'))
   Version.hasMany(TagSetSubmission)
 
   TagSetSubmission.belongsTo(EmbeddingApp, required)
@@ -791,16 +791,16 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const WordHashesSetSubmission = connection.define('wordHashesSetSubmission', Object.assign({
-    verseId: {
+    loc: {
       type: Sequelize.STRING(8),
-      unique: 'versionId-verseId-wordsHash',
+      unique: 'versionId-loc-wordsHash',
       validate: {
-        is: verseIdRegEx,
+        is: locRegEx,
       },
     },
     wordsHash: {  // See the notes on wordsHash column above.
       type: Sequelize.STRING(wordsHashLength),
-      unique: 'versionId-verseId-wordsHash',
+      unique: 'versionId-loc-wordsHash',
       allowNull: false,
       validate: {
         is: wordsHashRegEx,
@@ -812,7 +812,7 @@ const createConnection = () => {
         fields: ['versionId'],
       },
       {
-        fields: ['verseId'],
+        fields: ['loc'],
       },
       {
         fields: ['wordsHash'],
@@ -829,7 +829,7 @@ const createConnection = () => {
     ],
   }))
 
-  WordHashesSetSubmission.belongsTo(Version, unique('versionId-verseId-wordsHash'))
+  WordHashesSetSubmission.belongsTo(Version, unique('versionId-loc-wordsHash'))
   Version.hasMany(WordHashesSetSubmission)
 
   WordHashesSetSubmission.belongsTo(EmbeddingApp, required)
@@ -1110,11 +1110,11 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const uhbVerse = connection.define('uhbVerse', Object.assign({
-    id: {
+    loc: {
       type: Sequelize.STRING(8),
       primaryKey: true,
       validate: {
-        is: verseIdRegEx,
+        is: locRegEx,
       },
     },
     usfm,
@@ -1324,11 +1324,11 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const ugntVerse = connection.define('ugntVerse', Object.assign({
-    id: {
+    loc: {
       type: Sequelize.STRING(8),
       primaryKey: true,
       validate: {
-        is: verseIdRegEx,
+        is: locRegEx,
       },
     },
     usfm,
@@ -1491,11 +1491,11 @@ const createConnection = () => {
   //////////////////////////////////////////////////////////////////
 
   const lxxVerse = connection.define('lxxVerse', Object.assign({
-    id: {
+    loc: {
       type: Sequelize.STRING(8),
       primaryKey: true,
       validate: {
-        is: verseIdRegEx,
+        is: locRegEx,
       },
     },
     // Includes deuterocanonical books, though these are not included

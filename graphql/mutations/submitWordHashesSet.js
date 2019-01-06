@@ -8,7 +8,7 @@ module.exports = ({ connection, models }) => {
     { req }
   ) => {
 
-    const { verseId, versionId, wordsHash, wordHashes } = input
+    const { loc, versionId, wordsHash, wordHashes } = input
     delete input.wordHashes
 
     return connection.transaction(t => {
@@ -22,7 +22,7 @@ module.exports = ({ connection, models }) => {
             .then(() => {
 
               const newTagSet = {
-                verseId,
+                loc,
                 tags: [],
                 status: 'incomplete',
                 wordsHash,
@@ -46,7 +46,7 @@ module.exports = ({ connection, models }) => {
             // involving two users.
 
             const where = {
-              verseId,
+              loc,
               versionId,
               wordsHash,
             }
@@ -60,7 +60,7 @@ module.exports = ({ connection, models }) => {
         })
 
     }).then(tagSet => ({
-      id: `${verseId}-${versionId}-${wordsHash}`,
+      id: `${loc}-${versionId}-${wordsHash}`,
       tags: tagSet ? tagSet.tags : [],
       status: tagSet ? tagSet.status : 'none',
     }))

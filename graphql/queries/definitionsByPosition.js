@@ -1,7 +1,7 @@
 const {
   origLangAndLXXVersionIds,
   versionIdRegEx,
-  verseIdRegEx,
+  locRegEx,
   languageIdRegEx,
 } = require('../utils')
 
@@ -13,7 +13,7 @@ module.exports = ({ models }) => {
     queries,
     {
       versionId,
-      verseId,
+      loc,
       wordNum,
       languageId,
     },
@@ -28,8 +28,8 @@ module.exports = ({ models }) => {
       throw(new Error(`Invalid versionId (${versionId}).`))
     }
 
-    if(!verseId.match(verseIdRegEx)) {
-      throw(new Error(`Invalid verseId (${verseId}).`))
+    if(!loc.match(locRegEx)) {
+      throw(new Error(`Invalid loc (${loc}).`))
     }
 
     if(typeof wordNum !== 'number' && wordNum <= 0) {
@@ -51,8 +51,8 @@ module.exports = ({ models }) => {
 
     } else {
       wordLocs.push({
-        chapter: parseInt(verseId.substr(2,3)),
-        verse: parseInt(verseId.substr(5,3)),
+        chapter: parseInt(loc.substr(2,3)),
+        verse: parseInt(loc.substr(5,3)),
         number: wordNum,
       })
     }
@@ -64,13 +64,13 @@ module.exports = ({ models }) => {
     }
 
 
-    // use verseId and wordNum to get the strongs
+    // use loc and wordNum to get the strongs
 
     const attributes = [ 'strongs' ]
 
     const where = {
       $or: wordLocs.map(wordLoc => Object.assign({
-        bookId: parseInt(verseId.substr(0,2)),
+        bookId: parseInt(loc.substr(0,2)),
         qere: 0,
       }, wordLoc)),
     }
