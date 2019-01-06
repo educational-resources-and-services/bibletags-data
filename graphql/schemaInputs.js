@@ -35,7 +35,7 @@ module.exports = `
     verseId: String!
     versionId: String!
     wordsHash: String!
-    userId: Int!
+    deviceId: String!
     embeddingAppId: Int!
     tagSubmissions: [TagInput]!
   }
@@ -48,7 +48,7 @@ module.exports = `
 
   input UIWordsInput {
     languageId: String!
-    userId: Int!
+    deviceId: String!
     embeddingAppId: Int!
     words: [UIWordInput]!
   }
