@@ -595,6 +595,7 @@ const createConnection = () => {
       validate: {
         isEmail: true,
       },
+      unique: 'email',
     },
     google: {
       type: Sequelize.STRING(50),
@@ -620,9 +621,6 @@ const createConnection = () => {
     },
   }), Object.assign({
     indexes: [
-      {
-        fields: ['email'],
-      },
       {
         fields: ['google'],
       },
