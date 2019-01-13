@@ -21,8 +21,7 @@ connection.connect(async (err) => {
   console.log(`\nSTARTING`)
 
   const bookURIsByBookId = {}
-  // const importDir = '../morphhb/wlc'
-  const importDir = '../morphhb-parsing/morphhb-scripts/morphhb'
+  const importDir = '../../morphhb/wlc'
 
   await new Promise(resolve => {
 
@@ -153,6 +152,7 @@ connection.connect(async (err) => {
                   ;(wordOrSomethingElse.group || []).forEach(wordPart => {
                     word += wordPart['#'] || wordPart
                   })
+                  word = word.replace(/\//g, '​')
 
                   const strongs = wordOrSomethingElse['@'].lemma
                     .replace(/\+/g, '')  // TODO: this will need to be handled differently once we decide how to do multi-word lemmas
@@ -171,34 +171,36 @@ connection.connect(async (err) => {
                     strongsWithoutPrefixes = "H01980"
                   }
 
+                  const id = wordOrSomethingElse['@'].id
+
                   const strongsPrefixes = strongsParts.join('')
                   const strongsWithPrefixes = (strongsPrefixes ? strongsPrefixes + ':' : '') + strongsWithoutPrefixes
 
                   const morph = wordOrSomethingElse['@'].morph
+                    .replace(/^H/, 'He,')
+                    .replace(/^A/, 'Ar,')
+                    .replace(/\//g, ':')
 
-                  verseUsfm += (
-                    morph
-                      ? `\\n\\\\w ${word}|strong="${strongsWithPrefixes}" x-morph="${morph}" \\\\w*`
-                      : `\\n\\\\w ${word}|strong="${strongsWithPrefixes}" \\\\w*`
-                  )
+                  verseUsfm += 
+                    `\\n\\\\w ${word}|strong="${strongsWithPrefixes}"${morph ? ` x-morph="${morph}"` : ``}${id ? ` x-id="${id}"` : ``} \\\\w*`
 
-                  wordInserts.push({
-                    bookId,
-                    chapter: osisIDParts[1],
-                    verse: osisIDParts[2],
-                    number,
-                    qere: 0,
-                    word,
-                    strongs: strongsWithoutPrefixes,
-                    prefix: strongsPrefixes,
-                    morph,
-                    append: "",
-                  })
-                  
+                  // wordInserts.push({
+                  //   id,
+                  //   bookId,
+                  //   chapter: osisIDParts[1],
+                  //   verse: osisIDParts[2],
+                  //   number,
+                  //   word,
+                  //   strongs: strongsWithoutPrefixes,
+                  //   prefix: strongsPrefixes,
+                  //   morph,
+                  //   append: "",
+                  // })
+
                 } else if(wordOrSomethingElse['='] == 'seg') {
                   verseUsfm += wordOrSomethingElse['#'].trim()
 
-                  wordInserts[wordInserts.length - 1].append += wordOrSomethingElse['#'].trim() 
+                  // wordInserts[wordInserts.length - 1].append += wordOrSomethingElse['#'].trim() 
 
                 } else if(wordOrSomethingElse['='] == 'note') {
                   // TODO

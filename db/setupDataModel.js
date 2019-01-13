@@ -881,7 +881,7 @@ const createConnection = () => {
 
   const uhbWord = connection.define('uhbWord', Object.assign({
     id: {
-      type: Sequelize.STRING(4),
+      type: Sequelize.STRING(5),
       primaryKey: true,
       validate: {
         is: wordIdRegEx,
@@ -1211,7 +1211,7 @@ const createConnection = () => {
 
   const ugntWord = connection.define('ugntWord', Object.assign({
     id: {
-      type: Sequelize.STRING(4),
+      type: Sequelize.STRING(5),
       primaryKey: true,
       validate: {
         is: wordIdRegEx,

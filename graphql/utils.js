@@ -6,7 +6,7 @@ module.exports = {
     'lxx',
   ],
 
-  wordIdRegEx: /^[0-9a-z]{4}$/i,
+  wordIdRegEx: /^[0-9]{2}[0-9a-z]{3}$/i,
   locRegEx: /^[0-9]{8}$/,
   versionIdRegEx: /^[a-z0-9]{2,9}$/,
   definitionIdRegEx: /^[HAG][0-9]{5}[a-z]?$/,  // strongs number
