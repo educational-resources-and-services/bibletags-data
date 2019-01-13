@@ -15,6 +15,21 @@ const connection = mysql.createConnection({
   multipleStatements: true,
 })
 
+const noSpaceBeforeWordIds = [
+  '1391p',
+  '13B6v',
+  '14Cjb',
+  '143UC',
+  '14s8J',
+  '147rA',
+  '12vw5',
+  '15SP9',
+  '23q1v',
+  '24ATv',
+  '19T7s',
+  '22fZr',
+]
+
 connection.connect(async (err) => {
   if(err) throw err
 
@@ -182,9 +197,9 @@ connection.connect(async (err) => {
                     .replace(/\//g, ':')
 
                   verseUsfm += 
-                    `\\n\\\\w ${word}|strong="${strongsWithPrefixes}"${morph ? ` x-morph="${morph}"` : ``}${id ? ` x-id="${id}"` : ``} \\\\w*`
+                    `${verseUsfm.substr(-1) === '־' || noSpaceBeforeWordIds.includes(id) ? `` : `\\n`}\\\\w ${word}|strong="${strongsWithPrefixes}"${morph ? ` x-morph="${morph}"` : ``}${id ? ` x-id="${id}"` : ``} \\\\w*`
 
-                  // wordInserts.push({
+                  // wordInserts.push({ss
                   //   id,
                   //   bookId,
                   //   chapter: osisIDParts[1],
