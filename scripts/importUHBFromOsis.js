@@ -199,7 +199,7 @@ connection.connect(async (err) => {
                   verseUsfm += 
                     `${verseUsfm.substr(-1) === '־' || noSpaceBeforeWordIds.includes(id) ? `` : `\\n`}\\\\w ${word}|strong="${strongsWithPrefixes}"${morph ? ` x-morph="${morph}"` : ``}${id ? ` x-id="${id}"` : ``} \\\\w*`
 
-                  // wordInserts.push({ss
+                  // wordInserts.push({
                   //   id,
                   //   bookId,
                   //   chapter: osisIDParts[1],

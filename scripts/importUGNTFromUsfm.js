@@ -13,8 +13,23 @@ const connection = mysql.createConnection({
   multipleStatements: true,
 })
 
-const noSpaceBeforeWordIds = [
-]
+// matches posTerms in bibletags-widget/src/utils/greekMorph.js
+const posMapping = {
+  N: "N",
+  A: "A",
+  NS: "A",  // better categorized as an adjective
+  NP: "A",  // better categorized as an adjective
+  E: "E",
+  R: "R",
+  V: "V",
+  I: "I",
+  P: "P",
+  D: "D",
+  PI: "D",  // better categorized as an adverb
+  C: "C",
+  T: "T",
+  TF: "F",  // better in its own category
+}
 
 connection.connect(async (err) => {
   if(err) throw err
@@ -42,6 +57,12 @@ connection.connect(async (err) => {
 
   await new Promise(resolve => {
 
+    let wordNumber = 1
+    let verseNumber = 0
+    let phraseNumber = 1
+    let sentenceNumber = 1
+    let paragraphNumber = 0
+
     const exportBook = () => {
 
       const filename = filenames.shift()
@@ -67,6 +88,7 @@ connection.connect(async (err) => {
         const updates = []
         let currentVerseContent = []
         const ids = []
+        let isVariant = false
 
         const putVerseInUpdates = () => {
           const loc = utils.padWithZeros(bookId, 2) + utils.padWithZeros(chapter, 3) + utils.padWithZeros(verse, 3)
@@ -83,10 +105,112 @@ connection.connect(async (err) => {
               
               return ` x-id="${id}" \\w*`
             })
-            .replace(/\\/g, "\\\\")
-            .replace(/'/g, "\\'")
 
-          updates.push(`INSERT INTO ugntVerses (loc, usfm) VALUES ('${loc}', '${usfmVerseContent}')`)
+          updates.push(`INSERT INTO ugntVerses (loc, usfm) VALUES ('${loc}', '${usfmVerseContent.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}')`)
+
+          usfmVerseContent.match(/\\w.*?\\w\*|\\f \+ \\fqa|\\f\*|./g).forEach(wordUsfm => {
+            if([';', ',', '"', ':'].includes(wordUsfm)) {
+              phraseNumber++
+            }
+
+            if(['.', '!', '?'].includes(wordUsfm)) {
+              phraseNumber++
+              sentenceNumber++
+            }
+
+            if(wordUsfm.match(/^\\f \+ \\fqa$/)) {
+              isVariant = true
+            }
+  
+            if(wordUsfm.match(/^\\f\*$/)) {
+              isVariant = false
+            }
+
+            if(!wordUsfm.match(/^\\w.*?\\w\*$/)) return
+
+            const id = (wordUsfm.match(/x-id="([^"]*)"/) || [])[1]
+            const lemma = (wordUsfm.match(/lemma="([^"]*)"/) || [])[1]
+            const definitionId = (wordUsfm.match(/strong="([^"]*)"/) || [])[1]
+            const fullParsing = (wordUsfm.match(/x-morph="([^"]*)"/) || [])[1]
+            const nakedWord = utils.stripGreekAccents(((wordUsfm.match(/^\\w ([^\|]*)\|/) || [])[1] || "").toLowerCase())
+
+            if(!id || !lemma || !definitionId || !fullParsing || !nakedWord) {
+              console.log('word with missing info', wordUsfm)
+              process.exit()
+            }
+
+            const pos = posMapping[fullParsing.substr(3,2)] || posMapping[fullParsing.substr(3,1)]
+
+            if(!pos) {
+              console.log('invalid morph - pos not in mapping', wordUsfm)
+              process.exit()
+            }
+
+            const wordInsert = {
+              id,
+              bookId,
+              chapter,
+              verse,
+              verseNumber,
+              phraseNumber,
+              sentenceNumber,
+              paragraphNumber,
+              nakedWord,
+              lemma,
+              fullParsing,
+              pos,
+              morphPos: fullParsing.substr(3,1),
+              definitionId,
+            }
+
+            if(!isVariant) {
+              wordInsert.wordNumber = wordNumber++
+            }
+
+            if(fullParsing.substr(4,1) !== ',') {
+              wordInsert.type = fullParsing.substr(3,2)
+            }
+
+            [
+              "mood",
+              "aspect",
+              "voice",
+              "person",
+              "case",
+              "gender",
+              "number",
+              "attribute",
+            ].forEach((col, idx) => {
+              const morphDetail = fullParsing.substr(idx+5,1)
+              if(morphDetail !== ',') {
+                wordInsert[col] = morphDetail
+              }
+            })
+
+            const definitionInsert = {
+              id: definitionId,
+              lex: "",
+              lexUnique: 0,
+              vocal: "",
+              hits: 0,
+              lxx: JSON.stringify([]),
+            }
+
+            updates.push(`
+              INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
+              SELECT * FROM (SELECT ${Object.values(definitionInsert).map((val, idx) => `'${val}' as t${idx}`).join(", ")}) AS tmp
+              WHERE NOT EXISTS (
+                  SELECT id FROM definitions WHERE id='${definitionId}'
+              ) LIMIT 1
+            `)
+
+            updates.push(`
+              INSERT INTO ugntWords (\`${Object.keys(wordInsert).join("\`, \`")}\`)
+              VALUES ('${Object.values(wordInsert).join("', '")}')
+            `)
+
+          })
+
         }
 
         usfm.split(/\n/g).forEach(line => {
@@ -106,10 +230,16 @@ connection.connect(async (err) => {
 
           if(verseMatch) {
             verse = parseInt(verseMatch[1], 10)
+            verseNumber++
             return
           }
 
-          if(line.match(/^\\w /)) {
+          if(line.match(/^\\p/)) {
+            paragraphNumber++
+            return
+          }
+
+          if(line.match(/^\\w |^\\f \+ \\fqa|^\\f\*/)) {
             currentVerseContent.push(line.replace(/ x-tw="[^"]*"/g, ""))
           }
 
@@ -119,6 +249,9 @@ connection.connect(async (err) => {
 
         utils.doUpdatesInChunks(connection, { updates }, numRowsUpdated => {
           console.log(`  Book #${bookId} done--${numRowsUpdated} rows inserted.`)
+          phraseNumber++
+          sentenceNumber++
+          paragraphNumber++
           exportBook()
         })
 

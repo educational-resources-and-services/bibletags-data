@@ -291,7 +291,7 @@ const createConnection = () => {
   }
 
   const greekPos = {
-    type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T'),
+    type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T', 'F'),  // F is for foreign
     allowNull: false,
   }
 
@@ -1237,7 +1237,11 @@ const createConnection = () => {
     nakedWord,
     lemma,
     fullParsing,
-    pos: greekPos,
+    pos: greekPos,  // Different than UGNT's pos for a few types. Eg. NS (substantive adjective) is considered an adjective
+    morphPos: {  // UGNT's pos
+      type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T'),
+      allowNull: false,
+    },
     type: greekType,
     mood: greekMood,
     aspect: greekAspect,
@@ -1284,6 +1288,9 @@ const createConnection = () => {
       },
       {
         fields: ['pos'],
+      },
+      {
+        fields: ['morphPos'],
       },
       {
         fields: ['type'],
