@@ -240,7 +240,7 @@ connection.connect(async (err) => {
                     verse: osisIDParts[2],
                     verseNumber,
                     sectionNumber,
-                    nakedWord: word.replace(),
+                    nakedWord: utils.stripHebrewVowelsEtc(word),
                     lemma: "",  // TODO: set in def and pos building script
                     fullParsing: morph,
                     isAramaic,
@@ -364,6 +364,10 @@ connection.connect(async (err) => {
                 }
 
               })
+
+              if(verseUsfm.match(/\u200D/)) {
+                console.log('BAD CHARACTER', loc)
+              }
               
               updates.push(`INSERT INTO uhbVerses (loc, usfm) VALUES ('${loc}', '${verseUsfm.replace(/^\\n/, '')}')`)
 

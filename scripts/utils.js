@@ -133,7 +133,14 @@ const utils = {
     })
 
     return str
-  }
+  },
+
+  stripHebrewVowelsEtc: str => (
+    str
+      .replace(/[\u05B0-\u05BC\u05C1\u05C2\u05C4]/g,'')  // vowels
+      .replace(/[\u0591-\u05AF\u05A5\u05BD\u05BF\u05C5\u05C7]/g,'')  // cantilation
+      .replace(/\u200D/g,'')  // invalid character
+  ),
 
 }
   
