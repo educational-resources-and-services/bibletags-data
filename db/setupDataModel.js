@@ -1104,7 +1104,7 @@ const createConnection = () => {
     ],
   }, noTimestampsOptions))
 
-  uhbWord.belongsTo(Definition, required)
+  uhbWord.belongsTo(Definition)
   Definition.hasMany(uhbWord)
 
   //////////////////////////////////////////////////////////////////
