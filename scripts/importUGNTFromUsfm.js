@@ -240,7 +240,13 @@ connection.connect(async (err) => {
           }
 
           if(line.match(/^\\w |^\\f \+ \\fqa|^\\f\*/)) {
-            currentVerseContent.push(line.replace(/ x-tw="[^"]*"/g, ""))
+            currentVerseContent.push(
+              line
+                .replace(/ x-tw="[^"]*"/g, "")
+                .replace(/(strong="G)0*/g, '$1')
+                .replace(/(strong="G[0-9]*)([0-9])"/g, '$1.$2"')
+                .replace(/(strong="G[0-9]*)\.0"/g, '$1"')
+            )
           }
 
         })
