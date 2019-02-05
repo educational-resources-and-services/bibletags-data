@@ -173,15 +173,16 @@ connection.connect(async (err) => {
               let verseUsfm = ""
 
               verse.group.forEach(wordOrSomethingElse => {
-                if(wordOrSomethingElse['='] == 'w') {
 
-                  let word = wordOrSomethingElse['#'] || ''
-                  ;(wordOrSomethingElse.group || []).forEach(wordPart => {
+                const parseWord = ({ wordObj, isQere }) => {
+
+                  let word = wordObj['#'] || ''
+                  ;(wordObj.group || []).forEach(wordPart => {
                     word += wordPart['#'] || wordPart
                   })
                   word = word.replace(/\//g, '​')
 
-                  const strongs = wordOrSomethingElse['@'].lemma
+                  const strongs = wordObj['@'].lemma
                     .replace(/\//g, ':')
                     // .replace(/([0-9]+)/, match => ('H' + utils.padWithZeros(match, 5)))
                     .replace(/ a/g, '')
@@ -202,12 +203,12 @@ connection.connect(async (err) => {
                     strongsWithoutPrefixes = "H1980"
                   }
 
-                  const id = wordOrSomethingElse['@'].id
+                  const id = wordObj['@'].id
 
                   const strongsPrefixes = strongsParts.join('')
                   const strongsWithPrefixes = (strongsPrefixes ? strongsPrefixes + ':' : '') + 'H' + strongsWithoutPrefixes
 
-                  const morph = wordOrSomethingElse['@'].morph
+                  const morph = wordObj['@'].morph
                     .replace(/^H/, 'He,')
                     .replace(/^A/, 'Ar,')
                     .replace(/\//g, ':')
@@ -215,7 +216,7 @@ connection.connect(async (err) => {
                   const morphParts = morph.substr(3).split(':')
 
                   verseUsfm += 
-                    (verseUsfm.substr(-1) === '־' || noSpaceBeforeWordIds.includes(id) ? `` : `\\n`)
+                    (['־','['].includes(verseUsfm.substr(-1)) || noSpaceBeforeWordIds.includes(id) ? `` : `\\n`)
                      + `\\\\w ${word}|strong="${strongsWithPrefixes}"${morph ? ` x-morph="${morph}"` : ``}${id ? ` x-id="${id}"` : ``} \\\\w*`
 
                   const mainPartMorphLetters = morphParts[getMainWordPartIndex(morphParts)].split('')
@@ -248,7 +249,7 @@ connection.connect(async (err) => {
                     n: morph.match(/^(?:He,|Ar,)(?:[^:]*:)*Sn/) ? 1 : 0,
                   }
 
-                  if(true) {  // TODO: !qere
+                  if(!isQere) {
                     wordInsert.wordNumber = wordNumber++
                   }
 
@@ -336,7 +337,10 @@ connection.connect(async (err) => {
                     INSERT INTO uhbWords (${Object.keys(wordInsert).join(", ")})
                     VALUES ('${Object.values(wordInsert).join("', '")}')
                   `)
+                }
 
+                if(wordOrSomethingElse['='] == 'w') {
+                  parseWord({ wordObj: wordOrSomethingElse })
 
                 } else if(wordOrSomethingElse['='] == 'seg') {
                   verseUsfm += wordOrSomethingElse['#'].trim()
@@ -346,6 +350,23 @@ connection.connect(async (err) => {
                   }
 
                 } else if(wordOrSomethingElse['='] == 'note') {
+                  if(wordOrSomethingElse['@'] && wordOrSomethingElse['@'].type == 'variant') {
+
+                    verseUsfm += (verseUsfm.substr(-1) === '־' ? `` : `\\n`) + '['
+
+                    ;(wordOrSomethingElse.group || []).forEach(rdgOrSomethingElse => {
+                      if(rdgOrSomethingElse['='] == 'rdg' && rdgOrSomethingElse['@'] && rdgOrSomethingElse['@'].type == 'x-qere') {
+                        ;(rdgOrSomethingElse.group || []).forEach(wordOrSomethingElse2 => {
+                          if(wordOrSomethingElse2['='] == 'w') {
+                            parseWord({ wordObj: wordOrSomethingElse2, isQere: true })
+                          }
+                        })
+                      }
+                    })
+
+                    verseUsfm += ']'
+                  }
+
                   // TODO
 
                 } else {
