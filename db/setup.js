@@ -6,7 +6,7 @@ const connection = createConnection()
 connection.sync({force: true}).then(() => {
 
   connection.query(
-    ''
+    'SELECT 1;'
   ).then(() => {
 
     console.log('Database setup.');
