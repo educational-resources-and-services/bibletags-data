@@ -206,7 +206,13 @@ connection.connect(async (err) => {
                   const id = wordObj['@'].id
 
                   const strongsPrefixes = strongsParts.join('')
-                  const strongsWithPrefixes = (strongsPrefixes ? strongsPrefixes + ':' : '') + 'H' + strongsWithoutPrefixes
+                  let strongsWithPrefixes = strongsPrefixes
+                  if(strongsPrefixes && strongsWithoutPrefixes) {
+                    strongsWithPrefixes += ':'
+                  }
+                  if(strongsWithoutPrefixes) {
+                    strongsWithPrefixes += 'H' + strongsWithoutPrefixes
+                  }
 
                   const morph = wordObj['@'].morph
                     .replace(/^H/, 'He,')
