@@ -182,41 +182,30 @@ connection.connect(async (err) => {
                   word = word.replace(/\//g, '​')
 
                   const strongs = wordOrSomethingElse['@'].lemma
-                    .replace(/\+/g, '')  // TODO: this will need to be handled differently once we decide how to do multi-word lemmas
                     .replace(/\//g, ':')
-                    .replace(/([0-9]+)/, match => ('H' + utils.padWithZeros(match, 5)))
-                    .replace(/ ([a-z])$/, '$1')
+                    // .replace(/([0-9]+)/, match => ('H' + utils.padWithZeros(match, 5)))
+                    .replace(/ a/g, '')
+                    .replace(/ b/g, '.3')
+                    .replace(/ c/g, '.5')
+                    .replace(/ d/g, '.7')
+                    .replace(/ e/g, '.8')
+                    .replace(/ f/g, '.9')
 
                   const strongsParts = strongs.split(':')
-                  if(!strongsParts[strongsParts.length - 1].match(/^(?:He,|Ar,)/)) {
+                  if(!strongsParts[strongsParts.length - 1].match(/^[0-9\.]+/)) {
                     strongsParts.push("")
                   }
                   let strongsWithoutPrefixes = strongsParts.pop()
 
                   // change ילך lemma to הלך
-                  if(strongsWithoutPrefixes === "H03212") {
-                    strongsWithoutPrefixes = "H01980"
-                  }
-
-                  // change format of strongs
-                  strongsWithoutPrefixes = strongsWithoutPrefixes
-                    .replace(/^H0*/g, 'H')
-                    .replace(/a$/g, '.2')
-                    .replace(/b$/g, '.4')
-                    .replace(/c$/g, '.6')
-                    .replace(/d$/g, '.7')
-                    .replace(/e$/g, '.8')
-                    .replace(/f$/g, '.9')
- 
-                  if(strongsWithoutPrefixes && !strongsWithoutPrefixes.match(/^H[0-9\.]+$/)) {
-                    console.log(`UNEXPECTED STRONGS: ${strongs}`)
-                    process.exit()
+                  if(strongsWithoutPrefixes === "H3212") {
+                    strongsWithoutPrefixes = "H1980"
                   }
 
                   const id = wordOrSomethingElse['@'].id
 
                   const strongsPrefixes = strongsParts.join('')
-                  const strongsWithPrefixes = (strongsPrefixes ? strongsPrefixes + ':' : '') + strongsWithoutPrefixes
+                  const strongsWithPrefixes = (strongsPrefixes ? strongsPrefixes + ':' : '') + 'H' + strongsWithoutPrefixes
 
                   const morph = wordOrSomethingElse['@'].morph
                     .replace(/^H/, 'He,')
@@ -322,10 +311,11 @@ connection.connect(async (err) => {
                   })
 
                   if(strongsWithoutPrefixes) {
-                    wordInsert.definitionId = strongsWithoutPrefixes
+                    const definitionId = 'H' + strongsWithoutPrefixes.replace(/\+/g, '')
+                    wordInsert.definitionId = definitionId
   
                     const definitionInsert = {
-                      id: strongsWithoutPrefixes,
+                      id: definitionId,
                       lex: "",
                       lexUnique: 0,
                       vocal: "",
