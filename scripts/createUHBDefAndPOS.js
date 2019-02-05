@@ -22,65 +22,71 @@ connection.connect(async (err) => {
   const uniqueStateOfLexemes = {}
   let bdbOnlyCount = 0
   const updates = []
-  
+
+  const normalizeStrongs = strongs => strongs
+    // .replace(/([0-9]+)/, match => ('H' + utils.padWithZeros(match, 5)))
+    .replace(/([0-9])a/g, '$1')
+    .replace(/([0-9])b/g, '$1.3')
+    .replace(/([0-9])c/g, '$1.5')
+    .replace(/([0-9])d/g, '$1.7')
+    .replace(/([0-9])e/g, '$1.8')
+    .replace(/([0-9])f/g, '$1.9')
   
   // go through all bdb entries and put in definitions, recording bdbHasEntryByStrongs with strongs as the keys
 
-  const statement = `SELECT * FROM bdb`
+  const statement = `SELECT * FROM bdb WHERE src NOT LIKE "See <b data-stgs=%" OR src IS NULL`
 
   const result = await utils.queryAsync({ connection, statement })
 
   result.forEach(row => {
-    const paddedStrongs = row.id.replace(/([0-9]+)/, match => utils.padWithZeros(match, 5))
-    bdbHasEntryByStrongs[paddedStrongs] = true
+    const strongs = normalizeStrongs(row.id)
+    bdbHasEntryByStrongs[strongs] = true
     uniqueStateOfLexemes[row.word] = uniqueStateOfLexemes[row.word] ? 0 : 1
   })
       
   await Promise.all(result.map(async row => {
 
-    const paddedStrongs = row.id.replace(/([0-9]+)/, match => utils.padWithZeros(match, 5))
+    const strongs = normalizeStrongs(row.id)
 
-    if(!paddedStrongs.match(/^H[0-9]{5}[a-z]?$/)) {
-      badStrongs[paddedStrongs] = true
+    if(!strongs.match(/^H[0-9]{1,4}(\.[0-9])?$/)) {
+      badStrongs[strongs] = true
       return
     }
       
-    const statement2 = `SELECT morph FROM uhbWords WHERE strongs="${paddedStrongs}"`
+    const statement2 = `SELECT pos, wordNumber FROM uhbWords WHERE definitionId="${strongs}"`
 
     const result2 = await utils.queryAsync({ connection, statement: statement2 })
 
     if(result2.length > 0) {
+      
+      const hits = result2.reduce((sum, row2) => sum + (row2.wordNumber ? 1 : 0), 0)
 
-      const defInsert = {
-        id: paddedStrongs,
+      const defUpdate = {
         lex: row.word,
         lexUnique: uniqueStateOfLexemes[row.word],
         vocal: row.xlit,
-        hits: result2.length,
-        lxx: JSON.stringify([]),  // this info is not yet known
+        hits,
+        // lxx: JSON.stringify([]),  // this info is not yet known
       }
 
-      updates.push(`INSERT INTO definitions (${Object.keys(defInsert).join(", ")}) VALUES ('${Object.values(defInsert).join("', '")}')`)
+      const set = []
+
+      for(let col in defUpdate) {
+        set.push(`${col}="${(defUpdate[col] + '').replace(/"/g, '\\"')}"`)
+      }
+
+      updates.push(`UPDATE definitions SET ${set.join(", ")} WHERE id="${strongs}"`)
+      updates.push(`UPDATE uhbWords SET lemma="${row.word}" WHERE definitionId="${strongs}"`)
 
       const posInKeys = {}
 
-      result2.forEach(row2 => {
-        // TODO: this needs to be determined differently for aramaic
-        const morphParts = row2.morph.substr(1).split('/')
-        if(morphParts[morphParts.length - 1].substr(0,1) == 'S') {
-          morphParts.pop()
-        }
-        const pos = (morphParts.pop() || '').substr(0,1)
-        if(pos) {
-          posInKeys[pos] = true
-        }
-      })
+      result2.forEach(row2 => posInKeys[row2.pos] = true)
 
       Object.keys(posInKeys).forEach(pos => {
 
         const posInsert = {
           pos,
-          definitionId: paddedStrongs,
+          definitionId: strongs,
         }
         
         updates.push(`INSERT INTO partOfSpeeches (${Object.keys(posInsert).join(", ")}) VALUES ('${Object.values(posInsert).join("', '")}')`)
@@ -102,13 +108,13 @@ connection.connect(async (err) => {
 
   // get all distinct strongs from uhbWords and see if there are any not in bdbHasEntryByStrongs
   
-  const statement3 = `SELECT DISTINCT strongs FROM uhbWords`
+  const statement3 = `SELECT DISTINCT definitionId FROM uhbWords`
 
   const result3 = await utils.queryAsync({ connection, statement: statement3 })
 
   result3.forEach(row3 => {
-    if(!bdbHasEntryByStrongs[row3.strongs]) {
-      console.log(`  - ${row3.strongs} in uhbWords, but not in bdb.`)
+    if(!bdbHasEntryByStrongs[row3.definitionId]) {
+      console.log(`  - ${row3.definitionId} in uhbWords, but not in bdb.`)
     }
   })
 
