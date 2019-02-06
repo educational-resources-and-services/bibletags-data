@@ -249,7 +249,7 @@ const createConnection = () => {
   }
 
   const fullParsing = {
-    type: Sequelize.STRING(20),
+    type: Sequelize.STRING(30),
     allowNull: false,
     notEmpty: true,
   }

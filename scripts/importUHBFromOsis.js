@@ -171,6 +171,7 @@ connection.connect(async (err) => {
               const loc = utils.padWithZeros(bookId, 2) + utils.padWithZeros(osisIDParts[1], 3) + utils.padWithZeros(osisIDParts[2], 3)
 
               let verseUsfm = ""
+              let firstHalfOfMultiWordLemma = []
 
               verse.group.forEach(wordOrSomethingElse => {
 
@@ -205,7 +206,7 @@ connection.connect(async (err) => {
 
                   const id = wordObj['@'].id
 
-                  const strongsPrefixes = strongsParts.join('')
+                  let strongsPrefixes = strongsParts.join('')
                   let strongsWithPrefixes = strongsPrefixes
                   if(strongsPrefixes && strongsWithoutPrefixes) {
                     strongsWithPrefixes += ':'
@@ -225,124 +226,153 @@ connection.connect(async (err) => {
                     (['־','['].includes(verseUsfm.substr(-1)) || noSpaceBeforeWordIds.includes(id) ? `` : `\\n`)
                      + `\\\\w ${word}|strong="${strongsWithPrefixes}"${morph ? ` x-morph="${morph}"` : ``}${id ? ` x-id="${id}"` : ``} \\\\w*`
 
-                  const mainPartMorphLetters = morphParts[getMainWordPartIndex(morphParts)].split('')
-                  const pos = mainPartMorphLetters[0]
-                  const isAramaic = morph.match(/^Ar,/) ? 1 : 0
+                  if(strongsWithoutPrefixes.match(/\+/)) {
 
-                  const wordInsert = {
-                    id,
-                    bookId,
-                    chapter: osisIDParts[1],
-                    verse: osisIDParts[2],
-                    verseNumber,
-                    sectionNumber,
-                    nakedWord: utils.stripHebrewVowelsEtc(word),
-                    lemma: "",  // TODO: set in def and pos building script
-                    fullParsing: morph,
-                    isAramaic,
-                    b: strongsPrefixes.match(/b/) ? 1 : 0,
-                    l: strongsPrefixes.match(/l/) ? 1 : 0,
-                    k: strongsPrefixes.match(/k/) ? 1 : 0,
-                    m: strongsPrefixes.match(/m/) ? 1 : 0,
-                    sh: strongsPrefixes.match(/s/) ? 1 : 0,
-                    v: strongsPrefixes.match(/c/) ? 1 : 0,
-                    h1: morph.match(/^(?:He,|Ar,)(?:[^:]*:)*Td/) ? 1 : 0,
-                    h2: morph.match(/^(?:He,|Ar,)(?:[^:]*:)*Rd/) ? 1 : 0,
-                    h3: morph.match(/^(?:He,|Ar,)(?:[^:]*:)*Ti/) ? 1 : 0,
-                    pos: pos,
-                    h4: morph.match(/^(?:He,|Ar,)(?:[^:]*:)*Sd/) ? 1 : 0,
-                    h5: morph.match(/^(?:He,|Ar,)(?:[^:]*:)*Sh/) ? 1 : 0,
-                    n: morph.match(/^(?:He,|Ar,)(?:[^:]*:)*Sn/) ? 1 : 0,
-                  }
+                    firstHalfOfMultiWordLemma.push({
+                      strongsWithoutPrefixes,
+                      word,
+                      morph,
+                      strongsPrefixes,
+                    })
 
-                  if(!isQere) {
-                    wordInsert.wordNumber = wordNumber++
-                  }
+                  } else {
 
-                  switch(pos) {
-                    case 'A':
-                    case 'N':
-                      if(mainPartMorphLetters.length > 2) {
-                        if(mainPartMorphLetters.slice(1,4).join("") !== 'xxx') {
-                          wordInsert.gender = mainPartMorphLetters[2]
-                          wordInsert.number = mainPartMorphLetters[3]
-                        }
-                        wordInsert.state = mainPartMorphLetters[4]
+                    let fullParsing = morph
+                    let allMorphs = [ morph ]
+
+                    if(firstHalfOfMultiWordLemma.length > 0) {
+                      if(firstHalfOfMultiWordLemma.every(i => i.strongsWithoutPrefixes.replace(/\+/g, '') !== strongsWithoutPrefixes)) {
+                        console.log(`UNEXPECTED DOUBLE WORD LEMMA: ${JSON.stringify(firstHalfOfMultiWordLemma)} ${JSON.stringify(wordOrSomethingElse)}`)
+                        process.exit()
                       }
-                      
-                    case 'R':
-                    case 'T':
-                      const type = pos + mainPartMorphLetters[1]
-                      if(
-                        mainPartMorphLetters[1]
-                        && mainPartMorphLetters.slice(1,4).join("") !== 'xxx'
-                        && !['Aa','Nc'].includes(type)
-                      ) {
-                        wordInsert.type = type
-                      }
-                      break
-
-                    case 'P':
-                      wordInsert.type = pos + mainPartMorphLetters[1]
-                      if(mainPartMorphLetters[1] === 'f' && mainPartMorphLetters.length > 2) {
-                        const person = mainPartMorphLetters[2]
-                        if(!['x'].includes(person)) {
-                          wordInsert.person = person
-                        }
-                        wordInsert.gender = mainPartMorphLetters[3]
-                        wordInsert.number = mainPartMorphLetters[4]
-                      }
-                      break
-
-                    case 'V':
-                      wordInsert.stem = (isAramaic ? 'A' : 'H') + mainPartMorphLetters[1]
-                      wordInsert.aspect = mainPartMorphLetters[2]
-                      if(['r','s'].includes(mainPartMorphLetters[2])) {
-                        wordInsert.gender = mainPartMorphLetters[3]
-                        wordInsert.number = mainPartMorphLetters[4]
-                        wordInsert.state = mainPartMorphLetters[5]
-                      } else if(['a','c'].includes(mainPartMorphLetters[2])) {
-                        // nothing more to do
-                      } else {
-                        wordInsert.person = mainPartMorphLetters[3]
-                        wordInsert.gender = mainPartMorphLetters[4]
-                        wordInsert.number = mainPartMorphLetters[5]
-                      }
-                      break
-                  }
-
-                  ;(morph.match(/:Sp([^:]*)/g) || []).forEach(suffixMorph => {
-                      wordInsert.suffixPerson = suffixMorph.substr(3,1)
-                      wordInsert.suffixGender = suffixMorph.substr(4,1)
-                      wordInsert.suffixNumber = suffixMorph.substr(5,1)
-                  })
-
-                  if(strongsWithoutPrefixes) {
-                    const definitionId = 'H' + strongsWithoutPrefixes.replace(/\+/g, '')
-                    wordInsert.definitionId = definitionId
   
-                    const definitionInsert = {
-                      id: definitionId,
-                      lex: "",
-                      lexUnique: 0,
-                      vocal: "",
-                      hits: 0,
-                      lxx: JSON.stringify([]),
+                      word = `${firstHalfOfMultiWordLemma.map(i => i.word).join(' ')} ${word}`
+                      fullParsing = `${firstHalfOfMultiWordLemma.map(i => i.morph).join(' ')} ${morph}`
+                      strongsPrefixes = `${firstHalfOfMultiWordLemma.map(i => i.strongsPrefixes).join(' ')} ${strongsPrefixes}`
+                      allMorphs = [ ...allMorphs, ...firstHalfOfMultiWordLemma.map(i => i.morph) ]
                     }
-        
-                    updates.push(`
-                      INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
-                      SELECT * FROM (SELECT ${Object.values(definitionInsert).map((val, idx) => `'${val}' as t${idx}`).join(", ")}) AS tmp
-                      WHERE NOT EXISTS (
-                          SELECT id FROM definitions WHERE id='${definitionId}'
-                      ) LIMIT 1
-                    `)
-                  }
 
-                  updates.push(`
-                    INSERT INTO uhbWords (${Object.keys(wordInsert).join(", ")})
-                    VALUES ('${Object.values(wordInsert).join("', '")}')
-                  `)
+                    const mainPartMorphLetters = morphParts[getMainWordPartIndex(morphParts)].split('')
+                    const pos = mainPartMorphLetters[0]
+                    const isAramaic = morph.match(/^Ar,/) ? 1 : 0
+  
+                    const wordInsert = {
+                      id,
+                      bookId,
+                      chapter: osisIDParts[1],
+                      verse: osisIDParts[2],
+                      verseNumber,
+                      sectionNumber,
+                      nakedWord: utils.stripHebrewVowelsEtc(word),
+                      lemma: "",  // Is set in def and pos building script
+                      fullParsing,
+                      isAramaic,
+                      b: strongsPrefixes.match(/b/) ? 1 : 0,
+                      l: strongsPrefixes.match(/l/) ? 1 : 0,
+                      k: strongsPrefixes.match(/k/) ? 1 : 0,
+                      m: strongsPrefixes.match(/m/) ? 1 : 0,
+                      sh: strongsPrefixes.match(/s/) ? 1 : 0,
+                      v: strongsPrefixes.match(/c/) ? 1 : 0,
+                      h1: allMorphs.some(i => i.match(/^(?:He,|Ar,)(?:[^:]*:)*Td/)) ? 1 : 0,
+                      h2: allMorphs.some(i => i.match(/^(?:He,|Ar,)(?:[^:]*:)*Rd/)) ? 1 : 0,
+                      h3: allMorphs.some(i => i.match(/^(?:He,|Ar,)(?:[^:]*:)*Ti/)) ? 1 : 0,
+                      pos,
+                      h4: allMorphs.some(i => i.match(/^(?:He,|Ar,)(?:[^:]*:)*Sd/)) ? 1 : 0,
+                      h5: allMorphs.some(i => i.match(/^(?:He,|Ar,)(?:[^:]*:)*Sh/)) ? 1 : 0,
+                      n: allMorphs.some(i => i.match(/^(?:He,|Ar,)(?:[^:]*:)*Sn/)) ? 1 : 0,
+                    }
+  
+                    if(!isQere) {
+                      wordInsert.wordNumber = wordNumber++
+                    }
+  
+                    switch(pos) {
+                      case 'A':
+                      case 'N':
+                        if(mainPartMorphLetters.length > 2) {
+                          if(mainPartMorphLetters.slice(1,4).join("") !== 'xxx') {
+                            wordInsert.gender = mainPartMorphLetters[2]
+                            wordInsert.number = mainPartMorphLetters[3]
+                          }
+                          wordInsert.state = mainPartMorphLetters[4]
+                        }
+                        
+                      case 'R':
+                      case 'T':
+                        const type = pos + mainPartMorphLetters[1]
+                        if(
+                          mainPartMorphLetters[1]
+                          && mainPartMorphLetters.slice(1,4).join("") !== 'xxx'
+                          && !['Aa','Nc'].includes(type)
+                        ) {
+                          wordInsert.type = type
+                        }
+                        break
+  
+                      case 'P':
+                        wordInsert.type = pos + mainPartMorphLetters[1]
+                        if(mainPartMorphLetters[1] === 'f' && mainPartMorphLetters.length > 2) {
+                          const person = mainPartMorphLetters[2]
+                          if(!['x'].includes(person)) {
+                            wordInsert.person = person
+                          }
+                          wordInsert.gender = mainPartMorphLetters[3]
+                          wordInsert.number = mainPartMorphLetters[4]
+                        }
+                        break
+  
+                      case 'V':
+                        wordInsert.stem = (isAramaic ? 'A' : 'H') + mainPartMorphLetters[1]
+                        wordInsert.aspect = mainPartMorphLetters[2]
+                        if(['r','s'].includes(mainPartMorphLetters[2])) {
+                          wordInsert.gender = mainPartMorphLetters[3]
+                          wordInsert.number = mainPartMorphLetters[4]
+                          wordInsert.state = mainPartMorphLetters[5]
+                        } else if(['a','c'].includes(mainPartMorphLetters[2])) {
+                          // nothing more to do
+                        } else {
+                          wordInsert.person = mainPartMorphLetters[3]
+                          wordInsert.gender = mainPartMorphLetters[4]
+                          wordInsert.number = mainPartMorphLetters[5]
+                        }
+                        break
+                    }
+  
+                    ;(morph.match(/:Sp([^:]*)/g) || []).forEach(suffixMorph => {
+                        wordInsert.suffixPerson = suffixMorph.substr(3,1)
+                        wordInsert.suffixGender = suffixMorph.substr(4,1)
+                        wordInsert.suffixNumber = suffixMorph.substr(5,1)
+                    })
+  
+                    if(strongsWithoutPrefixes) {
+                      const definitionId = 'H' + strongsWithoutPrefixes
+                      wordInsert.definitionId = definitionId
+    
+                      const definitionInsert = {
+                        id: definitionId,
+                        lex: "",
+                        lexUnique: 0,
+                        vocal: "",
+                        hits: 0,
+                        lxx: JSON.stringify([]),
+                      }
+          
+                      updates.push(`
+                        INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
+                        SELECT * FROM (SELECT ${Object.values(definitionInsert).map((val, idx) => `'${val}' as t${idx}`).join(", ")}) AS tmp
+                        WHERE NOT EXISTS (
+                            SELECT id FROM definitions WHERE id='${definitionId}'
+                        ) LIMIT 1
+                      `)
+                    }
+  
+                    updates.push(`
+                      INSERT INTO uhbWords (${Object.keys(wordInsert).join(", ")})
+                      VALUES ('${Object.values(wordInsert).join("', '")}')
+                    `)
+
+                    firstHalfOfMultiWordLemma = []
+                  }
                 }
 
                 if(wordOrSomethingElse['='] == 'w') {
@@ -381,6 +411,11 @@ connection.connect(async (err) => {
                 }
 
               })
+
+              if(firstHalfOfMultiWordLemma.length > 0) {
+                console.log(`UNEXPECTED LEFT OVER MULTI-WORD LEMMA: ${JSON.stringify(firstHalfOfMultiWordLemma)}`)
+                process.exit()
+              }
 
               if(verseUsfm.match(/\u200D/)) {
                 console.log('BAD CHARACTER', loc)
