@@ -474,7 +474,7 @@ const createConnection = () => {
 
   const PartOfSpeech = connection.define('partOfSpeech', Object.assign({
     pos: {
-      type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V', 'E', 'I'),
+      type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V', 'E', 'I', 'F'),
       // Note: these part-of-speech codes mean different things depending
       // on whether they are Hebrew or Greek. But we leave it to the widget
       // to worry about this. Also, see biblearc-widget's getNormalizedGreekPOSCode
