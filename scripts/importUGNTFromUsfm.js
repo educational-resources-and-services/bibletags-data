@@ -239,7 +239,7 @@ connection.connect(async (err) => {
             return
           }
 
-          if(line.match(/^\\w |^\\f \+ \\fqa|^\\f\*/)) {
+          if(line.match(/\\w |^\\f \+ \\fqa|^\\f\*/)) {
             currentVerseContent.push(
               line
                 .replace(/ x-tw="[^"]*"/g, "")
