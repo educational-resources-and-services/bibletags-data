@@ -70,6 +70,9 @@ module.exports = ({ connection, nullLikeDate }) => {
     }
     
     type Mutation {
+      requestLoginToken(input: RequestLoginTokenInput!): Boolean
+      logIn(input: LogInInput!): Boolean
+      logOut: Boolean
       submitWordHashesSet(input: WordHashesSetInput!): TagSet
       submitTagSet(input: TagSetInput!): TagSet
       submitUIWords(input: UIWordsInput!): [UIWord]

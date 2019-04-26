@@ -15,6 +15,15 @@
 
 module.exports = `
 
+  input RequestLoginTokenInput {
+    email: String!
+    captchaValue: String!
+  }
+
+  input LogInInput {
+    token: String!
+  }
+
   input WordHashesSetInput {
     loc: String!
     versionId: String!

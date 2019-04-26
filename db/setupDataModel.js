@@ -615,6 +615,7 @@ const createConnection = () => {
     flaggedForAbuse: {
       type: Sequelize.BOOLEAN,
       allowNull: false,
+      defaultValue: false,
     },
     notes: {
       type: Sequelize.TEXT,
@@ -1716,6 +1717,50 @@ const createConnection = () => {
 
   UiWordSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(UiWordSubmission)
+
+  //////////////////////////////////////////////////////////////////
+
+  const BlackedListedEmail = connection.define('blackListedEmail', Object.assign({
+    email: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        isEmail: true,
+      },
+    },
+    cause: {
+      type: Sequelize.ENUM('BOUNCE', 'COMPLAINT'),
+      allowNull: false,
+    },
+  }, standardFields), Object.assign({
+    indexes: [
+      ...standardIndexes,
+      {
+        fields: ['email'],
+      },
+      {
+        fields: ['cause'],
+      },
+    ],
+  }, standardOptions))
+
+  //////////////////////////////////////////////////////////////////
+
+  const LoginToken = connection.define('loginToken', Object.assign({
+    token: {
+      type: Sequelize.STRING,
+    },
+  }, standardFields), Object.assign({
+    indexes: [
+      ...standardIndexes,
+      {
+        fields: ['token'],
+      }, 
+    ],
+  }, standardOptions))
+
+  LoginToken.belongsTo(User, required)
+  User.hasMany(LoginToken)
 
   //////////////////////////////////////////////////////////////////
 
