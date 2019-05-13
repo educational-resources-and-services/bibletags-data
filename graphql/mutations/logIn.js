@@ -49,7 +49,8 @@ module.exports = ({ connection, models }) => {
             })
           })
 
-        })
+        }).then(() => true)
+
       } else {
         throw(new Error(`Invalid token.`))
       }

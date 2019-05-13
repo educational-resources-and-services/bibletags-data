@@ -61,7 +61,9 @@ module.exports = ({ connection, models }) => {
             }, {transaction: t}).then(createTokenAndSendEmail)
 
           }
-        })
+
+        }).then(() => true)
+
       })
     }
 
