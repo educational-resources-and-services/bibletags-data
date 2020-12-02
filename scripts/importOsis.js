@@ -8,8 +8,8 @@ const fs = require('fs')
 const utils = require('./utils')
 
 const connection = mysql.createConnection({
-  host: process.env.DB_NAME || "localhost",
-  database: process.env.HOSTNAME || 'bibletags',
+  host: process.env.HOSTNAME || "localhost",
+  database: process.env.HOSTNAME || 'BibleTags',
   user: process.env.USERNAME || "root",
   password: process.env.PASSWORD || "",
   multipleStatements: true,

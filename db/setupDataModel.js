@@ -9,16 +9,16 @@ const nullLikeDate = new Date('0000-01-01');
 const createConnection = () => {
 
   const connection = new Sequelize(
-    process.env.RDS_DB_NAME,
-    process.env.RDS_USERNAME,
-    process.env.RDS_PASSWORD,
+    process.env.RDS_DB_NAME || 'BibleTags',
+    process.env.RDS_USERNAME || 'root',
+    process.env.RDS_PASSWORD || '',
     {
       dialect: 'mysql',
       dialectOptions: {
         multipleStatements: true,
       },
       host: process.env.RDS_HOSTNAME || 'localhost',
-      port: process.env.RDS_PORT,
+      port: process.env.RDS_PORT || '3306',
       logging: (query, msEllapsed) => (
         msEllapsed > 1000 ? console.log(`Slow query (${msEllapsed/1000} seconds). ${query}`) : null
       ),
