@@ -1,14 +1,20 @@
 {
-  "name": "bibletags-data",
+  "name": "@bibletags/bibletags-data",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/educational-resources-and-services/bibletags-widget.git"
+    "url": "git+https://github.com/educational-resources-and-services/bibletags-data.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/educational-resources-and-services/bibletags-widget/issues"
+    "url": "https://github.com/educational-resources-and-services/bibletags-data/issues"
   },
   "homepage": "https://bibletags.org",
+  "author": "Andy Hubert",
+  "funding": {
+    "type" : "individual",
+    "url" : "https://gofundme.com/f/yarn4-bible-tags"
+  },
   "scripts": {
     "open": "opn open-widget-test.html",
     "setup": "node db/setup.js",
@@ -17,7 +23,7 @@
   },
   "dependencies": {
     "aws-sdk": "2.413.0",
-    "bibletags-versification": "github:educational-resources-and-services/bibletags-versification#b91312ea9551b83740d17db2e61a35a102052359",
+    "@bibletags/bibletags-versification": "^0.1.0",
     "body-parser": "1.17.2",
     "connect-redis": "3.4.0",
     "console-stamp": "0.2.6",
