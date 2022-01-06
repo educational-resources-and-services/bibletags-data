@@ -1,6 +1,6 @@
 {
   "name": "@bibletags/bibletags-data",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/educational-resources-and-services/bibletags-data.git"
@@ -12,8 +12,8 @@
   "homepage": "https://bibletags.org",
   "author": "Andy Hubert",
   "funding": {
-    "type" : "individual",
-    "url" : "https://gofundme.com/f/yarn4-bible-tags"
+    "type": "individual",
+    "url": "https://gofundme.com/f/yarn4-bible-tags"
   },
   "scripts": {
     "open": "opn open-widget-test.html",
