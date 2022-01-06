@@ -1,4 +1,4 @@
-const { getLocFromRef } = require('bibletags-versification')
+const { getLocFromRef } = require('@bibletags/bibletags-versification/builds/index.js')
 
 const {
   versionIdRegEx,
