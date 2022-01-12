@@ -49,12 +49,9 @@ If you are aware of any open source word alignment data (what we call Bible tags
 git clone https://github.com/educational-resources-and-services/bibletags-data
 cd bibletags-data
 npm install
-npm run setup
+npm run setup-db
 ```
 
-### Running
+### Testing
 
-* `npm run open` (to open test.html in your browser)
-* `npm start` (to start the local server)
-
-Note: You will need to kill and rerun the server with each change.
+* `npm run test`
