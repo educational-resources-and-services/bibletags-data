@@ -7,7 +7,7 @@ const mysql = require('mysql2')
 const utils = require('./utils')
 
 const connection = mysql.createConnection({
-  host: process.env.HOSTNAME || 'localhost',
+  host: process.env.HOSTNAME || "localhost",
   database: process.env.DB_NAME || "BibleTags",
   user: process.env.USERNAME || "root",
   password: process.env.PASSWORD || "",
