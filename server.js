@@ -8,6 +8,8 @@ require('console-stamp')(console, {
   },
 })
 
+const authBasePath = '/auth'
+
 const express = require('express')
 
 const dev = process.env.NODE_ENV === 'development'
@@ -17,6 +19,9 @@ const bodyParser = require('body-parser')
 const { createConnection, nullLikeDate } = require('./db/setupDataModel')
 const { graphqlExpress, graphiqlExpress } = require('graphql-server-express')
 const schema = require('./graphql/schema')
+const aws = require('./auth/aws')
+
+const auth = require('./auth/auth')
 
 const port = parseInt(process.env.PORT, 10) || process.env.PORT || 8081
 
@@ -25,6 +30,9 @@ let reestablishingConnection = false
 
 connection.sync().then(() => {
   console.log('Connection has been established successfully.')
+
+  const { handleBounces } = aws
+  const sendEmail = aws.sendEmail(() => connection.models)
 
   const server = express()
 
@@ -78,6 +86,7 @@ connection.sync().then(() => {
   // take care of general middleware
   server.use(bodyParser.json())
   server.use(bodyParser.urlencoded({ extended: true }))
+  server.get('/', handleBounces({ getConnection: () => connection }))
 
   // allow cors
   server.use((req, res, next) => {
@@ -92,6 +101,8 @@ connection.sync().then(() => {
 
     next()
   })
+
+  auth({ server, getConnection: () => connection, dev, authBasePath })
 
   // graphql middleware
   server.use(bodyParser.text({ type: 'application/graphql' }))
@@ -110,7 +121,7 @@ connection.sync().then(() => {
 
   server.use('/graphql', graphqlExpress(req => ({
     schema: schema({ connection, nullLikeDate }),
-    context: { req },
+    context: { req, sendEmail, dev },
   })))
 
   server.listen(port, (err) => {

@@ -1,9 +1,9 @@
 // tagSets:versionId = [translationVersionId] (eg. esv)
 
-// definitionsByPosition:versionId = (eg. wlc, esv)
-// definitionsByPosition:verseLoc = (eg. 01001001)
+// definitionsByPosition:versionId = (eg. uhb, esv)
+// definitionsByPosition:loc = (eg. 01001001)
 // definitionsByPosition:wordNum = (eg. 3)
-// definitionsByPosition:language = (eg. eng)
+// definitionsByPosition:languageId = (eg. eng)
 // translationsByPosition has same params
 
 // Most of the time, definitionsByPosition will return a single word, but in the event that multiple orig language words
@@ -56,20 +56,26 @@ module.exports = ({ connection, nullLikeDate }) => {
     type Query {
       chapter(bookId: Int!, chapter: Int!, versionId: String!): [Verse]
       verse(id: ID!): Verse
-      tagSets(bookId: Int!, chapter: Int!, versionId: String!): [TagSet]
+      tagSets(bookId: Int!, chapter: Int!, verse: Int, versionId: String!): [TagSet]
       tagSet(id: ID!): TagSet
       definition(id: ID!): Definition
-      definitionsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, language: String!): [Definition]
+      definitionsByPosition(versionId: String!, loc: String!, wordNum: Int!, languageId: String!): [Definition]
       hits(id: ID!): Hits
       translations(id: ID!): Translations
-      translationsByPosition(versionId: String!, verseLoc: String!, wordNum: Int!, language: String!): [Translations]
+      translationsByPosition(versionId: String!, loc: String!, wordNum: Int!, languageId: String!): [Translations]
       search(query: String!, offset: Int, limit: Int, tagVersionIds: [String]): SearchResult
       versionInfo(id: ID!): VersionInfo
-      uiWords(language: String!): [UIWord]
+      embeddingApp(uri: String!): EmbeddingApp
+      uiWords(languageId: String!): [UIWord]
     }
     
     type Mutation {
-      example(param1: String!): Boolean
+      requestLoginToken(input: RequestLoginTokenInput!): Boolean
+      logIn(input: LogInInput!): Boolean
+      logOut: Boolean
+      submitWordHashesSet(input: WordHashesSetInput!): TagSet
+      submitTagSet(input: TagSetInput!): TagSet
+      submitUIWords(input: UIWordsInput!): [UIWord]
     }
     
     schema {

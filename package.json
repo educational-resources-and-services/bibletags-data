@@ -1,32 +1,56 @@
 {
-  "name": "bibletags-data",
+  "name": "@bibletags/bibletags-data",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/educational-resources-and-services/bibletags-widget.git"
+    "url": "git+https://github.com/educational-resources-and-services/bibletags-data.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/educational-resources-and-services/bibletags-widget/issues"
+    "url": "https://github.com/educational-resources-and-services/bibletags-data/issues"
   },
   "homepage": "https://bibletags.org",
+  "author": "Andy Hubert",
+  "funding": {
+    "type": "individual",
+    "url": "https://gofundme.com/f/yarn4-bible-tags"
+  },
   "scripts": {
     "open": "opn open-widget-test.html",
     "setup": "node db/setup.js",
     "start": "node server.js",
-    "zip": "rm -f build.zip && zip build.zip -qr --exclude=package.json --exclude=scripts* *"
+    "zip": "rm -f build.zip && zip build.zip -qr --exclude=package.json --exclude=scripts* *",
+    "confirm": "read -p 'Are you sure? ' -n 1 -r && echo '\n' && [[ $REPLY =~ ^[Yy]$ ]]",
+    "update-patch": "npm run go-update-patch -s",
+    "update-major": "npm run go-update-major -s",
+    "update-minor": "npm run go-update-minor -s",
+    "go-update-patch": "echo '-------------------------------------------\nUpdate version (PATCH) and deploy to npm...\n-------------------------------------------\n' && npm run confirm && npm i && npm version patch && npm run publish-to-npm",
+    "go-update-minor": "echo '-------------------------------------------\nUpdate version (MINOR) and deploy to npm...\n-------------------------------------------\n' && npm run confirm && npm i && npm version minor && npm run publish-to-npm",
+    "go-update-major": "echo '-------------------------------------------\nUpdate version (MAJOR) and deploy to npm...\n-------------------------------------------\n' && npm run confirm && npm i && npm version major && npm run publish-to-npm",
+    "publish-to-npm": "npm publish --access public && echo '\nSUCCESS!\n'"
   },
   "dependencies": {
+    "aws-sdk": "2.413.0",
+    "@bibletags/bibletags-versification": "^0.2.0",
     "body-parser": "1.17.2",
+    "connect-redis": "3.4.0",
     "console-stamp": "0.2.6",
     "dotenv": "4.0.0",
     "express": "4.15.3",
+    "express-session": "1.15.6",
     "graphql": "0.10.1",
     "graphql-server-express": "0.8.5",
     "graphql-tools": "1.0.0",
     "graphql-type-json": "0.1.4",
     "js2xmlparser": "3.0.0",
     "mysql2": "1.5.1",
+    "node-fetch": "2.3.0",
+    "passport": "0.4.0",
+    "passport-facebook": "3.0.0",
+    "passport-google-oauth20": "github:jaredhanson/passport-google-oauth2#5b3f943ce340052d04e47b667951f7c00f8e8fb6",
     "sequelize": "4.1.0",
+    "session-file-store": "1.2.0",
+    "sns-validator": "0.3.4",
     "xml2js": "0.4.19"
   },
   "devDependencies": {

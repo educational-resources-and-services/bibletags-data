@@ -1,3 +1,8 @@
+const {
+  versionIdRegEx,
+  locRegEx,
+} = require('../utils')
+
 module.exports = ({ models }) => {
 
   return (
@@ -8,23 +13,34 @@ module.exports = ({ models }) => {
     { req }
   ) => {
 
-    const [ verseLoc, versionId, invalidExtra ] = id.split('-')
-    const model = models[`${versionId}Verse`]
+    const [ loc, versionId, invalidExtra ] = id.split('-')
 
-    if(invalidExtra !== undefined) {
-      throw(new Error('Invalid id.'))
+    if(versionId === undefined || invalidExtra !== undefined) {
+      throw(new Error(`Invalid id (${id}).`))
     }
+
+    if(!loc.match(locRegEx)) {
+      throw(new Error(`Invalid loc (${loc}) indicated in id (${id}).`))
+    }
+
+    if(!versionId.match(versionIdRegEx)) {
+      throw(new Error(`Invalid versionId (${versionId}) indicated in id (${id}).`))
+    }
+
+    const model = models[`${versionId}Verse`]
 
     if(!model) {
       throw(new Error('Invalid versionId indicated in id.'))
     }
 
-    if(!verseLoc.match(/^[0-9]{8}$/)) {
-      throw(new Error('Invalid verse location indicated in id.'))
+    const where = {
+      loc,
     }
 
-    return model.findById(verseLoc).then(verse => !verse ? null : ({
-      id: `${verse.id}-${versionId}`,
+    return model.findOne({
+      where
+    }).then(verse => !verse ? null : ({
+      id: `${verse.loc}-${versionId}`,
       usfm: verse.usfm,
     }))
 

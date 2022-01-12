@@ -6,7 +6,7 @@
     firstname: String
     lastname: String
     gender: String
-    language: String
+    languageId: String
     onVacationUntil: Date
     adminLevel: String
   }
@@ -14,5 +14,62 @@
 */
 
 module.exports = `
-  
+
+  input RequestLoginTokenInput {
+    email: String!
+    captchaValue: String!
+  }
+
+  input LogInInput {
+    token: String!
+  }
+
+  input WordHashesSetInput {
+    loc: String!
+    versionId: String!
+    wordsHash: String!
+    embeddingAppId: Int!
+    wordHashes: [WordHashesInput]!
+  }
+
+  input WordHashesInput {
+    wordNumberInVerse: Int!
+    hash: String!
+    withBeforeHash: String!
+    withAfterHash: String!
+    withBeforeAndAfterHash: String!
+  }
+
+  input TagSetInput {
+    loc: String!
+    versionId: String!
+    wordsHash: String!
+    deviceId: String!
+    embeddingAppId: Int!
+    tagSubmissions: [TagInput]!
+  }
+
+  input TagInput {
+    origWordsInfo: [String]!
+    translationWordsInfo: [TranslationWordsInfo]!
+    alignmentType: String!  ${/* ENUM: affirmation, correction, without-suggestion */ ""}
+  }
+
+  input TranslationWordsInfo {
+    word: String!
+    wordNumberInVerse: Int!
+  }
+
+  input UIWordsInput {
+    languageId: String!
+    deviceId: String!
+    embeddingAppId: Int!
+    words: [UIWordInput]!
+  }
+
+  input UIWordInput {
+    uiEnglishWordId: Int!
+    translation: String!
+  }
+
 `
