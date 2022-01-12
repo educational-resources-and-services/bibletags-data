@@ -50,9 +50,14 @@ module.exports = `
   }
 
   input TagInput {
-    translationWordNumberInVerse: Int!
-    translationWord: String!
-    ugntWordId: String!
+    origWordsInfo: [String]!
+    translationWordsInfo: [TranslationWordsInfo]!
+    alignmentType: String!  ${/* ENUM: affirmation, correction, without-suggestion */ ""}
+  }
+
+  input TranslationWordsInfo {
+    word: String!
+    wordNumberInVerse: Int!
   }
 
   input UIWordsInput {
