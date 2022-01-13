@@ -14,6 +14,7 @@ For more information on this project, see the [Bible Tags website](https://bible
 * [bibletags-react-native-app](https://github.com/educational-resources-and-services/bibletags-react-native-app)
 * [bibletags-ui-helper](https://github.com/educational-resources-and-services/bibletags-ui-helper)
 * [bibletags-versification](https://github.com/educational-resources-and-services/bibletags-versification)
+* [bibletags-usfm](https://github.com/educational-resources-and-services/bibletags-usfm)
 * [bibletags-widget](https://github.com/educational-resources-and-services/bibletags-widget)
 * [bibletags-widget-script](https://github.com/educational-resources-and-services/bibletags-widget-script)
 
