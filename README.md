@@ -44,6 +44,8 @@ If you are aware of any open source word alignment data (what we call Bible tags
 
 ## Development
 
+Note that a local MySQL database install is required.
+
 ### Installation
 
 ```bash
@@ -53,7 +55,7 @@ cd bibletags-data
 cp .env.example .env
 ```
 
-Update `RDS_USERNAME` and `RDS_PASSWORD` in `.env` for accessing your local MySQL database (required).
+Update `RDS_USERNAME` and `RDS_PASSWORD` in `.env` for accessing your local MySQL database.
 
 ```bash
 npm install
