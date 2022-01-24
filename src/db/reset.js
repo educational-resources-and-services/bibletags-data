@@ -6,7 +6,6 @@ const { setUpConnection } = require('./connect')
 
   setUpConnection({ setUpCascadeDeletes: true })
 
-  try {
   await global.connection.query(
     `
       SET FOREIGN_KEY_CHECKS = 0;
@@ -27,10 +26,6 @@ const { setUpConnection } = require('./connect')
       SET FOREIGN_KEY_CHECKS = 1;
     `
   )
-
-  await global.connection.sync({ alter: true })
-  await global.connection.authenticate()
-} catch(e) { console.log('eee', e)}
 
   console.log('Database reset.')
   process.exit()

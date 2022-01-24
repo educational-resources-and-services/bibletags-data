@@ -64,4 +64,14 @@ npm run setup-db
 
 ### Testing
 
-* `npm run test`
+```bash
+npm run test
+```
+
+### Updating `/src/db/connect.js`
+
+After making edit to this file, run the following:
+
+```bash
+npm run update-db
+```
