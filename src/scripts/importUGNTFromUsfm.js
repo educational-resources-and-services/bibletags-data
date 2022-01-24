@@ -48,7 +48,7 @@ connection.connect(async (err) => {
       }              
 
       filenames = files.filter(filename => filename.match(/^[0-9]{2}-\w{3}\.usfm$/))
-      // filenames = filenames.slice(0, 1)
+      // filenames = filenames.slice(1)
 
       resolve()
     })
@@ -96,7 +96,7 @@ connection.connect(async (err) => {
 
           updates.push(`INSERT INTO ugntVerses (loc, usfm) VALUES ('${loc}', '${usfmVerseContent.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}')`)
 
-          usfmVerseContent.match(/\\w.*?\\w\*|\\p|./g).forEach(wordUsfm => {
+          usfmVerseContent.match(/\\w.*?\\w\*|\\zApparatusJson.*?\\zApparatusJson\*|\\p|./g).forEach(wordUsfm => {
 
             if([';', ',', '"', ':'].includes(wordUsfm)) {
               phraseNumber++
@@ -111,88 +111,106 @@ connection.connect(async (err) => {
               paragraphNumber++
             }
 
-            if(!wordUsfm.match(/^\\w.*?\\w\*$/)) return
+            const handleWord = ({ w, id, lemma, strong, morph, isVariant }) => {
 
-            const id = (wordUsfm.match(/x-id="([^"]*)"/) || [])[1]
-            const lemma = (wordUsfm.match(/lemma="([^"]*)"/) || [])[1]
-            const definitionId = (wordUsfm.match(/strong="([^"]*)"/) || [])[1]
-            const fullParsing = (wordUsfm.match(/x-morph="([^"]*)"/) || [])[1]
-            const nakedWord = utils.stripGreekAccents(((wordUsfm.match(/^\\w ([^\|]*)\|/) || [])[1] || "").toLowerCase())
+              const definitionId = (strong.match(/G[0-9]{5}/) || [])[0]
+              const nakedWord = utils.stripHebrewVowelsEtc(w)
 
-            if(!id || !lemma || !definitionId || !fullParsing || !nakedWord) {
-              console.log('word with missing info', wordUsfm)
-              process.exit()
-            }
-
-            const pos = posMapping[fullParsing.slice(3,5)] || posMapping[fullParsing.slice(3,4)]
-
-            if(!pos) {
-              console.log('invalid morph - pos not in mapping', wordUsfm)
-              process.exit()
-            }
-
-            const wordInsert = {
-              id,
-              bookId,
-              chapter,
-              verse,
-              verseNumber,
-              phraseNumber,
-              sentenceNumber,
-              paragraphNumber,
-              nakedWord,
-              lemma,
-              fullParsing,
-              pos,
-              morphPos: fullParsing.slice(3,4),
-              definitionId,
-            }
-
-            if(!isVariant) {
-              wordInsert.wordNumber = wordNumber++
-            }
-
-            if(fullParsing.slice(4,5) !== ',') {
-              wordInsert.type = fullParsing.slice(3,5)
-            }
-
-            [
-              "mood",
-              "aspect",
-              "voice",
-              "person",
-              "case",
-              "gender",
-              "number",
-              "attribute",
-            ].forEach((col, idx) => {
-              const morphDetail = fullParsing.slice(idx+5,idx+6)
-              if(morphDetail !== ',') {
-                wordInsert[col] = morphDetail
+              if(!id || !lemma || !definitionId || !morph || !nakedWord) {
+                console.log('word with missing info', wordUsfm)
+                process.exit()
               }
-            })
 
-            const definitionInsert = {
-              id: definitionId,
-              lex: "",
-              lexUnique: 0,
-              vocal: "",
-              hits: 0,
-              lxx: JSON.stringify([]),
-            }
+              const pos = posMapping[morph.slice(3,5)] || posMapping[morph.slice(3,4)]
 
-            if(!definitionUpdates[definitionId]) {
-              definitionUpdates[definitionId] = true
+              if(!pos) {
+                console.log('invalid morph - pos not in mapping', wordUsfm)
+                process.exit()
+              }
+
+              const wordInsert = {
+                id,
+                bookId,
+                chapter,
+                verse,
+                verseNumber,
+                phraseNumber,
+                sentenceNumber,
+                paragraphNumber,
+                nakedWord,
+                lemma,
+                fullParsing: morph,
+                pos,
+                morphPos: morph.slice(3,4),
+                definitionId,
+              }
+
+              if(!isVariant) {
+                wordInsert.wordNumber = wordNumber++
+              }
+
+              if(morph.slice(4,5) !== ',') {
+                wordInsert.type = morph.slice(3,5)
+              }
+
+              [
+                "mood",
+                "aspect",
+                "voice",
+                "person",
+                "case",
+                "gender",
+                "number",
+                "attribute",
+              ].forEach((col, idx) => {
+                const morphDetail = morph.slice(idx+5,idx+6)
+                if(morphDetail !== ',') {
+                  wordInsert[col] = morphDetail
+                }
+              })
+
+              const definitionInsert = {
+                id: definitionId,
+                lex: "",
+                lexUnique: 0,
+                vocal: "",
+                hits: 0,
+                lxx: JSON.stringify([]),
+              }
+
+              if(!definitionUpdates[definitionId]) {
+                definitionUpdates[definitionId] = true
+                updates.push(`
+                  INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
+                  VALUES ('${Object.values(definitionInsert).join("', '")}')
+                `)
+              }
+
               updates.push(`
-                INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
-                VALUES ('${Object.values(definitionInsert).join("', '")}')
+                INSERT INTO ugntWords (\`${Object.keys(wordInsert).join("\`, \`")}\`)
+                VALUES ('${Object.values(wordInsert).join("', '")}')
               `)
+
             }
 
-            updates.push(`
-              INSERT INTO ugntWords (\`${Object.keys(wordInsert).join("\`, \`")}\`)
-              VALUES ('${Object.values(wordInsert).join("', '")}')
-            `)
+            if(/^\\zApparatusJson/.test(wordUsfm)) {
+
+              // TODO: I first need to get strong, lemma, and morph attributes for the critical text comparison in the apparatus before I can add these to ugntWords
+
+              // const apparatus = JSON.parse((wordUsfm.match(/\\zApparatusJson (.*?)\\zApparatusJson\*/) || [])[1])
+              // apparatus.words.filter(word => typeof word === 'object').forEach(word => handleWord({ ...word, isVariant: true }))
+
+            } else if(wordUsfm.match(/^\\w.*?\\w\*$/)) {
+
+              const w = (wordUsfm.match(/^\\w ([^\|]*)\|/) || [])[1]
+              const id = (wordUsfm.match(/x-id="([^"]*)"/) || [])[1]
+              const lemma = (wordUsfm.match(/lemma="([^"]*)"/) || [])[1]
+              const strong = (wordUsfm.match(/strong="([^"]*)"/) || [])[1]
+              const morph = (wordUsfm.match(/x-morph="([^"]*)"/) || [])[1]
+
+              handleWord({ w, id, lemma, strong, morph })
+
+            }
 
           })
 
@@ -225,7 +243,7 @@ connection.connect(async (err) => {
             pLine = line
           }
 
-          if(line.match(/\\w |\\f /)) {
+          if(line.match(/\\w |\\f |\\zApparatusJson /)) {
             pLine && currentVerseContent.push(pLine)
             pLine = undefined
             currentVerseContent.push(line)
