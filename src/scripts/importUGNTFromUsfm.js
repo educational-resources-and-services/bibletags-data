@@ -7,7 +7,7 @@ const utils = require('./utils')
 
 const connection = mysql.createConnection({
   host: process.env.DB_NAME || "localhost",
-  database: process.env.HOSTNAME || 'bibletags',
+  database: process.env.HOST || 'bibletags',
   user: process.env.USERNAME || "root",
   password: process.env.PASSWORD || "",
   multipleStatements: true,
@@ -36,8 +36,7 @@ connection.connect(async (err) => {
 
   console.log(`\nSTARTING`)
 
-  const bookURIsByBookId = {}
-  const importDir = '../../UGNT'
+  const importDir = '../bibletags-usfm/usfm/ugnt'
   let filenames
 
   await new Promise(resolve => {
@@ -49,6 +48,7 @@ connection.connect(async (err) => {
       }              
 
       filenames = files.filter(filename => filename.match(/^[0-9]{2}-\w{3}\.usfm$/))
+      // filenames = filenames.slice(0, 1)
 
       resolve()
     })
@@ -63,6 +63,8 @@ connection.connect(async (err) => {
     let sentenceNumber = 1
     let paragraphNumber = 0
 
+    const definitionUpdates = {}
+
     const exportBook = () => {
 
       const filename = filenames.shift()
@@ -74,7 +76,6 @@ connection.connect(async (err) => {
 
       const bookId = parseInt(filename.replace(/^([0-9]{2}).*$/, '$1'), 10) - 1
       let chapter, verse
-      let wordIndexInBook = 0
 
       fs.readFile(`${importDir}/${filename}`, 'utf-8', (err, usfm) => {
         console.log(`====================================================================================`)
@@ -87,28 +88,16 @@ connection.connect(async (err) => {
 
         const updates = []
         let currentVerseContent = []
-        const ids = []
         let isVariant = false
 
         const putVerseInUpdates = () => {
           const loc = utils.padWithZeros(bookId, 2) + utils.padWithZeros(chapter, 3) + utils.padWithZeros(verse, 3)
-          const usfmVerseContent = currentVerseContent
-            .join("\n")
-            .replace(/ ?\\w\*/g, () => {
-
-              const id = `${utils.padWithZeros(bookId, 2)}${utils.padWithZeros((wordIndexInBook++).toString(36),3)}`
-              if(ids.includes(id)) {
-                console.log('repeat id', wordIndexInBook, id)
-                process.exit()
-              }
-              ids.push(id)
-              
-              return ` x-id="${id}" \\w*`
-            })
+          const usfmVerseContent = currentVerseContent.join("\n")
 
           updates.push(`INSERT INTO ugntVerses (loc, usfm) VALUES ('${loc}', '${usfmVerseContent.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}')`)
 
-          usfmVerseContent.match(/\\w.*?\\w\*|\\f \+ \\fqa|\\f\*|./g).forEach(wordUsfm => {
+          usfmVerseContent.match(/\\w.*?\\w\*|\\p|./g).forEach(wordUsfm => {
+
             if([';', ',', '"', ':'].includes(wordUsfm)) {
               phraseNumber++
             }
@@ -118,12 +107,8 @@ connection.connect(async (err) => {
               sentenceNumber++
             }
 
-            if(wordUsfm.match(/^\\f \+ \\fqa$/)) {
-              isVariant = true
-            }
-  
-            if(wordUsfm.match(/^\\f\*$/)) {
-              isVariant = false
+            if(wordUsfm === "\\p") {
+              paragraphNumber++
             }
 
             if(!wordUsfm.match(/^\\w.*?\\w\*$/)) return
@@ -139,7 +124,7 @@ connection.connect(async (err) => {
               process.exit()
             }
 
-            const pos = posMapping[fullParsing.substr(3,2)] || posMapping[fullParsing.substr(3,1)]
+            const pos = posMapping[fullParsing.slice(3,5)] || posMapping[fullParsing.slice(3,4)]
 
             if(!pos) {
               console.log('invalid morph - pos not in mapping', wordUsfm)
@@ -159,7 +144,7 @@ connection.connect(async (err) => {
               lemma,
               fullParsing,
               pos,
-              morphPos: fullParsing.substr(3,1),
+              morphPos: fullParsing.slice(3,4),
               definitionId,
             }
 
@@ -167,8 +152,8 @@ connection.connect(async (err) => {
               wordInsert.wordNumber = wordNumber++
             }
 
-            if(fullParsing.substr(4,1) !== ',') {
-              wordInsert.type = fullParsing.substr(3,2)
+            if(fullParsing.slice(4,5) !== ',') {
+              wordInsert.type = fullParsing.slice(3,5)
             }
 
             [
@@ -181,7 +166,7 @@ connection.connect(async (err) => {
               "number",
               "attribute",
             ].forEach((col, idx) => {
-              const morphDetail = fullParsing.substr(idx+5,1)
+              const morphDetail = fullParsing.slice(idx+5,idx+6)
               if(morphDetail !== ',') {
                 wordInsert[col] = morphDetail
               }
@@ -196,13 +181,13 @@ connection.connect(async (err) => {
               lxx: JSON.stringify([]),
             }
 
-            updates.push(`
-              INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
-              SELECT * FROM (SELECT ${Object.values(definitionInsert).map((val, idx) => `'${val}' as t${idx}`).join(", ")}) AS tmp
-              WHERE NOT EXISTS (
-                  SELECT id FROM definitions WHERE id='${definitionId}'
-              ) LIMIT 1
-            `)
+            if(!definitionUpdates[definitionId]) {
+              definitionUpdates[definitionId] = true
+              updates.push(`
+                INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
+                VALUES ('${Object.values(definitionInsert).join("', '")}')
+              `)
+            }
 
             updates.push(`
               INSERT INTO ugntWords (\`${Object.keys(wordInsert).join("\`, \`")}\`)
@@ -213,40 +198,37 @@ connection.connect(async (err) => {
 
         }
 
+        let pLine, nextChapter
         usfm.split(/\n/g).forEach(line => {
 
           const chapterMatch = line.match(/^\\c ([0-9]+)/)
           const verseMatch = line.match(/^\\v ([0-9]+)/)
 
-          if((chapterMatch || verseMatch) && currentVerseContent.length > 0) {
+          if(verseMatch && currentVerseContent.length > 0 && verse) {
             putVerseInUpdates()
             currentVerseContent = []
           }
 
           if(chapterMatch) {
-            chapter = parseInt(chapterMatch[1], 10)
+            nextChapter = parseInt(chapterMatch[1], 10)
             return
           }
 
           if(verseMatch) {
+            chapter = nextChapter
             verse = parseInt(verseMatch[1], 10)
             verseNumber++
             return
           }
 
           if(line.match(/^\\p/)) {
-            paragraphNumber++
-            return
+            pLine = line
           }
 
-          if(line.match(/\\w |^\\f \+ \\fqa|^\\f\*/)) {
-            currentVerseContent.push(
-              line
-                .replace(/ x-tw="[^"]*"/g, "")
-                .replace(/(strong="G)0*/g, '$1')
-                .replace(/(strong="G[0-9]*)([0-9])"/g, '$1.$2"')
-                .replace(/(strong="G[0-9]*)\.0"/g, '$1"')
-            )
+          if(line.match(/\\w |\\f /)) {
+            pLine && currentVerseContent.push(pLine)
+            pLine = undefined
+            currentVerseContent.push(line)
           }
 
         })
@@ -263,9 +245,9 @@ connection.connect(async (err) => {
 
       })
     }
-          
+
     exportBook()
-                
+
   })
 
   console.log(`\nCOMPLETED\n`)

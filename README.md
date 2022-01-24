@@ -48,7 +48,14 @@ If you are aware of any open source word alignment data (what we call Bible tags
 
 ```bash
 git clone https://github.com/educational-resources-and-services/bibletags-data
+git clone https://github.com/educational-resources-and-services/bibletags-usfm
 cd bibletags-data
+cp .env.example .env
+```
+
+Update `RDS_USERNAME` and `RDS_PASSWORD` in `.env` for accessing your local MySQL database (required).
+
+```bash
 npm install
 npm run setup-db
 ```

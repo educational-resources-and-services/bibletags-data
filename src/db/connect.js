@@ -21,9 +21,9 @@ const MAX_CONNECTION_AGE = 1000 * 60 * 60 * 7.5
 
 const connectionObj = {
   host: process.env.RDS_HOST || 'localhost',
+  database: process.env.RDS_DB_NAME || 'BibleTags',
   user: process.env.RDS_USERNAME || 'root',
   password: process.env.RDS_PASSWORD || '',
-  database: process.env.RDS_DB_NAME || 'BibleTags',
   port: process.env.RDS_PORT || '3306',
 }
 
@@ -865,6 +865,10 @@ const setUpConnection = ({
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
+      paragraphNumber: {
+        type: Sequelize.INTEGER.UNSIGNED,
+        allowNull: false,
+      },
       nakedWord,
       lemma,
       fullParsing,  // prefixes + parsing string
@@ -975,6 +979,7 @@ const setUpConnection = ({
         { fields: ['wordNumber'] },
         { fields: ['verseNumber'] },
         { fields: ['sectionNumber'] },
+        { fields: ['paragraphNumber'] },
         { fields: ['nakedWord'] },
         { fields: ['lemma'] },
         { fields: ['fullParsing'] },

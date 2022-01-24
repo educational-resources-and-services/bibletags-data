@@ -23,7 +23,7 @@
     "update-db": "npm run go-update-db -s",
     "go-update-db": "(echo '--------------------\nUpdating database...\n--------------------\n' && npm run confirm && node src/db/update.js) || true",
     "setup-db": "npm run go-setup-db -s",
-    "go-setup-db": "(echo '----------------------\nSetting up database...\n----------------------\n\n** WARNING **  This will wipe current data!\n' && npm run confirm && npm run do-setup-db) || true",
+    "go-setup-db": "(echo '----------------------\nSetting up database...\n----------------------\n\n** WARNING **  This will wipe current data!\n' && npm run confirm && npm run do-setup-db && node ./src/scripts/importUHBFromUsfm.js && node ./src/scripts/importUGNTFromUsfm.js) || true",
     "do-setup-db": "node src/db/setup.js && node src/db/seed.js",
     "reset-db": "npm run go-reset-db -s",
     "go-reset-db": "(echo '-------------------------\nResetting the database...\n-------------------------\n\n** WARNING **  This will wipe all current data except for uhbVerses, uhbWords, ugntVerses, ugntWords, and definitions tables!\n' && npm run confirm && npm run do-reset-db) || true",
@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "aws-sdk": "2.413.0",
-    "@bibletags/bibletags-versification": "^0.2.0",
+    "@bibletags/bibletags-versification": "^0.2.3",
     "body-parser": "^1.19.0",
     "connect-redis": "3.4.0",
     "console-stamp": "0.2.6",
