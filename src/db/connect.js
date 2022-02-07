@@ -1027,34 +1027,34 @@ const setUpConnection = ({
         { fields: ['bookId', 'verseNumber'] },
         { fields: ['bookId', 'sectionNumber'] },
         { fields: ['bookId', 'paragraphNumber'] },
-        { fields: ['nakedWord'] },
-        { fields: ['lemma'] },
-        { fields: ['fullParsing'] },
-        { fields: ['isAramaic'] },
-        { fields: ['b'] },
-        { fields: ['l'] },
-        { fields: ['k'] },
-        { fields: ['m'] },
-        { fields: ['sh'] },
-        { fields: ['v'] },
-        { fields: ['h1'] },
-        { fields: ['h2'] },
-        { fields: ['h3'] },
-        { fields: ['pos'] },
-        { fields: ['stem'] },
-        { fields: ['aspect'] },
-        { fields: ['type'] },
-        { fields: ['person'] },
-        { fields: ['gender'] },
-        { fields: ['number'] },
-        { fields: ['state'] },
-        { fields: ['h4'] },
-        { fields: ['h5'] },
-        { fields: ['n'] },
-        { fields: ['suffixPerson'] },
-        { fields: ['suffixGender'] },
-        { fields: ['suffixNumber'] },
-        { fields: ['definitionId'] },
+        { fields: ['nakedWord', 'bookId', 'wordNumber'] },
+        { fields: ['lemma', 'bookId', 'wordNumber'] },
+        { fields: ['fullParsing', 'bookId', 'wordNumber'] },
+        { fields: ['isAramaic', 'bookId', 'wordNumber'] },
+        { fields: ['b', 'bookId', 'wordNumber'] },
+        { fields: ['l', 'bookId', 'wordNumber'] },
+        { fields: ['k', 'bookId', 'wordNumber'] },
+        { fields: ['m', 'bookId', 'wordNumber'] },
+        { fields: ['sh', 'bookId', 'wordNumber'] },
+        { fields: ['v', 'bookId', 'wordNumber'] },
+        { fields: ['h1', 'bookId', 'wordNumber'] },
+        { fields: ['h2', 'bookId', 'wordNumber'] },
+        { fields: ['h3', 'bookId', 'wordNumber'] },
+        { fields: ['pos', 'bookId', 'wordNumber'] },
+        { fields: ['stem', 'bookId', 'wordNumber'] },
+        { fields: ['aspect', 'bookId', 'wordNumber'] },
+        { fields: ['type', 'bookId', 'wordNumber'] },
+        { fields: ['person', 'bookId', 'wordNumber'] },
+        { fields: ['gender', 'bookId', 'wordNumber'] },
+        { fields: ['number', 'bookId', 'wordNumber'] },
+        { fields: ['state', 'bookId', 'wordNumber'] },
+        { fields: ['h4', 'bookId', 'wordNumber'] },
+        { fields: ['h5', 'bookId', 'wordNumber'] },
+        { fields: ['n', 'bookId', 'wordNumber'] },
+        { fields: ['suffixPerson', 'bookId', 'wordNumber'] },
+        { fields: ['suffixGender', 'bookId', 'wordNumber'] },
+        { fields: ['suffixNumber', 'bookId', 'wordNumber'] },
+        { fields: ['definitionId', 'bookId', 'wordNumber'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
@@ -1062,6 +1062,66 @@ const setUpConnection = ({
 
   uhbWord.belongsTo(Definition)
   Definition.hasMany(uhbWord)
+
+  //////////////////////////////////////////////////////////////////
+
+  const uhbUnitWord = connection.define(
+    `uhbUnitWord`,
+    {
+      id: {  // ["verse"/"paragraph"/"section"]:[word/parsing_detail]
+        type: Sequelize.STRING(translationWordLength + 11),  // 11 for "paragraph:="
+        primaryKey: true,
+      },
+      scopeMap: {
+        // contains JSON; did not use JSON type column, however, since that type does not maintain key order
+        /*
+          value structure for verse type:
+            {
+              "[loc]-": [
+                [
+                  wordNumber,  // in book
+                  "nakedWord",
+                  definitionId,  // as int; 0 if none
+                  "lemma",  // 0 if none
+                  "[type/pos_][stem][aspect][person][gender][number][state]"  // each hold designated # of chars for a total of 9 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
+                  "b3",  // last chars of whichever the following are true: isAramaic,b,l,k,m,sh,v,h1,h2,h3,h4,h5,n; only include if there something or a suffix
+                  "1ms",  // only include if there is a suffix
+                ],
+              ],
+            }
+          keys for other types: "[bookId]:[paragraphNumber/sectionNumber]"
+        */
+        type: Sequelize.TEXT('medium'),
+        allowNull: false,
+        notEmpty: true,
+      },
+    },
+    {
+      indexes: [],
+      timestamps: false,
+    },
+  )
+
+  ////////////////////////////////////////////////////////////////////
+
+  const uhbUnitRange = connection.define(
+    `uhbUnitRange`,
+    {
+      id: {
+        type: Sequelize.STRING(20),
+        primaryKey: true,
+      },
+      originalLoc: {
+        type: Sequelize.STRING(17),  // BBCCCVVV-BBCCCVVV
+        allowNull: false,
+        notEmpty: true,
+      },
+    },
+    {
+      indexes: [],
+      timestamps: false,
+    },
+  )
 
   //////////////////////////////////////////////////////////////////
 
@@ -1201,21 +1261,21 @@ const setUpConnection = ({
         { fields: ['bookId', 'phraseNumber'] },
         { fields: ['bookId', 'sentenceNumber'] },
         { fields: ['bookId', 'paragraphNumber'] },
-        { fields: ['nakedWord'] },
-        { fields: ['lemma'] },
-        { fields: ['fullParsing'] },
-        { fields: ['pos'] },
-        { fields: ['morphPos'] },
-        { fields: ['type'] },
-        { fields: ['mood'] },
-        { fields: ['aspect'] },
-        { fields: ['voice'] },
-        { fields: ['person'] },
-        { fields: ['case'] },
-        { fields: ['gender'] },
-        { fields: ['number'] },
-        { fields: ['attribute'] },
-        { fields: ['definitionId'] },
+        { fields: ['nakedWord', 'bookId', 'wordNumber'] },
+        { fields: ['lemma', 'bookId', 'wordNumber'] },
+        { fields: ['fullParsing', 'bookId', 'wordNumber'] },
+        { fields: ['pos', 'bookId', 'wordNumber'] },
+        { fields: ['morphPos', 'bookId', 'wordNumber'] },
+        { fields: ['type', 'bookId', 'wordNumber'] },
+        { fields: ['mood', 'bookId', 'wordNumber'] },
+        { fields: ['aspect', 'bookId', 'wordNumber'] },
+        { fields: ['voice', 'bookId', 'wordNumber'] },
+        { fields: ['person', 'bookId', 'wordNumber'] },
+        { fields: ['case', 'bookId', 'wordNumber'] },
+        { fields: ['gender', 'bookId', 'wordNumber'] },
+        { fields: ['number', 'bookId', 'wordNumber'] },
+        { fields: ['attribute', 'bookId', 'wordNumber'] },
+        { fields: ['definitionId', 'bookId', 'wordNumber'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
@@ -1223,6 +1283,64 @@ const setUpConnection = ({
 
   ugntWord.belongsTo(Definition, required)
   Definition.hasMany(ugntWord)
+
+  //////////////////////////////////////////////////////////////////
+
+  const ugntUnitWord = connection.define(
+    `ugntUnitWord`,
+    {
+      id: {  // ["verse"/"phrase"/"sentence"/"paragraph"]:[word/parsing_detail]
+        type: Sequelize.STRING(translationWordLength + 11),  // 11 for "paragraph:="
+        primaryKey: true,
+      },
+      scopeMap: {
+        // contains JSON; did not use JSON type column, however, since that type does not maintain key order
+        /*
+          value structure for verse type:
+            {
+              "[loc]-": [
+                [
+                  wordNumber,  // in book
+                  "nakedWord",
+                  definitionId,  // as int
+                  "lemma",
+                  "[type/pos_][mood][aspect][voice][person][case][gender][number][attribute]"  // each hold designated # of chars for a total of 10 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
+                ],
+              ],
+            }
+          keys for other types: "[bookId]:[phraseNumber/sentenceNumber/paragraphNumber]"
+        */
+        type: Sequelize.TEXT('medium'),
+        allowNull: false,
+        notEmpty: true,
+      },
+    },
+    {
+      indexes: [],
+      timestamps: false,
+    },
+  )
+
+  ////////////////////////////////////////////////////////////////////
+
+  const ugntUnitRange = connection.define(
+    `ugntUnitRange`,
+    {
+      id: {
+        type: Sequelize.STRING(20),
+        primaryKey: true,
+      },
+      originalLoc: {
+        type: Sequelize.STRING(17),  // BBCCCVVV-BBCCCVVV
+        allowNull: false,
+        notEmpty: true,
+      },
+    },
+    {
+      indexes: [],
+      timestamps: false,
+    },
+  )
 
   //////////////////////////////////////////////////////////////////
 

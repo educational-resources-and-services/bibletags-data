@@ -57,12 +57,6 @@ connection.connect(async (err) => {
 
   await new Promise(resolve => {
 
-    let wordNumber = 1
-    let verseNumber = 0
-    let phraseNumber = 1
-    let sentenceNumber = 1
-    let paragraphNumber = 0
-
     const definitionUpdates = {}
 
     const exportBook = () => {
@@ -74,6 +68,12 @@ connection.connect(async (err) => {
         return
       }
 
+      let wordNumber = 1
+      let verseNumber = 0
+      let phraseNumber = 1
+      let sentenceNumber = 1
+      let paragraphNumber = 0
+  
       const bookId = parseInt(filename.replace(/^([0-9]{2}).*$/, '$1'), 10) - 1
       let chapter, verse
 
@@ -88,7 +88,6 @@ connection.connect(async (err) => {
 
         const updates = []
         let currentVerseContent = []
-        let isVariant = false
 
         const putVerseInUpdates = () => {
           const loc = utils.padWithZeros(bookId, 2) + utils.padWithZeros(chapter, 3) + utils.padWithZeros(verse, 3)
@@ -255,9 +254,6 @@ connection.connect(async (err) => {
 
         utils.doUpdatesInChunks(connection, { updates }, numRowsUpdated => {
           console.log(`  Book #${bookId} done--${numRowsUpdated} rows inserted.`)
-          phraseNumber++
-          sentenceNumber++
-          paragraphNumber++
           exportBook()
         })
 

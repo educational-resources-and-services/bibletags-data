@@ -23,7 +23,7 @@
     "update-db": "npm run go-update-db -s",
     "go-update-db": "(echo '--------------------\nUpdating database...\n--------------------\n' && npm run confirm && node src/db/update.js) || true",
     "setup-db": "npm run go-setup-db -s",
-    "go-setup-db": "(echo '----------------------\nSetting up database...\n----------------------\n\n** WARNING **  This will wipe current data!\n' && npm run confirm && npm run do-setup-db && node ./src/scripts/importUHBFromUsfm.js && node ./src/scripts/importUGNTFromUsfm.js) || true",
+    "go-setup-db": "(echo '----------------------\nSetting up database...\n----------------------\n\n** WARNING **  This will wipe current data!\n' && npm run confirm && npm run do-setup-db && node ./src/scripts/importUHBFromUsfm.js && node ./src/scripts/populateUHBUnitWordsTable.js && node ./src/scripts/importUGNTFromUsfm.js && node ./src/scripts/populateUGNTUnitWordsTable.js) || true",
     "do-setup-db": "node src/db/setup.js && node src/db/seed.js",
     "reset-db": "npm run go-reset-db -s",
     "go-reset-db": "(echo '-------------------------\nResetting the database...\n-------------------------\n\n** WARNING **  This will wipe all current data except for uhbVerses, uhbWords, ugntVerses, ugntWords, and definitions tables!\n' && npm run confirm && npm run do-reset-db) || true",
