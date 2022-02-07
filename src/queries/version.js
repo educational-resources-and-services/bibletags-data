@@ -2,7 +2,7 @@ const {
   versionIdRegEx,
 } = require('../constants')
 
-const versionInfo = async (args, req, queryInfo) => {
+const version = async (args, req, queryInfo) => {
 
   const { id } = args
 
@@ -18,4 +18,4 @@ const versionInfo = async (args, req, queryInfo) => {
 
 }
 
-module.exports = versionInfo
+module.exports = version

@@ -1,10 +1,10 @@
 const { doQuery } = require('./testUtils')
 
-describe('Query: versionInfo', async () => {
+describe('Query: version', async () => {
 
   it('Fetch the ESV', async () => {
-    const versionInfo = await doQuery(`
-      versionInfo(id: "esv") {
+    const version = await doQuery(`
+      version(id: "esv") {
         id
         name
         languageId
@@ -15,7 +15,7 @@ describe('Query: versionInfo', async () => {
         extraVerseMappings
       }
     `)
-    versionInfo.should.eql({
+    version.should.eql({
       id: "esv",
       name: "English Standard Version",
       languageId: "eng",
@@ -23,7 +23,10 @@ describe('Query: versionInfo', async () => {
       partialScope: null,
       versificationModel: "kjv",
       skipsUnlikelyOriginals: true,
-      extraVerseMappings: null,
+      extraVerseMappings: {
+        "64001014": "64001014",
+        "64001015": "64001015",
+      },
     })
   })
 

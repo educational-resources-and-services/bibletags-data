@@ -38,7 +38,10 @@ const { setUpConnection } = require('./connect')
       // "partialScope": "ot",
       "versificationModel": "kjv",
       "skipsUnlikelyOriginals": 1,
-      // "extraVerseMappings": null,
+      "extraVerseMappings": {
+        "64001014": "64001014",
+        "64001015": "64001015"
+      },
       "createdAt": "2022-01-01 00:00:00 GMT",
       "updatedAt": "2022-01-01 00:00:00 GMT",
       "languageId": "eng",

@@ -70,7 +70,7 @@ const types = `
     translation: String
   }
 
-  type VersionInfo {
+  type Version {
     id: ID
     name: String
     languageId: String
