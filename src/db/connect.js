@@ -196,6 +196,13 @@ const setUpConnection = ({
 
   const loc = {
     type: Sequelize.STRING(8),
+    validate: {
+      is: locRegEx,
+    },
+  }
+
+  const locPrimaryKey = {
+    type: Sequelize.STRING(8),
     primaryKey: true,
     validate: {
       is: locRegEx,
@@ -207,7 +214,7 @@ const setUpConnection = ({
     // Effectively works to distiguish verses which differ due to being
     // from two different editions of a single Bible version.
     type: Sequelize.STRING(wordsHashLength),
-    primaryKey: true,
+    allowNull: false,
     validate: {
       is: wordsHashRegEx,
     },
@@ -221,7 +228,7 @@ const setUpConnection = ({
 
   const scope = {
     type: Sequelize.STRING(2),
-    primaryKey: true,
+    allowNull: false,
     validate: {
       is: scopeRegEx,
     },
@@ -346,6 +353,28 @@ const setUpConnection = ({
     allowNull: false,
   }
 
+  const wordPartNumber = {
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
+  }
+
+  const translationWordNumberInVerse = {
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
+  }
+
+  const translationWord = {
+    type: Sequelize.STRING(translationWordLength),
+    allowNull: false,
+    notEmpty: true,
+  }
+
+  const translation = {
+    type: Sequelize.STRING(translationLength),
+    allowNull: false,
+    notEmpty: true,
+  }
+
   // const createdAtDesc = { attribute: 'createdAt', order: 'DESC' }
   // const updatedAtDesc = { attribute: 'updatedAt', order: 'DESC' }
 
@@ -353,10 +382,11 @@ const setUpConnection = ({
   const onDeleteAddition = setUpCascadeDeletes ? { onDelete: 'CASCADE' } : {}
   const requiredWithCascadeDelete = { foreignKey: { allowNull: false }, ...onDeleteAddition }
   const primaryKey = { foreignKey: { allowNull: false, primaryKey: true } }
-  const unique = unique => ({ foreignKey: { allowNull: false, unique } })
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app (partial), biblearc (partial)
+  // changes some
   const Language = connection.define(
     'language',
     {
@@ -396,6 +426,8 @@ const setUpConnection = ({
 
   ////////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // doesn't change
   const Definition = connection.define(
     'definition',
     {
@@ -439,6 +471,8 @@ const setUpConnection = ({
 
   ////////////////////////////////////////////////////////////////////
 
+  // needed: app (partial), biblearc (partial)
+  // changes some
   const DefinitionByLanguage = connection.define(
     'definitionByLanguage',
     {
@@ -472,7 +506,7 @@ const setUpConnection = ({
       indexes: [
         { fields: ['gloss'] },
         { fields: ['definitionId'] },
-        { fields: ['languageId'] },
+        { fields: ['languageId', 'definitionId'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
@@ -483,6 +517,8 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // doesn't change
   const PartOfSpeech = connection.define(
     'partOfSpeech',
     {
@@ -509,6 +545,8 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app (partial), biblearc (partial)
+  // changes some
   const Version = connection.define(
     'version',
     {
@@ -521,7 +559,6 @@ const setUpConnection = ({
       },
       name: {
         type: Sequelize.STRING(versionNameLength),
-        unique: 'name',
         allowNull: false,
         notEmpty: true,
       },
@@ -553,6 +590,11 @@ const setUpConnection = ({
     },
     {
       indexes: [
+        {
+          fields: ['name'],
+          unique: true,
+          name: 'name',
+        },
         { fields: ['partialScope'] },
         { fields: ['versificationModel'] },
         { fields: ['skipsUnlikelyOriginals'] },
@@ -566,13 +608,14 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const EmbeddingApp = connection.define(
     'embeddingApp',
     {
       // will need a default row (id=1) where uri=import
       uri: {
         type: Sequelize.STRING(255),
-        unique: 'uri',
         allowNull: false,
       },
       notes: {
@@ -583,13 +626,19 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['uri'] },
+        {
+          fields: ['uri'],
+          unique: true,
+          name: 'uri',
+        },
       ],
     },
   )
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const User = connection.define(
     'user',
     {
@@ -599,13 +648,6 @@ const setUpConnection = ({
         validate: {
           isEmail: true,
         },
-        unique: 'email',
-      },
-      google: {
-        type: Sequelize.STRING(50),
-      },
-      facebook: {
-        type: Sequelize.STRING(50),
       },
       rating: {
         type: Sequelize.INTEGER,
@@ -629,8 +671,11 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['google'] },
-        { fields: ['facebook'] },
+        {
+          fields: ['email'],
+          unique: true,
+          name: 'email',
+        },
         { fields: ['rating'] },
         { fields: ['flaggedForAbuse'] },
         { fields: ['createdAt'] },
@@ -641,6 +686,8 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const UserEmbeddingApp = connection.define(
     'userEmbeddingApp',
     {
@@ -662,6 +709,8 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const UserRatingAdjustment = connection.define(
     'userRatingAdjustment',
     {
@@ -690,6 +739,8 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // changes often
   const TagSet = connection.define(
     'tagSet',
     {
@@ -710,9 +761,13 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['loc'] },
-        { fields: ['versionId'] },
-        { fields: ['loc', 'versionId'] },
+        {
+          fields: ['loc', 'wordsHash', 'versionId'],
+          unique: true,
+          name: 'loc_wordsHash_versionId',
+        },
+        { fields: ['loc', 'status'] },
+        { fields: ['versionId', 'status'] },
         { fields: ['wordsHash'] },
         { fields: ['status'] },
       ],
@@ -720,38 +775,30 @@ const setUpConnection = ({
     },
   )
 
-  TagSet.belongsTo(Version, primaryKey)
+  TagSet.belongsTo(Version, required)
   Version.hasMany(TagSet)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const TagSetSubmission = connection.define(
     'tagSetSubmission',
     {
-      loc: {
-        type: Sequelize.STRING(8),
-        unique: 'userId-versionId-loc-wordsHash',
-        validate: {
-          is: locRegEx,
-        },
-      },
-      wordsHash: {  // See the notes on wordsHash column above.
-        type: Sequelize.STRING(wordsHashLength),
-        unique: 'userId-versionId-loc-wordsHash',
-        allowNull: false,
-        validate: {
-          is: wordsHashRegEx,
-        },
-      },
+      loc,
+      wordsHash,
       createdAt,
       updatedAt,
     },
     {
       indexes: [
+        {
+          fields: ['versionId', 'wordsHash', 'loc', 'userId',],
+          unique: true,
+          name: 'versionId_wordsHash_loc_userId',
+        },
         { fields: ['userId'] },
-        { fields: ['versionId'] },
         { fields: ['loc'] },
-        { fields: ['wordsHash'] },
         { fields: ['embeddingAppId'] },
         { fields: ['createdAt'] },
         { fields: ['updatedAt'] },
@@ -759,10 +806,10 @@ const setUpConnection = ({
     },
   )
 
-  TagSetSubmission.belongsTo(User, unique('userId-versionId-loc-wordsHash'))
+  TagSetSubmission.belongsTo(User, required)
   User.hasMany(TagSetSubmission)
 
-  TagSetSubmission.belongsTo(Version, unique('userId-versionId-loc-wordsHash'))
+  TagSetSubmission.belongsTo(Version, required)
   Version.hasMany(TagSetSubmission)
 
   TagSetSubmission.belongsTo(EmbeddingApp, required)
@@ -770,32 +817,27 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // This table and the next used in the auto-tagging process
+  // since we do now know the actual (copyrighted) words of the translations.
+
+  // needed: none
+  // changes often
   const WordHashesSetSubmission = connection.define(
     'wordHashesSetSubmission',
     {
-      loc: {
-        type: Sequelize.STRING(8),
-        unique: 'versionId-loc-wordsHash',
-        validate: {
-          is: locRegEx,
-        },
-      },
-      wordsHash: {  // See the notes on wordsHash column above.
-        type: Sequelize.STRING(wordsHashLength),
-        unique: 'versionId-loc-wordsHash',
-        allowNull: false,
-        validate: {
-          is: wordsHashRegEx,
-        },
-      },
+      loc,
+      wordsHash,
       createdAt,
       updatedAt,
     },
     {
       indexes: [
-        { fields: ['versionId'] },
+        {
+          fields: ['versionId', 'wordsHash', 'loc'],
+          unique: true,
+          name: 'versionId_wordsHash_loc',
+        },
         { fields: ['loc'] },
-        { fields: ['wordsHash'] },
         { fields: ['embeddingAppId'] },
         { fields: ['createdAt'] },
         { fields: ['updatedAt'] },
@@ -803,7 +845,7 @@ const setUpConnection = ({
     },
   )
 
-  WordHashesSetSubmission.belongsTo(Version, unique('versionId-loc-wordsHash'))
+  WordHashesSetSubmission.belongsTo(Version, required)
   Version.hasMany(WordHashesSetSubmission)
 
   WordHashesSetSubmission.belongsTo(EmbeddingApp, required)
@@ -811,12 +853,14 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const WordHashesSubmission = connection.define(
     'wordHashesSubmission',
     {
       wordNumberInVerse: {
         type: Sequelize.INTEGER.UNSIGNED,
-        primaryKey: true,
+        allowNull: false,
       },
       hash: { ...wordComboHash },
       withBeforeHash: { ...wordComboHash },
@@ -825,18 +869,21 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['wordNumberInVerse'] },
+        {
+          fields: ['wordHashesSetSubmissionId', 'wordNumberInVerse'],
+          unique: true,
+          name: 'wordHashesSetSubmissionId_wordNumberInVerse',
+        },
         { fields: ['hash'] },
         { fields: ['withBeforeHash'] },
         { fields: ['withAfterHash'] },
         { fields: ['withBeforeAndAfterHash'] },
-        { fields: ['wordHashesSetSubmissionId'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // timestamps for this data kep in related WordHashesSetSubmission row
     },
   )
 
-  WordHashesSubmission.belongsTo(WordHashesSetSubmission, primaryKey)
+  WordHashesSubmission.belongsTo(WordHashesSetSubmission, required)
   WordHashesSetSubmission.hasMany(WordHashesSubmission)
 
   //////////////////////////////////////////////////////////////////
@@ -846,6 +893,8 @@ const setUpConnection = ({
   // does not mean that such things could not be indicated as footnotes
   // in the text.
 
+  // needed: ??
+  // doesn't change
   const uhbWord = connection.define(
     'uhbWord',
     {
@@ -861,11 +910,11 @@ const setUpConnection = ({
       verse,
       wordNumber,
       verseNumber,
-      sectionNumber: {  // sections separated by ס or פ (or chapter?)
+      sectionNumber: {  // sections separated by ס or פ (or chapter?); reset in each book
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
-      paragraphNumber: {
+      paragraphNumber: {  // reset in each book
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
@@ -973,13 +1022,11 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['bookId'] },
-        { fields: ['chapter'] },
-        { fields: ['verse'] },
-        { fields: ['wordNumber'] },
-        { fields: ['verseNumber'] },
-        { fields: ['sectionNumber'] },
-        { fields: ['paragraphNumber'] },
+        { fields: ['bookId', 'chapter', 'verse'] },
+        { fields: ['bookId', 'wordNumber'] },
+        { fields: ['bookId', 'verseNumber'] },
+        { fields: ['bookId', 'sectionNumber'] },
+        { fields: ['bookId', 'paragraphNumber'] },
         { fields: ['nakedWord'] },
         { fields: ['lemma'] },
         { fields: ['fullParsing'] },
@@ -1018,16 +1065,12 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // doesn't change
   const uhbVerse = connection.define(
     'uhbVerse',
     {
-      loc: {
-        type: Sequelize.STRING(8),
-        primaryKey: true,
-        validate: {
-          is: locRegEx,
-        },
-      },
+      loc: locPrimaryKey,
       usfm,
     },
     {
@@ -1039,78 +1082,72 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const uhbTag = connection.define(
     'uhbTag',
     {
-      wordPartNumber: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        primaryKey: true,
-      },
-      translationWordNumberInVerse: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        primaryKey: true,
-      },
+      wordPartNumber,
+      translationWordNumberInVerse,
       wordsHash,
       type,
     },
     {
       indexes: [
-        { fields: ['versionId'] },
-        { fields: ['uhbWordId'] },
-        { fields: ['wordPartNumber'] },
-        { fields: ['translationWordNumberInVerse'] },
-        { fields: ['wordsHash'] },
+        {
+          fields: ['uhbWordId', 'wordPartNumber', 'versionId', 'wordsHash', 'translationWordNumberInVerse'],
+          unique: true,
+          name: 'uhbWordId_wordPartNumber_versionId__',
+        },
+        { fields: ['versionId', 'wordsHash', 'translationWordNumberInVerse', 'type'], name: 'versionId_wordsHash_translationWordNumberInVerse__' },
+        { fields: ['uhbWordId', 'wordPartNumber','type'] },
         { fields: ['type'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
   )
 
-  uhbTag.belongsTo(Version, primaryKey)
+  uhbTag.belongsTo(Version, required)
   Version.hasMany(uhbTag)
 
-  uhbTag.belongsTo(uhbWord, primaryKey)
+  uhbTag.belongsTo(uhbWord, required)
   uhbWord.hasMany(uhbTag)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const uhbTagSubmission = connection.define(
     'uhbTagSubmission',
     {
-      wordPartNumber: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        primaryKey: true,
-      },
-      translationWordNumberInVerse: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        primaryKey: true,
-      },
-      translationWord: {
-        type: Sequelize.STRING(translationWordLength),
-        allowNull: false,
-        notEmpty: true,
-      },
+      wordPartNumber,
+      translationWordNumberInVerse,
+      translationWord,
     },
     {
       indexes: [
-        { fields: ['tagSetSubmissionId'] },
-        { fields: ['uhbWordId'] },
-        { fields: ['wordPartNumber'] },
-        { fields: ['translationWordNumberInVerse'] },
+        {
+          fields: ['uhbWordId', 'wordPartNumber', 'tagSetSubmissionId', 'translationWordNumberInVerse'],
+          unique: true,
+          name: 'uhbWordId_wordPartNumber_tagSetSubmissionId__',
+        },
+        { fields: ['tagSetSubmissionId', 'translationWordNumberInVerse'], name: 'tagSetSubmissionId_translationWordNumberInVerse' },
         { fields: ['translationWord'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // timestamps for this data kep in related TagSetSubmission row
     },
   )
 
-  uhbTagSubmission.belongsTo(TagSetSubmission, primaryKey)
+  uhbTagSubmission.belongsTo(TagSetSubmission, required)
   TagSetSubmission.hasMany(uhbTagSubmission)
 
-  uhbTagSubmission.belongsTo(uhbWord, primaryKey)
+  uhbTagSubmission.belongsTo(uhbWord, required)
   uhbWord.hasMany(uhbTagSubmission)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: ??
+  // doesn't change
   const ugntWord = connection.define(
     'ugntWord',
     {
@@ -1158,14 +1195,12 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['bookId'] },
-        { fields: ['chapter'] },
-        { fields: ['verse'] },
-        { fields: ['wordNumber'] },
-        { fields: ['verseNumber'] },
-        { fields: ['phraseNumber'] },
-        { fields: ['sentenceNumber'] },
-        { fields: ['paragraphNumber'] },
+        { fields: ['bookId', 'chapter', 'verse'] },
+        { fields: ['bookId', 'wordNumber'] },
+        { fields: ['bookId', 'verseNumber'] },
+        { fields: ['bookId', 'phraseNumber'] },
+        { fields: ['bookId', 'sentenceNumber'] },
+        { fields: ['bookId', 'paragraphNumber'] },
         { fields: ['nakedWord'] },
         { fields: ['lemma'] },
         { fields: ['fullParsing'] },
@@ -1191,16 +1226,12 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // doesn't change
   const ugntVerse = connection.define(
     'ugntVerse',
     {
-      loc: {
-        type: Sequelize.STRING(8),
-        primaryKey: true,
-        validate: {
-          is: locRegEx,
-        },
-      },
+      loc: locPrimaryKey,
       usfm,
     },
     {
@@ -1212,68 +1243,70 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const ugntTag = connection.define(
     'ugntTag',
     {
-      translationWordNumberInVerse: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        primaryKey: true,
-      },
+      translationWordNumberInVerse,
       wordsHash,
       type,
     },
     {
       indexes: [
-        { fields: ['versionId'] },
-        { fields: ['ugntWordId'] },
-        { fields: ['translationWordNumberInVerse'] },
-        { fields: ['wordsHash'] },
+        {
+          fields: ['ugntWordId', 'versionId', 'wordsHash', 'translationWordNumberInVerse'],
+          unique: true,
+          name: 'ugntWordId_versionId_wordsHash__',
+        },
+        { fields: ['versionId', 'wordsHash', 'translationWordNumberInVerse', 'type'], name: 'versionId_wordsHash_translationWordNumberInVerse__' },
+        { fields: ['ugntWordId','type'] },
         { fields: ['type'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
   )
 
-  ugntTag.belongsTo(Version, primaryKey)
+  ugntTag.belongsTo(Version, required)
   Version.hasMany(ugntTag)
 
-  ugntTag.belongsTo(ugntWord, primaryKey)
+  ugntTag.belongsTo(ugntWord, required)
   ugntWord.hasMany(ugntTag)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const ugntTagSubmission = connection.define(
     'ugntTagSubmission',
     {
-      translationWordNumberInVerse: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        primaryKey: true,
-      },
-      translationWord: {
-        type: Sequelize.STRING(translationWordLength),
-        allowNull: false,
-        notEmpty: true,
-      },
+      translationWordNumberInVerse,
+      translationWord,
     },
     {
       indexes: [
-        { fields: ['tagSetSubmissionId'] },
-        { fields: ['ugntWordId'] },
-        { fields: ['translationWordNumberInVerse'] },
+        {
+          fields: ['ugntWordId', 'tagSetSubmissionId', 'translationWordNumberInVerse'],
+          unique: true,
+          name: 'ugntWordId_tagSetSubmissionId__',
+        },
+        { fields: ['tagSetSubmissionId', 'translationWordNumberInVerse'], name: 'tagSetSubmissionId_translationWordNumberInVerse' },
         { fields: ['translationWord'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // timestamps for this data kep in related TagSetSubmission row
     },
   )
 
-  ugntTagSubmission.belongsTo(TagSetSubmission, primaryKey)
+  ugntTagSubmission.belongsTo(TagSetSubmission, required)
   TagSetSubmission.hasMany(ugntTagSubmission)
 
-  ugntTagSubmission.belongsTo(ugntWord, primaryKey)
+  ugntTagSubmission.belongsTo(ugntWord, required)
   ugntWord.hasMany(ugntTagSubmission)
   
   //////////////////////////////////////////////////////////////////
 
+  // needed: ??
+  // doesn't change
   const lxxWord = connection.define(
     'lxxWord',
     {
@@ -1299,11 +1332,9 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['bookId'] },
-        { fields: ['chapter'] },
-        { fields: ['verse'] },
-        { fields: ['wordNumber'] },
-        { fields: ['verseNumber'] },
+        { fields: ['bookId', 'chapter', 'verse'] },
+        { fields: ['bookId', 'wordNumber'] },
+        { fields: ['bookId', 'verseNumber'] },
         { fields: ['nakedWord'] },
         { fields: ['pos'] },
         { fields: ['type'] },
@@ -1326,16 +1357,12 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // doesn't change
   const lxxVerse = connection.define(
     'lxxVerse',
     {
-      loc: {
-        type: Sequelize.STRING(8),
-        primaryKey: true,
-        validate: {
-          is: locRegEx,
-        },
-      },
+      loc: locPrimaryKey,
       // Includes deuterocanonical books, though these are not included
       // in default Bible Tags searches, nor in statistics.
       usfm,
@@ -1349,14 +1376,12 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // changes often
   const WordTranslation = connection.define(
     'wordTranslation',
     {
-      translation: {
-        type: Sequelize.STRING(translationLength),
-        primaryKey: true,
-        notEmpty: true,
-      },
+      translation,
       hits,
       // The number of hits might exceed the number of [non-variant] instances of this word
       // for two different reasons. (1) If there is a translation from a variant. (2) If
@@ -1364,23 +1389,29 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['translation'] },
-        { fields: ['definitionId'] },
-        { fields: ['versionId'] },
+        {
+          fields: ['definitionId', 'versionId', 'translation'],
+          unique: true,
+          name: 'definitionId_versionId_translation',
+        },
+        { fields: ['translation', 'hits'] },
+        { fields: ['versionId', 'translation', 'hits'] },
         { fields: ['hits'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
   )
 
-  WordTranslation.belongsTo(Definition, primaryKey)
+  WordTranslation.belongsTo(Definition, required)
   Definition.hasMany(WordTranslation)
 
-  WordTranslation.belongsTo(Version, primaryKey)
+  WordTranslation.belongsTo(Version, required)
   Version.hasMany(WordTranslation)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // doesn't change
   const HitsByScope = connection.define(
     'hitsByScope',
     {
@@ -1389,41 +1420,55 @@ const setUpConnection = ({
     },
     {
       indexes: [
+        {
+          fields: ['definitionId', 'scope'],
+          unique: true,
+          name: 'definitionId_scope',
+        },
+        { fields: ['scope'] },
         { fields: ['hits'] },
-        { fields: ['definitionId'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
   )
 
-  HitsByScope.belongsTo(Definition, primaryKey)
+  HitsByScope.belongsTo(Definition, required)
   Definition.hasMany(HitsByScope)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // doesn't change
   const HitsByForm = connection.define(
     'hitsByForm',
     {
       form: {
         type: Sequelize.STRING(30),
-        primaryKey: true,
+        allowNull: false,
       },
       hits,
     },
     {
       indexes: [
+        {
+          fields: ['definitionId', 'form'],
+          unique: true,
+          name: 'definitionId_form',
+        },
+        { fields: ['form'] },
         { fields: ['hits'] },
-        { fields: ['definitionId'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
   )
 
-  HitsByForm.belongsTo(Definition, primaryKey)
+  HitsByForm.belongsTo(Definition, required)
   Definition.hasMany(HitsByForm)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // doesn't change
   const HitsInLXXByScope = connection.define(
     'hitsInLXXByScope',
     {
@@ -1432,30 +1477,35 @@ const setUpConnection = ({
     },
     {
       indexes: [
+        {
+          fields: ['definitionId', 'scope'],
+          unique: true,
+          name: 'definitionId_scope',
+        },
+        { fields: ['scope'] },
         { fields: ['hits'] },
-        { fields: ['definitionId'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
   )
 
-  HitsInLXXByScope.belongsTo(Definition, primaryKey)
+  HitsInLXXByScope.belongsTo(Definition, required)
   Definition.hasMany(HitsInLXXByScope)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app, biblearc
+  // change some
   const UiEnglishWord = connection.define(
     'uiEnglishWord',
     {
       str: {
         type: Sequelize.STRING(255),
-        unique: 'str-desc',
         allowNull: false,
         notEmpty: true,
       },
       desc: {
         type: Sequelize.STRING(255),
-        unique: 'str-desc',
         notEmpty: true,
       },
       createdAt,
@@ -1463,61 +1513,61 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        { fields: ['str'] },
-        { fields: ['desc'] },
+        {
+          fields: ['str', 'desc'],
+          unique: true,
+          name: 'str_desc',
+        },
       ],
     },
   )
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app (partial), biblearc (partial)
+  // change often
   const UiWord = connection.define(
     'uiWord',
     {
-      translation: {
-        type: Sequelize.STRING(255),
-        allowNull: false,
-      },
+      translation,
     },
     {
       indexes: [
+        {
+          fields: ['uiEnglishWordId', 'languageId'],
+          name: 'uiEnglishWordId_languageId',
+        },
         { fields: ['translation'] },
-        { fields: ['uiEnglishWordId'] },
         { fields: ['languageId'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
   )
 
-  UiWord.belongsTo(UiEnglishWord, unique('uiEnglishWordId-languageId'))
+  UiWord.belongsTo(UiEnglishWord, required)
   UiEnglishWord.hasMany(UiWord)
 
-  UiWord.belongsTo(Language, unique('uiEnglishWordId-languageId'))
+  UiWord.belongsTo(Language, required)
   Language.hasMany(UiWord)
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
   const UiWordSubmission = connection.define(
     'uiWordSubmission',
     {
-      translation: {
-        type: Sequelize.STRING(255),
-        allowNull: false,
-      },
-      uiEnglishWordId: {
-        // One primaryKey column needs to be listed here to prevent sequelize
-        // from creating an id column.
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-      },
+      translation,
       createdAt,
       updatedAt,
     },
     {
       indexes: [
-        { fields: ['userId'] },
-        { fields: ['uiEnglishWordId'] },
-        { fields: ['languageId'] },
+        {
+          fields: ['userId', 'languageId', 'uiEnglishWordId'],
+          name: 'userId_languageId_uiEnglishWordId',
+        },
+        { fields: ['languageId', 'uiEnglishWordId'] },
         { fields: ['embeddingAppId'] },
         { fields: ['translation'] },
         { fields: ['createdAt'] },
@@ -1526,13 +1576,13 @@ const setUpConnection = ({
     },
   )
 
-  UiWordSubmission.belongsTo(User, primaryKey)
+  UiWordSubmission.belongsTo(User, required)
   User.hasMany(UiWordSubmission)
 
-  UiWordSubmission.belongsTo(UiEnglishWord, primaryKey)
+  UiWordSubmission.belongsTo(UiEnglishWord, required)
   UiEnglishWord.hasMany(UiWordSubmission)
 
-  UiWordSubmission.belongsTo(Language, primaryKey)
+  UiWordSubmission.belongsTo(Language, required)
   Language.hasMany(UiWordSubmission)
 
   UiWordSubmission.belongsTo(EmbeddingApp, required)

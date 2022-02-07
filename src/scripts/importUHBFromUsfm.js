@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const mysql = require('mysql2')
 const fs = require('fs')
+const { getMainWordPartIndex } = require('@bibletags/bibletags-ui-helper')
 
 const utils = require('./utils')
 
@@ -12,17 +13,6 @@ const connection = mysql.createConnection({
   password: process.env.PASSWORD || "",
   multipleStatements: true,
 })
-
-// same as in @bibletags/bibletags-ui-helper
-const getMainWordPartIndex = wordParts => {
-  if(!wordParts) return null
-
-  for(let idx = wordParts.length - 1; idx >= 0; idx--) {
-    if(!wordParts[idx].match(/^S/)) {
-      return idx
-    }
-  }
-}
 
 connection.connect(async (err) => {
   if(err) throw err

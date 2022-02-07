@@ -41,8 +41,9 @@
     "publish-to-npm": "npm publish --access public && echo '\nSUCCESS!\n'"
   },
   "dependencies": {
+    "@bibletags/bibletags-ui-helper": "^0.3.0",
+    "@bibletags/bibletags-versification": "^0.2.8",
     "aws-sdk": "2.413.0",
-    "@bibletags/bibletags-versification": "^0.2.3",
     "body-parser": "^1.19.0",
     "connect-redis": "3.4.0",
     "console-stamp": "0.2.6",
