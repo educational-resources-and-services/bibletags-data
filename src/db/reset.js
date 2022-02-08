@@ -15,8 +15,12 @@ const { setUpConnection } = require('./connect')
             ![
               'uhbVerse',
               'uhbWord',
+              'uhbUnitWord',
+              'uhbUnitRange',
               'ugntVerse',
               'ugntWord',
+              'ugntUnitWord',
+              'ugntUnitRange',
               'definition',
             ].includes(model)
           ))

@@ -91,10 +91,10 @@ connection.connect(async (err) => {
 
               const definitionId = (strong.match(/H[0-9]{5}/) || [])[0]
               const prefixParts = (strong.match(/[^"H]*/) || [])[0].split(':').filter(Boolean)
-              const nakedWord = utils.stripHebrewVowelsEtc(w)
+              const form = utils.stripHebrewVowelsEtc(w)
               const isAramaic = /^Ar,/.test(morph) ? 1 : 0
 
-              if(!id || !morph || !nakedWord || (!!definitionId !== !!lemma)) {
+              if(!id || !morph || !form || (!!definitionId !== !!lemma)) {
                 console.log('word with missing info', wordUsfm)
                 process.exit()
               }
@@ -113,7 +113,7 @@ connection.connect(async (err) => {
                 verseNumber,
                 sectionNumber,
                 paragraphNumber,
-                nakedWord,
+                form,
                 lemma,
                 fullParsing: morph,
                 isAramaic,

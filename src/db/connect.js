@@ -244,7 +244,7 @@ const setUpConnection = ({
     allowNull: false,
   }
 
-  const nakedWord = {  // no capitalization, accents, vowels or diacritical marks
+  const form = {  // no capitalization, accents, vowels or diacritical marks
     type: Sequelize.STRING(30),
     allowNull: false,
     notEmpty: true,
@@ -918,7 +918,7 @@ const setUpConnection = ({
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
-      nakedWord,
+      form,
       lemma,
       fullParsing,  // prefixes + parsing string
       isAramaic: {
@@ -1027,7 +1027,7 @@ const setUpConnection = ({
         { fields: ['bookId', 'verseNumber'] },
         { fields: ['bookId', 'sectionNumber'] },
         { fields: ['bookId', 'paragraphNumber'] },
-        { fields: ['nakedWord', 'bookId', 'wordNumber'] },
+        { fields: ['form', 'bookId', 'wordNumber'] },
         { fields: ['lemma', 'bookId', 'wordNumber'] },
         { fields: ['fullParsing', 'bookId', 'wordNumber'] },
         { fields: ['isAramaic', 'bookId', 'wordNumber'] },
@@ -1080,7 +1080,7 @@ const setUpConnection = ({
               "[loc]-": [
                 [
                   wordNumber,  // in book
-                  "nakedWord",
+                  "form",
                   definitionId,  // as int; 0 if none
                   "lemma",  // 0 if none
                   "[type/pos_][stem][aspect][person][gender][number][state]"  // each hold designated # of chars for a total of 9 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
@@ -1235,7 +1235,7 @@ const setUpConnection = ({
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
-      nakedWord,
+      form,
       lemma,
       fullParsing,
       pos: greekPos,  // Different than UGNT's pos for a few types. Eg. NS (substantive adjective) is considered an adjective
@@ -1261,7 +1261,7 @@ const setUpConnection = ({
         { fields: ['bookId', 'phraseNumber'] },
         { fields: ['bookId', 'sentenceNumber'] },
         { fields: ['bookId', 'paragraphNumber'] },
-        { fields: ['nakedWord', 'bookId', 'wordNumber'] },
+        { fields: ['form', 'bookId', 'wordNumber'] },
         { fields: ['lemma', 'bookId', 'wordNumber'] },
         { fields: ['fullParsing', 'bookId', 'wordNumber'] },
         { fields: ['pos', 'bookId', 'wordNumber'] },
@@ -1301,7 +1301,7 @@ const setUpConnection = ({
               "[loc]-": [
                 [
                   wordNumber,  // in book
-                  "nakedWord",
+                  "form",
                   definitionId,  // as int
                   "lemma",
                   "[type/pos_][mood][aspect][voice][person][case][gender][number][attribute]"  // each hold designated # of chars for a total of 10 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
@@ -1435,7 +1435,7 @@ const setUpConnection = ({
       verse,
       wordNumber,
       verseNumber,
-      nakedWord,
+      form,
       lemma,
       pos: greekPos,
       type: greekType,
@@ -1453,7 +1453,7 @@ const setUpConnection = ({
         { fields: ['bookId', 'chapter', 'verse'] },
         { fields: ['bookId', 'wordNumber'] },
         { fields: ['bookId', 'verseNumber'] },
-        { fields: ['nakedWord'] },
+        { fields: ['form'] },
         { fields: ['pos'] },
         { fields: ['type'] },
         { fields: ['mood'] },

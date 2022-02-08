@@ -17,8 +17,8 @@ const queries = `
 
   ${/*
   autoCompleteSuggestions(incompleteQuery: String!, languageIds: [ID]!, projectId: ID): [AutoCompleteSuggestion]  ${/* note: isn't as exhaustive in offline version * / ""}
-  bibleSearchResults(query: String!, hebrewOrdering: Boolean!, offset: Int!, limit: Int!): BibleSearchResultSet
   */ ""}
+  bibleSearchResults(query: String!, hebrewOrdering: Boolean!, offset: Int!, limit: Int!): BibleSearchResultSet
 
 `
 

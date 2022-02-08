@@ -4,7 +4,7 @@ const { getLocFromRef } = require('@bibletags/bibletags-versification');
 const mysql = require('mysql2/promise')
 
 const wordColumnsToUse = [
-  "nakedWord",
+  "form",
   "definitionId",
   "lemma",
   "pos",
@@ -58,7 +58,7 @@ const wordColumnsToUse = [
 
         const info = [
           word.wordNumber,
-          word.nakedWord,
+          word.form,
           word.definitionId,
           word.lemma,
           `${word.type || `${word.pos}_`}${word.mood || '_'}${word.aspect || '_'}${word.voice || '_'}${word.person || '_'}${word.case || '_'}${word.gender || '_'}${word.number || '_'}${word.attribute || '_'}`,
@@ -66,7 +66,7 @@ const wordColumnsToUse = [
 
         scopeMap[key].push(info)
 
-        bookIdAndVerseNumberToLocMap[key] = getLocFromRef(word)
+        bookIdAndVerseNumberToLocMap[`verseNumber:${key}`] = getLocFromRef(word)
 
       }
 

@@ -57,10 +57,27 @@ const types = `
     usfm: String
   }
 
-  type SearchResult {
-    hitsPerBook: JSON
-    results: [Verse]
+  type VersionResult {
+    versionId: ID
+    usfm: String
     tagSets: [TagSet]
+  }
+
+  type BibleSearchResult {
+    originalLoc: String
+    versionResults: [VersionResult]
+  }
+
+  type SuggestedQuery {
+    suggestedQuery: String!
+    resultCount: Int
+  }
+
+  type BibleSearchResultSet {
+    results: [BibleSearchResult]
+    countByBookId: JSON
+    totalHits: Int
+    otherSuggestedQueries: [SuggestedQuery]
   }
 
   type UIWord {

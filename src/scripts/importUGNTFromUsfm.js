@@ -113,9 +113,9 @@ connection.connect(async (err) => {
             const handleWord = ({ w, id, lemma, strong, morph, isVariant }) => {
 
               const definitionId = (strong.match(/G[0-9]{5}/) || [])[0]
-              const nakedWord = utils.stripHebrewVowelsEtc(w)
+              const form = utils.stripGreekAccents(w)
 
-              if(!id || !lemma || !definitionId || !morph || !nakedWord) {
+              if(!id || !lemma || !definitionId || !morph || !form) {
                 console.log('word with missing info', wordUsfm)
                 process.exit()
               }
@@ -136,7 +136,7 @@ connection.connect(async (err) => {
                 phraseNumber,
                 sentenceNumber,
                 paragraphNumber,
-                nakedWord,
+                form,
                 lemma,
                 fullParsing: morph,
                 pos,
