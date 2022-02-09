@@ -305,9 +305,9 @@ const setUpConnection = ({
 
   const greekType = {  // includes the pos to remove ambiguity
     type: Sequelize.ENUM(
-      'NS', 'NP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER',
-      'ET', 'RD', 'RE', 'RP', 'RC', 'RI', 'RR', 'RT', 'VT', 'VI', 'VL', 'VM',
-      'VP', 'IE', 'ID', 'IR', 'PI', 'DO', 'CC', 'CS', 'CO', 'TF'
+      'AS', 'AP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER',
+      'ET', 'PD', 'PE', 'PP', 'PC', 'PI', 'PR', 'PT', 'VT', 'VI', 'VL', 'VM',
+      'VP', 'IE', 'ID', 'IR', 'DI', 'DO', 'CC', 'CS', 'CO', 'FF'
     ),
   }
 
@@ -524,10 +524,6 @@ const setUpConnection = ({
     {
       pos: {
         type: Sequelize.ENUM('A', 'C', 'D', 'N', 'P', 'R', 'T', 'V', 'E', 'I', 'F'),
-        // Note: these part-of-speech codes mean different things depending
-        // on whether they are Hebrew or Greek. But we leave it to the widget
-        // to worry about this. Also, see biblearc-widget's getNormalizedGreekPOSCode
-        // function for importing the Greek for this table properly.
         primaryKey: true,
       },
     },
@@ -1083,7 +1079,7 @@ const setUpConnection = ({
                   "form",
                   definitionId,  // as int; 0 if none
                   "lemma",  // 0 if none
-                  "[type/pos_][stem][aspect][person][gender][number][state]"  // each hold designated # of chars for a total of 9 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
+                  "H[type/pos_][stem][aspect][person][gender][number][state]"  // each hold designated # of chars for a total of 9 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
                   "b3",  // last chars of whichever the following are true: isAramaic,b,l,k,m,sh,v,h1,h2,h3,h4,h5,n; only include if there something or a suffix
                   "1ms",  // only include if there is a suffix
                 ],
@@ -1238,7 +1234,7 @@ const setUpConnection = ({
       form,
       lemma,
       fullParsing,
-      pos: greekPos,  // Different than UGNT's pos for a few types. Eg. NS (substantive adjective) is considered an adjective
+      pos: greekPos,  // Different than UGNT's pos for a few types. Eg. NS (substantive adjective) is considered an adjective. Also, R and P are flipped to match UHB.
       morphPos: {  // UGNT's pos
         type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T'),
         allowNull: false,
@@ -1304,7 +1300,7 @@ const setUpConnection = ({
                   "form",
                   definitionId,  // as int
                   "lemma",
-                  "[type/pos_][mood][aspect][voice][person][case][gender][number][attribute]"  // each hold designated # of chars for a total of 10 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
+                  "G[type/pos_][mood][voice][aspect][person][gender][number][case][attribute]"  // each hold designated # of chars for a total of 11 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
                 ],
               ],
             }

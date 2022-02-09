@@ -75,7 +75,7 @@ const wordColumnsToUse = [
           word.form,
           word.definitionId ? parseInt(word.definitionId.slice(1), 10) : 0,
           word.lemma || 0,
-          `${word.type || `${word.pos}_`}${word.stem || '__'}${word.aspect || '_'}${word.person || '_'}${word.gender || '_'}${word.number || '_'}${word.state || '_'}`,
+          `H${word.type || `${word.pos}_`}${word.stem || '__'}${word.aspect || '_'}${word.person || '_'}${word.gender || '_'}${word.number || '_'}${word.state || '_'}`,
         ]
 
         const booleanColInfo = (

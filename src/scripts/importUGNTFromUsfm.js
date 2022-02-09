@@ -13,17 +13,16 @@ const connection = mysql.createConnection({
   multipleStatements: true,
 })
 
-// matches posTerms in bibletags-widget/src/utils/greekMorph.js
 const posMapping = {
   N: "N",
   A: "A",
   NS: "A",  // better categorized as an adjective
   NP: "A",  // better categorized as an adjective
   E: "E",
-  R: "R",
+  R: "P",  // flipped to match UHB
   V: "V",
   I: "I",
-  P: "P",
+  P: "R",  // flipped to match UHB
   D: "D",
   PI: "D",  // better categorized as an adverb
   C: "C",
@@ -149,7 +148,7 @@ connection.connect(async (err) => {
               }
 
               if(morph.slice(4,5) !== ',') {
-                wordInsert.type = morph.slice(3,5)
+                wordInsert.type = `${pos}${morph.slice(4,5)}`
               }
 
               [

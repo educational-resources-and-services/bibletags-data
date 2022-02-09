@@ -59,9 +59,9 @@ const wordColumnsToUse = [
         const info = [
           word.wordNumber,
           word.form,
-          word.definitionId,
+          word.definitionId ? parseInt(word.definitionId.slice(1), 10) : 0,
           word.lemma,
-          `${word.type || `${word.pos}_`}${word.mood || '_'}${word.aspect || '_'}${word.voice || '_'}${word.person || '_'}${word.case || '_'}${word.gender || '_'}${word.number || '_'}${word.attribute || '_'}`,
+          `G${word.type || `${word.pos}_`}${word.mood || '_'}${word.voice || '_'}${word.aspect || '_'}${word.person || '_'}${word.gender || '_'}${word.number || '_'}${word.case || '_'}${word.attribute || '_'}`,
         ]
 
         scopeMap[key].push(info)

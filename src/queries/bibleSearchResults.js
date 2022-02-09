@@ -1,10 +1,10 @@
 const { Op } = require('sequelize')
-const { getQueryAndFlagInfo, bibleSearch, BIBLE_SEARCH_FLAG_MAP } = require('@bibletags/bibletags-ui-helper')
+const { getQueryAndFlagInfo, bibleSearch, bibleSearchFlagMap } = require('@bibletags/bibletags-ui-helper')
 
 const bibleSearchResults = async (args, req, queryInfo) => {
 
 let a = Date.now()
-  const { query, flags } = getQueryAndFlagInfo({ ...args, FLAG_MAP: BIBLE_SEARCH_FLAG_MAP })
+  const { query, flags } = getQueryAndFlagInfo({ ...args, FLAG_MAP: bibleSearchFlagMap })
 
   const { models } = global.connection
 
