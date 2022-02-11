@@ -9,6 +9,7 @@ let a = Date.now()
   const { models } = global.connection
 
   if(/(?:^| )[^#= ]/.test(query.replace(/["/()*.]/g, ''))) throw `invalid original language search: contains token that doesn't start with # or =`
+  if((flags.same || "verse") !== "verse") throw `invalid original language search: cannot use the 'same' flag`
 
   if(!(flags.in || []).some(inItem => [ 'uhb', 'ugnt', 'lxx' ].includes(inItem))) {
     flags.in = flags.in || []
