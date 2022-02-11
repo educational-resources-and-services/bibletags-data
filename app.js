@@ -97,9 +97,9 @@ app.use((err, req, res, next) => {
 
 // Local listener
 if(!!process.env.LOCAL) {
-  app.listen(8081, (err) => {
+  app.listen(8082, (err) => {
     if (err) throw err
-    console.log('> Ready on http://localhost:8081')
+    console.log('> Ready on http://localhost:8082')
   })
 }
 

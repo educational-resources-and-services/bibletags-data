@@ -41,7 +41,7 @@
     "publish-to-npm": "npm publish --access public && echo '\nSUCCESS!\n'"
   },
   "dependencies": {
-    "@bibletags/bibletags-ui-helper": "^0.5.1",
+    "@bibletags/bibletags-ui-helper": "^0.5.2",
     "@bibletags/bibletags-versification": "^0.2.8",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
