@@ -23,9 +23,9 @@ const bibleSearchResultsQuery = `
 
 describe('Query: bibleSearchResults', async () => {
 
-  it('Search: #H43250', async () => {
+  it('Search: #H43250 include:variants', async () => {
     const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#H43250", hebrewOrdering: false, offset: 0, limit: 1) {
+      bibleSearchResults(query: "#H43250 include:variants", hebrewOrdering: false, offset: 0, limit: 1) {
         ${bibleSearchResultsQuery}
       }
     `)
@@ -54,9 +54,9 @@ describe('Query: bibleSearchResults', async () => {
     })
   })
 
-  it('Search: #noun#masculine#plural', async () => {
+  it('Search: #noun#masculine#plural include:variants', async () => {
     const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#noun#masculine#plural", hebrewOrdering: false, offset: 0, limit: 0) {
+      bibleSearchResults(query: "#noun#masculine#plural include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
         ${bibleSearchResultsQuery}
       }
     `)
@@ -243,8 +243,8 @@ describe('Query: bibleSearchResults', async () => {
 
     bibleSearchResults.should.eql({
       results: [],
-      countByBookId: [0,789,776,549,727,599,456,408,53,543,485,579,504,445,580,181,262,147,96,325,42,140,60,429,738,22,622,301,34,37,71,8,32,39,14,11,26,33,130,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      totalHits: 24827,
+      countByBookId: [0,789,776,549,727,599,456,408,53,543,485,579,504,445,580,181,262,147,96,325,42,140,60,429,738,21,622,301,34,37,71,8,32,39,14,11,26,33,130,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      totalHits: 24755,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -254,9 +254,9 @@ describe('Query: bibleSearchResults', async () => {
     })
   })
 
-  it('Search: #h\'', async () => {
+  it('Search: #h\' include:variants', async () => {
     const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#h'", hebrewOrdering: false, offset: 0, limit: 0) {
+      bibleSearchResults(query: "#h' include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
         ${bibleSearchResultsQuery}
       }
     `)
@@ -274,9 +274,9 @@ describe('Query: bibleSearchResults', async () => {
     })
   })
 
-  it('Search: #h', async () => {
+  it('Search: #h include:variants', async () => {
     const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#h", hebrewOrdering: false, offset: 0, limit: 0) {
+      bibleSearchResults(query: "#h include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
         ${bibleSearchResultsQuery}
       }
     `)
@@ -294,9 +294,9 @@ describe('Query: bibleSearchResults', async () => {
     })
   })
 
-  it('Search: #h#v', async () => {
+  it('Search: #h#v include:variants', async () => {
     const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#h#v", hebrewOrdering: false, offset: 0, limit: 0) {
+      bibleSearchResults(query: "#h#v include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
         ${bibleSearchResultsQuery}
       }
     `)
@@ -323,8 +323,8 @@ describe('Query: bibleSearchResults', async () => {
 
     bibleSearchResults.should.eql({
       results: [],
-      countByBookId: [0,82,87,84,85,104,77,38,1,58,40,77,52,68,145,52,63,29,12,20,5,24,2,96,89,3,111,89,9,10,7,1,3,6,4,1,4,6,22,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      totalHits: 2197,
+      countByBookId: [0,82,87,84,85,104,77,38,1,58,40,77,52,68,145,52,63,29,12,20,5,24,2,96,89,2,111,89,9,10,7,1,3,6,4,1,4,6,22,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      totalHits: 2188,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -343,8 +343,8 @@ describe('Query: bibleSearchResults', async () => {
 
     bibleSearchResults.should.eql({
       results: [],
-      countByBookId: [0,133,56,3,55,37,23,80,14,117,103,66,96,17,44,4,17,19,203,138,36,38,14,121,146,12,56,13,10,7,20,4,10,16,7,10,1,6,26,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      totalHits: 2247,
+      countByBookId: [0,133,56,3,55,37,23,80,14,117,103,66,96,17,44,4,17,19,203,138,35,38,14,121,146,12,56,13,10,7,20,4,10,16,7,10,1,6,26,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      totalHits: 2244,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -363,8 +363,8 @@ describe('Query: bibleSearchResults', async () => {
 
     bibleSearchResults.should.eql({
       results: [],
-      countByBookId: [0,109,66,32,85,61,84,46,2,54,40,37,47,30,35,2,2,0,5,8,2,3,1,21,48,0,82,8,3,2,2,0,2,1,0,2,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      totalHits: 1082,
+      countByBookId: [0,109,66,32,85,61,84,46,2,54,40,37,47,30,35,2,2,0,5,8,2,3,1,21,48,0,81,8,3,2,2,0,2,1,0,2,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      totalHits: 1080,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -383,8 +383,8 @@ describe('Query: bibleSearchResults', async () => {
 
     bibleSearchResults.should.eql({
       results: [],
-      countByBookId: [0,40,4,0,16,4,5,19,3,36,8,5,11,4,5,13,33,0,17,108,7,3,2,3,10,5,9,10,3,1,1,0,2,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      totalHits: 455,
+      countByBookId: [0,40,4,0,15,4,4,18,3,36,8,5,11,4,4,13,33,0,17,108,7,3,2,3,10,4,9,10,3,1,1,0,2,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      totalHits: 444,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -414,9 +414,9 @@ describe('Query: bibleSearchResults', async () => {
     })
   })
 
-  it('Search: #preposition/particle', async () => {
+  it('Search: #preposition/particle include:variants', async () => {
     const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#preposition/particle", hebrewOrdering: false, offset: 0, limit: 0) {
+      bibleSearchResults(query: "#preposition/particle include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
         ${bibleSearchResultsQuery}
       }
     `)
@@ -464,7 +464,7 @@ describe('Query: bibleSearchResults', async () => {
     bibleSearchResults.should.eql({
       results: [],
       countByBookId: [0,21,37,9,13,101,7,16,2,33,18,13,18,8,10,2,7,2,9,101,12,5,0,19,19,0,24,9,7,0,1,1,0,2,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      totalHits: 631,
+      totalHits: 630,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -483,8 +483,8 @@ describe('Query: bibleSearchResults', async () => {
 
     bibleSearchResults.should.eql({
       results: [],
-      countByBookId: [0,96,99,86,59,158,24,59,4,91,65,57,78,34,70,6,18,21,76,221,75,23,6,105,69,7,85,46,18,2,5,4,1,5,1,6,1,5,11,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      totalHits: 2082,
+      countByBookId: [0,96,99,86,59,158,24,59,4,91,63,57,78,34,70,6,18,21,76,221,75,23,6,105,69,7,85,46,18,2,5,4,1,5,1,6,1,5,11,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      totalHits: 2062,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -643,8 +643,8 @@ describe('Query: bibleSearchResults', async () => {
 
     bibleSearchResults.should.eql({
       results: [],
-      countByBookId: [0,801,703,389,649,632,374,366,22,453,327,450,420,597,567,219,307,96,366,1171,279,102,64,674,768,82,782,203,108,49,100,15,24,64,30,30,30,12,109,27,389,174,306,193,374,73,88,39,32,32,22,21,29,11,30,16,13,2,85,27,25,20,11,0,3,8,171],
-      totalHits: 23886,
+      countByBookId: [0,801,703,389,649,632,374,366,22,453,325,450,418,596,567,217,307,96,364,1170,277,102,64,673,768,81,782,203,108,49,100,15,24,64,30,30,30,12,109,27,389,174,306,193,374,73,88,39,32,32,22,21,29,11,30,16,13,2,85,27,25,20,11,0,3,8,171],
+      totalHits: 23808,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -775,17 +775,57 @@ describe('Query: bibleSearchResults', async () => {
   //   })
   // })
 
-  it('Search: #G15190 #G20640 same:verses:3', async () => {
+  // it('Search: #G15190 #G20640 same:verses:3', async () => {
+  //   const bibleSearchResults = await doQuery(`
+  //     bibleSearchResults(query: "#G15190 #G20640 same:verses:3", hebrewOrdering: false, offset: 0, limit: 0) {
+  //       ${bibleSearchResultsQuery}
+  //     }
+  //   `)
+
+  //   bibleSearchResults.should.eql({
+  //     results: [],
+  //     // countByBookId: [0,46,38,40,36,20,20,11,0,8,10,17,19,3,4,1,10,0,25,49,14,2,3,54,26,5,40,3,3,2,5,0,2,1,3,3,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  //     // totalHits: 582,
+  //     otherSuggestedQueries: [
+  //       // {
+  //       //   suggestedQuery: ``,
+  //       //   resultCount: 1,
+  //       // },
+  //     ],
+  //   })
+  // })
+
+  // it('Search: #G24140 include:variants', async () => {
+  //   const bibleSearchResults = await doQuery(`
+  //     bibleSearchResults(query: "#G24140 include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
+  //       ${bibleSearchResultsQuery}
+  //     }
+  //   `)
+
+  //   bibleSearchResults.should.eql({
+  //     results: [],
+  //     // countByBookId: [0,46,38,40,36,20,20,11,0,8,10,17,19,3,4,1,10,0,25,49,14,2,3,54,26,5,40,3,3,2,5,0,2,1,3,3,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  //     // totalHits: 582,
+  //     otherSuggestedQueries: [
+  //       // {
+  //       //   suggestedQuery: ``,
+  //       //   resultCount: 1,
+  //       // },
+  //     ],
+  //   })
+  // })
+
+  it('Search: #H19790', async () => {
     const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#G15190 #G20640 same:verses:3", hebrewOrdering: false, offset: 0, limit: 0) {
+      bibleSearchResults(query: "#H19790", hebrewOrdering: false, offset: 0, limit: 0) {
         ${bibleSearchResultsQuery}
       }
     `)
 
     bibleSearchResults.should.eql({
       results: [],
-      // countByBookId: [0,46,38,40,36,20,20,11,0,8,10,17,19,3,4,1,10,0,25,49,14,2,3,54,26,5,40,3,3,2,5,0,2,1,3,3,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      // totalHits: 582,
+      countByBookId: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      totalHits: 5,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
@@ -795,37 +835,17 @@ describe('Query: bibleSearchResults', async () => {
     })
   })
 
-  it('Search: #G24140 include:variants', async () => {
+  it('Search: #H19790 include:variants', async () => {
     const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#G24140 include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
+      bibleSearchResults(query: "#H19790 include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
         ${bibleSearchResultsQuery}
       }
     `)
 
     bibleSearchResults.should.eql({
       results: [],
-      // countByBookId: [0,46,38,40,36,20,20,11,0,8,10,17,19,3,4,1,10,0,25,49,14,2,3,54,26,5,40,3,3,2,5,0,2,1,3,3,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      // totalHits: 582,
-      otherSuggestedQueries: [
-        // {
-        //   suggestedQuery: ``,
-        //   resultCount: 1,
-        // },
-      ],
-    })
-  })
-
-  it('Search: #H01600 include:variants', async () => {
-    const bibleSearchResults = await doQuery(`
-      bibleSearchResults(query: "#H01600 include:variants", hebrewOrdering: false, offset: 0, limit: 0) {
-        ${bibleSearchResultsQuery}
-      }
-    `)
-
-    bibleSearchResults.should.eql({
-      results: [],
-      // countByBookId: [0,46,38,40,36,20,20,11,0,8,10,17,19,3,4,1,10,0,25,49,14,2,3,54,26,5,40,3,3,2,5,0,2,1,3,3,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      // totalHits: 582,
+      countByBookId: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      totalHits: 6,
       otherSuggestedQueries: [
         // {
         //   suggestedQuery: ``,
