@@ -63,7 +63,7 @@ const wordColumnsToUse = [
       if(!uniqueVal) continue
 
       const scopeMap = {}
-      const [ allWordsWithThisUniqueVal ] = await connection.query(`SELECT * FROM uhbWords WHERE \`${wordCol}\`= ? ORDER BY bookId, wordNumber`, [ uniqueVal ])
+      const [ allWordsWithThisUniqueVal ] = await connection.query(`SELECT * FROM uhbWords WHERE \`${wordCol}\`= ? ORDER BY bookId, verseNumber, wordNumber`, [ uniqueVal ])
 
       for(let word of allWordsWithThisUniqueVal) {
 
