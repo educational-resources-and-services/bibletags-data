@@ -30,7 +30,9 @@ const utils = require('./utils')
   // insert to lemmas table
   const updates = []
   distinctLemmas.forEach(({ lemma }) => {
-    updates.push(`INSERT INTO lemmas (id, nakedLemma) VALUES ('${lemma}', '${utils.stripGreekAccents(utils.stripHebrewVowelsEtc(lemma)).toLowerCase()}')`)
+    if(lemma) {
+      updates.push(`INSERT INTO lemmas (id, nakedLemma) VALUES ('${lemma}', '${utils.stripGreekAccents(utils.stripHebrewVowelsEtc(lemma)).toLowerCase()}')`)
+    }
   })
 
   const chunkSize = 500
