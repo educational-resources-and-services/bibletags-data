@@ -17,7 +17,7 @@ const connection = mysql.createConnection({
 connection.connect(async (err) => {
   if(err) throw err
 
-  console.log(`\nSTARTING`)
+  console.log(`\nSTARTING createTempEngGloss...`)
 
   const badStrongs = {}
   let noGlossCount = 0

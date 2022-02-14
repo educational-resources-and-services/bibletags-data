@@ -17,7 +17,7 @@ const connection = mysql.createConnection({
 connection.connect(async (err) => {
   if(err) throw err
 
-  console.log(`\nSTARTING`)
+  console.log(`\nSTARTING importUHBFromUsfm...`)
 
   const importDir = '../bibletags-usfm/usfm/uhb'
   let filenames
@@ -212,6 +212,8 @@ connection.connect(async (err) => {
                   vocal: "",
                   hits: 0,
                   lxx: JSON.stringify([]),
+                  lemmas: JSON.stringify([]),
+                  forms: JSON.stringify([]),
                 }
 
                 if(!definitionUpdates[definitionId]) {

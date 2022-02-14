@@ -43,7 +43,7 @@ const wordColumnsToUse = [
     multipleStatements: true,
   })
 
-  console.log(`\nSTARTING...\n`)
+  console.log(`\nSTARTING populateUHBUnitWordsTable...\n`)
 
   await connection.query(`TRUNCATE uhbUnitWords`)
 

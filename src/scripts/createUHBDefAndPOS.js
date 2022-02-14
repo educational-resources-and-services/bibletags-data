@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const mysql = require('mysql2')
+const fs = require('fs').promises
 
 const utils = require('./utils')
 
@@ -15,7 +16,14 @@ const connection = mysql.createConnection({
 connection.connect(async (err) => {
   if(err) throw err
 
-  console.log(`\nSTARTING`)
+  console.log(`\nSTARTING createUHBDefAndPOS...`)
+
+  const [ hasBdb ] = await utils.queryAsync({ connection, statement: `SHOW TABLES LIKE 'bdb'` })
+
+  if(!hasBdb) {
+    const sqlImport = (await fs.readFile(`src/data/bdb.sql`)).toString()
+    await utils.queryAsync({ connection, statement: sqlImport })
+  }
 
   const badStrongs = {}
   const bdbHasEntryByStrongs = {}
@@ -23,50 +31,51 @@ connection.connect(async (err) => {
   let bdbOnlyCount = 0
   const updates = []
 
-  const normalizeStrongs = strongs => strongs
-    // .replace(/([0-9]+)/, match => ('H' + utils.padWithZeros(match, 5)))
-    .replace(/([0-9])a/g, '$1')
-    .replace(/([0-9])b/g, '$1.3')
-    .replace(/([0-9])c/g, '$1.5')
-    .replace(/([0-9])d/g, '$1.7')
-    .replace(/([0-9])e/g, '$1.8')
-    .replace(/([0-9])f/g, '$1.9')
-  
-  // go through all bdb entries and put in definitions, recording bdbHasEntryByStrongs with strongs as the keys
+  const normalizeStrongs = strongs => {
+    if(!/^H/.test(strongs)) return strongs
+    const endDigit = {
+      a: 1,
+      b: 2,
+      c: 3,
+      d: 4,
+      e: 5,
+      f: 6,
+    }[strongs.slice(-1)] || 0
+    return `H${`000${strongs.replace(/[^0-9]/g, '')}`.slice(-4)}${endDigit}`
+  }
 
-  const statement = `SELECT * FROM bdb WHERE src NOT LIKE "See <b data-stgs=%" OR src IS NULL`
+  await utils.queryAsync({ connection, statement: `DELETE FROM partOfSpeeches WHERE definitionId LIKE 'H%'` })
 
-  const result = await utils.queryAsync({ connection, statement })
+  const addOnUpdates = async ({ strongs, lex, vocal="" }) => {
 
-  result.forEach(row => {
-    const strongs = normalizeStrongs(row.id)
-    bdbHasEntryByStrongs[strongs] = true
-    uniqueStateOfLexemes[row.word] = uniqueStateOfLexemes[row.word] ? 0 : 1
-  })
-      
-  await Promise.all(result.map(async row => {
-
-    const strongs = normalizeStrongs(row.id)
-
-    if(!strongs.match(/^H[0-9]{1,4}(\.[0-9])?$/)) {
-      badStrongs[strongs] = true
-      return
-    }
-      
-    const statement2 = `SELECT pos, wordNumber FROM uhbWords WHERE definitionId="${strongs}"`
+    const statement2 = `SELECT pos, wordNumber, lemma, form FROM uhbWords WHERE definitionId="${strongs}"`
 
     const result2 = await utils.queryAsync({ connection, statement: statement2 })
 
     if(result2.length > 0) {
-      
-      const hits = result2.reduce((sum, row2) => sum + (row2.wordNumber ? 1 : 0), 0)
+
+      let lexHasMatchingLemma = true
+      let hits = 0
+      let lemmas = []
+      let forms = []
+      result2.forEach(({ wordNumber, lemma, form }) => {
+        hits += (wordNumber ? 1 : 0)
+        lemmas.push(lemma)
+        forms.push(form)
+        lexHasMatchingLemma = lexHasMatchingLemma || lemma === word.lex
+      })
+
+      lemmas = JSON.stringify([ ...new Set(lemmas) ])
+      forms = JSON.stringify([ ...new Set(forms) ])
 
       const defUpdate = {
-        lex: row.word,
-        lexUnique: uniqueStateOfLexemes[row.word],
-        vocal: row.xlit,
+        lex,
+        lexUnique: uniqueStateOfLexemes[lex],
+        vocal,
         hits,
         // lxx: JSON.stringify([]),  // this info is not yet known
+        lemmas,
+        forms,
       }
 
       const set = []
@@ -76,7 +85,10 @@ connection.connect(async (err) => {
       }
 
       updates.push(`UPDATE definitions SET ${set.join(", ")} WHERE id="${strongs}"`)
-      updates.push(`UPDATE uhbWords SET lemma="${row.word}" WHERE definitionId="${strongs}"`)
+
+      if(!lexHasMatchingLemma) {
+        console.log(`  - Lex value not found among lemmas.`, lex, lemmas)
+      }
 
       const posInKeys = {}
 
@@ -88,7 +100,7 @@ connection.connect(async (err) => {
           pos,
           definitionId: strongs,
         }
-        
+
         updates.push(`INSERT INTO partOfSpeeches (${Object.keys(posInsert).join(", ")}) VALUES ('${Object.values(posInsert).join("', '")}')`)
 
       })
@@ -97,6 +109,49 @@ connection.connect(async (err) => {
       bdbOnlyCount++
     }
 
+  }
+
+  const statement = `SELECT * FROM bdb WHERE src NOT LIKE "See <b data-stgs=%" OR src IS NULL`
+  const result = await utils.queryAsync({ connection, statement })
+  result.forEach(row => {
+    const strongs = normalizeStrongs(row.id)
+    bdbHasEntryByStrongs[strongs] = true
+    uniqueStateOfLexemes[row.word] = uniqueStateOfLexemes[row.word] ? 0 : 1
+  })
+
+  // get all distinct strongs from uhbWords and see if there are any not in bdbHasEntryByStrongs
+  const statement3 = `SELECT DISTINCT definitionId, lemma FROM uhbWords`
+  const result3 = await utils.queryAsync({ connection, statement: statement3 })
+  const missingStrongs = []
+  for(let row3 of result3) {
+    const strongs = row3.definitionId
+    if(strongs && !bdbHasEntryByStrongs[row3.definitionId]) {
+      if(missingStrongs.includes(strongs)) {
+        if(
+          strongs !== `H39190`  // already dealt with below
+          && !(strongs === `H69570` && row3.lemma === `קַו`)  // checks out
+        ) {
+          console.log(`  **** word in uhbWords that is not in bdb has multiple lemmas`, strongs)
+        }
+      } else {
+        let lex = row3.lemma
+        if(lex === `לוּשׁ`) lex = `לָֽיִשׁ`
+        missingStrongs.push(strongs)
+        uniqueStateOfLexemes[lex] = uniqueStateOfLexemes[lex] ? 0 : 1
+        await addOnUpdates({ strongs, lex })
+      }
+    }
+  }
+
+  await Promise.all(result.map(async row => {
+    const strongs = normalizeStrongs(row.id)
+
+    if(!strongs.match(/^H[0-9]{5}$/)) {
+      badStrongs[strongs] = true
+      return
+    }
+
+    await addOnUpdates({ strongs, lex: row.word, vocal: row.xlit })
   }))
 
   console.log(`  - ${bdbOnlyCount} words in bdb, but not in uhbWords.`)
@@ -105,19 +160,9 @@ connection.connect(async (err) => {
   const numRowsUpdated = await utils.doUpdatesInChunksAsync({ connection, updates })
   console.log(`\n  ${numRowsUpdated} rows inserted.\n`)
 
-
-  // get all distinct strongs from uhbWords and see if there are any not in bdbHasEntryByStrongs
-  
-  const statement3 = `SELECT DISTINCT definitionId FROM uhbWords`
-
-  const result3 = await utils.queryAsync({ connection, statement: statement3 })
-
-  result3.forEach(row3 => {
-    if(!bdbHasEntryByStrongs[row3.definitionId]) {
-      console.log(`  - ${row3.definitionId} in uhbWords, but not in bdb.`)
-    }
+  missingStrongs.forEach(strongs => {
+    console.log(`  - ${strongs} in uhbWords, but not in bdb. 'lex' has been added from lemmas, but 'vocal' remains blank.`)
   })
-
 
   console.log(`\nCOMPLETED\n`)
   process.exit()

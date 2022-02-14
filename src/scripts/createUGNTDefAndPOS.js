@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const mysql = require('mysql2')
+const fs = require('fs').promises
 
 const utils = require('./utils')
 
@@ -15,57 +16,61 @@ const connection = mysql.createConnection({
 connection.connect(async (err) => {
   if(err) throw err
 
-  console.log(`\nSTARTING`)
+  console.log(`\nSTARTING createUGNTDefAndPOS...`)
+
+  const [ hasDodson ] = await utils.queryAsync({ connection, statement: `SHOW TABLES LIKE 'dodson'` })
+
+  if(!hasDodson) {
+    const sqlImport = (await fs.readFile(`src/data/dodson.sql`)).toString()
+    await utils.queryAsync({ connection, statement: sqlImport })
+  }
 
   const badStrongs = {}
   const dodsonHasEntryByStrongs = {}
   const uniqueStateOfLexemes = {}
   let dodsonOnlyCount = 0
   const updates = []
-  
-  const normalizeStrongs = strongs => strongs
-    .replace(/\+1$/g, '.5')
-    .replace(/^G1189\+2$/g, 'G1189.5')
-    .replace(/^G1774\+2$/g, 'G1774.5')
-    .replace(/^G3835\+2$/g, 'G3835.5')
-    .replace(/^G4345\+2$/g, 'G4345.5')
-    .replace(/^G1177\+2$/g, 'G1177.5')
-  
-  // go through all dodson entries and put in definitions, recording dodsonHasEntryByStrongs with strongs as the keys
 
-  const statement = `SELECT * FROM dodson`
+  const normalizeStrongs = strongs => {
+    let endDigit
+    if(!/\+/.test(strongs)) endDigit = 0
+    if(/\+1/.test(strongs)) endDigit = 5
+    if(endDigit === undefined) return ``
+    return `G${`000${strongs.slice(1).replace(/\+.*$/, '')}`.slice(-4)}${endDigit}`
+  }
 
-  const result = await utils.queryAsync({ connection, statement })
+  await utils.queryAsync({ connection, statement: `DELETE FROM partOfSpeeches WHERE definitionId LIKE 'G%'` })
 
-  result.forEach(row => {
-    const strongs = normalizeStrongs(row.id)
-    dodsonHasEntryByStrongs[strongs] = true
-    uniqueStateOfLexemes[row.word] = uniqueStateOfLexemes[row.word] ? 0 : 1
-  })
+  const addOnUpdates = async ({ strongs, lex, vocal="" }) => {
       
-  await Promise.all(result.map(async row => {
-
-    const strongs = normalizeStrongs(row.id)
-
-    if(!strongs.match(/^G[0-9]{1,4}(?:\.[0-9])?$/)) {
-      badStrongs[strongs] = true
-      return
-    }
-      
-    const statement2 = `SELECT pos, wordNumber FROM ugntWords WHERE definitionId="${strongs}"`
+    const statement2 = `SELECT pos, wordNumber, lemma, form FROM ugntWords WHERE definitionId="${strongs}"`
 
     const result2 = await utils.queryAsync({ connection, statement: statement2 })
 
     if(result2.length > 0) {
 
-      const hits = result2.reduce((sum, row2) => sum + (row2.wordNumber ? 1 : 0), 0)
+      let lexHasMatchingLemma = true
+      let hits = 0
+      let lemmas = []
+      let forms = []
+      result2.forEach(({ wordNumber, lemma, form }) => {
+        hits += (wordNumber ? 1 : 0)
+        lemmas.push(lemma)
+        forms.push(form)
+        lexHasMatchingLemma = lexHasMatchingLemma || lemma === word.lex
+      })
+
+      lemmas = JSON.stringify([ ...new Set(lemmas) ])
+      forms = JSON.stringify([ ...new Set(forms) ])
 
       const defUpdate = {
-        lex: row.word,
-        lexUnique: uniqueStateOfLexemes[row.word],
-        vocal: row.xlit,
+        lex,
+        lexUnique: uniqueStateOfLexemes[lex],
+        vocal,
         hits,
         // lxx: JSON.stringify([]),  // this info is not yet known
+        lemmas,
+        forms,
       }
 
       const set = []
@@ -75,6 +80,10 @@ connection.connect(async (err) => {
       }
 
       updates.push(`UPDATE definitions SET ${set.join(", ")} WHERE id="${strongs}"`)
+
+      if(!lexHasMatchingLemma) {
+        console.log(`  **** Lex value not found among lemmas.`, lex, lemmas)
+      }
 
       const posInKeys = {}
 
@@ -94,6 +103,46 @@ connection.connect(async (err) => {
       dodsonOnlyCount++
     }
 
+  }
+
+  const statement = `SELECT * FROM dodson`
+  const result = await utils.queryAsync({ connection, statement })
+  result.forEach(row => {
+    const strongs = normalizeStrongs(row.id)
+    dodsonHasEntryByStrongs[strongs] = true
+    uniqueStateOfLexemes[row.word] = uniqueStateOfLexemes[row.word] ? 0 : 1
+  })
+
+  // get all distinct strongs from ugntWords and see if there are any not in dodsonHasEntryByStrongs
+  const statement3 = `SELECT DISTINCT definitionId, lemma FROM ugntWords`
+  const result3 = await utils.queryAsync({ connection, statement: statement3 })
+  const missingStrongs = []
+  for(let row3 of result3) {
+    const strongs = row3.definitionId
+    if(!dodsonHasEntryByStrongs[strongs]) {
+      if(missingStrongs.includes(strongs)) {
+        if(
+          (strongs !== 'G41775' && row3.lemma === 'πολύ')  // this one already checks out; πολλά is the correct lex value
+        ) {
+          console.log(`  **** word in ugntWords that is not in dodson has multiple lemmas`, strongs)
+        }
+      } else {
+        missingStrongs.push(strongs)
+        uniqueStateOfLexemes[row3.lemma] = uniqueStateOfLexemes[row3.lemma] ? 0 : 1
+        await addOnUpdates({ strongs, lex: row3.lemma })
+      }
+    }
+  }
+
+  await Promise.all(result.map(async row => {
+    const strongs = normalizeStrongs(row.id)
+
+    if(!strongs.match(/^G[0-9]{5}$/)) {
+      badStrongs[strongs] = true
+      return
+    }
+
+    await addOnUpdates({ strongs, lex: row.word, vocal: row.xlit })
   }))
 
   console.log(`  - ${dodsonOnlyCount} words in dodson, but not in ugntWords.`)
@@ -102,21 +151,9 @@ connection.connect(async (err) => {
   const numRowsUpdated = await utils.doUpdatesInChunksAsync({ connection, updates })
   console.log(`\n  ${numRowsUpdated} rows inserted.\n`)
 
-
-  // get all distinct strongs from ugntWords and see if there are any not in dodsonHasEntryByStrongs
-  
-  const statement3 = `SELECT DISTINCT definitionId FROM ugntWords`
-
-  const result3 = await utils.queryAsync({ connection, statement: statement3 })
-
-  const missingStrongs = []
-  result3.forEach(row3 => {
-    if(!dodsonHasEntryByStrongs[row3.definitionId]) {
-      missingStrongs.push(row3.definitionId)
-    }
+  missingStrongs.forEach(strongs => {
+    console.log(`  - ${strongs} in ugntWords, but not in dodson. 'lex' has been added from lemmas, but 'vocal' remains blank.`)
   })
-  console.log(`  - The following are in ugntWords, but not in dodson:\n${missingStrongs.join("\n")}`)
-
 
   console.log(`\nCOMPLETED\n`)
   process.exit()

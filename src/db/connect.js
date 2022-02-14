@@ -155,6 +155,16 @@ const setUpConnection = ({
     })
   }
 
+  const isArrayOfStrings = ary => {
+    if(!(ary instanceof Array)) {
+      throw new Error('Must be an array.')
+    }
+
+    if(ary.some(str => typeof str !== 'string')) {
+      throw new Error('Array must contain strings.')
+    }
+  }
+
   const isVerseMappings = obj => {
 
     if(typeof obj !== 'object') {
@@ -456,6 +466,20 @@ const setUpConnection = ({
         allowNull: false,
         validate: {
           isArrayOfLXXObjs,
+        },
+      },
+      lemmas: {
+        type: Sequelize.JSON,
+        allowNull: false,
+        validate: {
+          isArrayOfStrings,
+        },
+      },
+      forms: {
+        type: Sequelize.JSON,
+        allowNull: false,
+        validate: {
+          isArrayOfStrings,
         },
       },
     },
@@ -1490,6 +1514,34 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // Covers UHB, UGNT, and LXX
+
+  // needed: app, biblearc
+  // doesn't change
+  const Lemma = connection.define(
+    'lemma',
+    {
+      id: {
+        type: Sequelize.STRING(45),  // used following to arrive at this number: SELECT LENGTH(lemma), lemma FROM uhbWords ORDER BY LENGTH(lemma) DESC LIMIT 1
+        primaryKey: true,
+        notEmpty: true,
+      },
+      nakedLemma: {
+        type: Sequelize.STRING(45),
+        primaryKey: true,
+        notEmpty: true,
+      },
+    },
+    {
+      indexes: [
+        { fields: ['nakedLemma', 'id'] },
+      ],
+      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+    },
+  )
+
+  //////////////////////////////////////////////////////////////////
+
   // needed: app, biblearc
   // changes often
   const WordTranslation = connection.define(
@@ -1553,6 +1605,7 @@ const setUpConnection = ({
 
   // needed: app, biblearc
   // doesn't change
+  // NOT SURE WE NEED THIS - shouldn't this rather be HitsByMorph so as to give a quick number to the "Search inflected" option?
   const HitsByForm = connection.define(
     'hitsByForm',
     {

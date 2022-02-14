@@ -33,7 +33,7 @@ const posMapping = {
 connection.connect(async (err) => {
   if(err) throw err
 
-  console.log(`\nSTARTING`)
+  console.log(`\nSTARTING importUGNTFromUsfm...`)
 
   const importDir = '../bibletags-usfm/usfm/ugnt'
   let filenames
@@ -112,7 +112,7 @@ connection.connect(async (err) => {
             const handleWord = ({ w, id, lemma, strong, morph, isVariant }) => {
 
               const definitionId = (strong.match(/G[0-9]{5}/) || [])[0]
-              const form = utils.stripGreekAccents(w)
+              const form = utils.stripGreekAccents(w).toLowerCase()
 
               if(!id || !lemma || !definitionId || !morph || !form) {
                 console.log('word with missing info', wordUsfm)
@@ -174,6 +174,8 @@ connection.connect(async (err) => {
                 vocal: "",
                 hits: 0,
                 lxx: JSON.stringify([]),
+                lemmas: JSON.stringify([]),
+                forms: JSON.stringify([]),
               }
 
               if(!definitionUpdates[definitionId]) {

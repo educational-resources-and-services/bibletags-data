@@ -29,7 +29,7 @@ const wordColumnsToUse = [
     multipleStatements: true,
   })
 
-  console.log(`\nSTARTING...\n`)
+  console.log(`\nSTARTING populateUGNTUnitWordsTable...\n`)
 
   await connection.query(`TRUNCATE ugntUnitWords`)
 
