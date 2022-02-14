@@ -452,11 +452,19 @@ const setUpConnection = ({
         type: Sequelize.STRING(50),
         allowNull: false,
       },
+      nakedLex: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
+      },
       lexUnique: {  // i.e. Is the lexeme's form unique?
         type: Sequelize.BOOLEAN,
         allowNull: false,
       },
       vocal: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
+      },
+      simplifiedVocal: {
         type: Sequelize.STRING(50),
         allowNull: false,
       },
@@ -497,8 +505,8 @@ const setUpConnection = ({
 
   // needed: app (partial), biblearc (partial)
   // changes some
-  const DefinitionByLanguage = connection.define(
-    'definitionByLanguage',
+  const LanguageSpecificDefinition = connection.define(
+    'languageSpecificDefinition',
     {
       gloss: {
         type: Sequelize.STRING(glossLength),
@@ -528,16 +536,23 @@ const setUpConnection = ({
     },
     {
       indexes: [
+        {
+          fields: ['languageId', 'definitionId'],
+          unique: true,
+          name: 'languageId_definitionId',
+        },
         { fields: ['gloss'] },
         { fields: ['definitionId'] },
-        { fields: ['languageId', 'definitionId'] },
       ],
       timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
     },
   )
 
-  Language.belongsToMany(Definition, { through: DefinitionByLanguage })
-  Definition.belongsToMany(Language, { through: DefinitionByLanguage })
+  LanguageSpecificDefinition.belongsTo(Language, required)
+  Language.hasMany(LanguageSpecificDefinition)
+
+  LanguageSpecificDefinition.belongsTo(Definition, required)
+  Definition.hasMany(LanguageSpecificDefinition)
 
   //////////////////////////////////////////////////////////////////
 

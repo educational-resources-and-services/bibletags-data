@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const mysql = require('mysql2')
 const fs = require('fs').promises
+const { stripGreekAccents, stripHebrewVowelsEtc, stripVocalOfAccents } = require('@bibletags/bibletags-ui-helper')
 
 const utils = require('./utils')
 
@@ -63,10 +64,15 @@ connection.connect(async (err) => {
       lemmas = JSON.stringify([ ...new Set(lemmas) ])
       forms = JSON.stringify([ ...new Set(forms) ])
 
+      const simplifiedVocal = stripVocalOfAccents(vocal)
+      if(/[^- a-z]/.test(simplifiedVocal)) throw `Unexpected char in vocal: ${simplifiedVocal}`
+
       const defUpdate = {
         lex,
+        nakedLex: stripGreekAccents(stripHebrewVowelsEtc(lex)).toLowerCase(),
         lexUnique: uniqueStateOfLexemes[lex],
         vocal,
+        simplifiedVocal,
         hits,
         // lxx: JSON.stringify([]),  // this info is not yet known
         lemmas,

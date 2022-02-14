@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const mysql = require('mysql2')
 const fs = require('fs')
+const { stripGreekAccents } = require('@bibletags/bibletags-ui-helper')
 
 const utils = require('./utils')
 
@@ -112,7 +113,7 @@ connection.connect(async (err) => {
             const handleWord = ({ w, id, lemma, strong, morph, isVariant }) => {
 
               const definitionId = (strong.match(/G[0-9]{5}/) || [])[0]
-              const form = utils.stripGreekAccents(w).toLowerCase()
+              const form = stripGreekAccents(w).toLowerCase()
 
               if(!id || !lemma || !definitionId || !morph || !form) {
                 console.log('word with missing info', wordUsfm)
@@ -170,8 +171,10 @@ connection.connect(async (err) => {
               const definitionInsert = {
                 id: definitionId,
                 lex: "",
+                nakedLex: "",
                 lexUnique: 0,
                 vocal: "",
+                simplifiedVocal: "",
                 hits: 0,
                 lxx: JSON.stringify([]),
                 lemmas: JSON.stringify([]),

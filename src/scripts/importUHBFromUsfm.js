@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const mysql = require('mysql2')
 const fs = require('fs')
-const { getMainWordPartIndex } = require('@bibletags/bibletags-ui-helper')
+const { getMainWordPartIndex, stripHebrewVowelsEtc } = require('@bibletags/bibletags-ui-helper')
 
 const utils = require('./utils')
 
@@ -91,7 +91,7 @@ connection.connect(async (err) => {
 
               const definitionId = (strong.match(/H[0-9]{5}/) || [])[0]
               const prefixParts = (strong.match(/[^"H]*/) || [])[0].split(':').filter(Boolean)
-              const form = utils.stripHebrewVowelsEtc(w)
+              const form = stripHebrewVowelsEtc(w)
               const isAramaic = /^Ar,/.test(morph) ? 1 : 0
 
               if(!id || !morph || !form || (!!definitionId !== !!lemma)) {
@@ -208,8 +208,10 @@ connection.connect(async (err) => {
                 const definitionInsert = {
                   id: definitionId,
                   lex: "",
+                  nakedLex: "",
                   lexUnique: 0,
                   vocal: "",
+                  simplifiedVocal: "",
                   hits: 0,
                   lxx: JSON.stringify([]),
                   lemmas: JSON.stringify([]),

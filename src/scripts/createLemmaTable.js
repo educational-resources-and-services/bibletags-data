@@ -1,8 +1,7 @@
 require('dotenv').config()
 
 const mysql = require('mysql2/promise')
-
-const utils = require('./utils')
+const { stripGreekAccents, stripHebrewVowelsEtc } = require('@bibletags/bibletags-ui-helper')
 
 ;(async() => {
 
@@ -31,7 +30,7 @@ const utils = require('./utils')
   const updates = []
   distinctLemmas.forEach(({ lemma }) => {
     if(lemma) {
-      updates.push(`INSERT INTO lemmas (id, nakedLemma) VALUES ('${lemma}', '${utils.stripGreekAccents(utils.stripHebrewVowelsEtc(lemma)).toLowerCase()}')`)
+      updates.push(`INSERT INTO lemmas (id, nakedLemma) VALUES ('${lemma}', '${stripGreekAccents(stripHebrewVowelsEtc(lemma)).toLowerCase()}')`)
     }
   })
 

@@ -27,6 +27,14 @@ const definition = async (args, req, queryInfo) => {
     {
       model: models.partOfSpeech,
       attributes: [ 'pos' ],
+      required: false,
+    },
+    {
+      model: models.languageSpecificDefinition,
+      required: false,
+      where: {
+        languageId,
+      },
     },
   ]
 
@@ -36,18 +44,9 @@ const definition = async (args, req, queryInfo) => {
 
   if(!definition) return null
 
-  const where = {
-    definitionId,
-    languageId,
-  }
-
-  const definitionByLanguage = await models.definitionByLanguage.findOne({
-    where,
-  })
-
   return {
     ...definition.dataValues,
-    ...(definitionByLanguage ? definitionByLanguage.dataValues : {}),
+    ...(((definition.languageSpecificDefinitions || [])[0] || {}).dataValues || {}),
     id,
     pos: (definition.partOfSpeeches || []).map(partOfSpeech => partOfSpeech.pos),
   }
