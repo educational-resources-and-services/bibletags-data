@@ -15,9 +15,7 @@ const queries = `
   definition(id: ID!): Definition
   definitionsByPosition(versionId: String!, loc: String!, wordNum: Int!, languageId: String!): [Definition]
 
-  ${/*
-  autoCompleteSuggestions(incompleteQuery: String!, languageIds: [ID]!, projectId: ID): [AutoCompleteSuggestion]  ${/* note: isn't as exhaustive in offline version * / ""}
-  */ ""}
+  autoCompleteSuggestions(incompleteQuery: String!, languageId: ID!): [AutoCompleteSuggestion]  ${/* note: isn't as exhaustive in offline version */ ""}
   bibleSearchResults(query: String!, hebrewOrdering: Boolean!, offset: Int!, limit: Int!): BibleSearchResultSet
 
 `

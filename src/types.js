@@ -80,6 +80,13 @@ const types = `
     otherSuggestedQueries: [SuggestedQuery]
   }
 
+  type AutoCompleteSuggestion {
+    from: String!
+    suggestedQuery: String!
+    originalWords: JSON
+    resultCount: Int
+  }
+
   type UIWord {
     id: ID
     str: String
