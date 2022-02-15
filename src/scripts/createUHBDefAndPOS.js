@@ -66,8 +66,8 @@ connection.connect(async (err) => {
         lexHasMatchingLemma = lexHasMatchingLemma || lemma === word.lex
       })
 
-      lemmas = JSON.stringify([ ...new Set(lemmas) ])
-      forms = JSON.stringify([ ...new Set(forms) ])
+      lemmas = JSON.stringify([ ...new Set(lemmas.sort()) ])
+      forms = JSON.stringify([ ...new Set(forms.sort()) ])
 
       const simplifiedVocal = stripVocalOfAccents(vocal)
       if(/[^- a-z]/.test(simplifiedVocal)) throw `Unexpected char in vocal: ${simplifiedVocal}`

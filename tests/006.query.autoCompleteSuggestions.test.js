@@ -363,7 +363,7 @@ describe('Query: autoCompleteSuggestions', async () => {
           },
         },
         resultCount: null,
-        suggestedQuery: "#G00140#lemma:ἀγαθουργέω",
+        suggestedQuery: "#G00140#lemma:ἀγαθοεργέω",
       },
       {
         from: "look-up",
@@ -374,7 +374,7 @@ describe('Query: autoCompleteSuggestions', async () => {
           },
         },
         resultCount: null,
-        suggestedQuery: "#G00140#lemma:ἀγαθοεργέω",
+        suggestedQuery: "#G00140#lemma:ἀγαθουργέω",
       },
     ])
   })
@@ -475,7 +475,7 @@ describe('Query: autoCompleteSuggestions', async () => {
           },
         },
         resultCount: null,
-        suggestedQuery: "#G00320#form:αγγελος",
+        suggestedQuery: "#G00320#form:αγγελοι",
       },
       {
         from: "look-up",
@@ -497,7 +497,7 @@ describe('Query: autoCompleteSuggestions', async () => {
           },
         },
         resultCount: null,
-        suggestedQuery: "#G00320#form:αγγελοι",
+        suggestedQuery: "#G00320#form:αγγελον",
       },
       {
         from: "look-up",
@@ -508,7 +508,7 @@ describe('Query: autoCompleteSuggestions', async () => {
           },
         },
         resultCount: null,
-        suggestedQuery: "#G00320#form:αγγελον",
+        suggestedQuery: "#G00320#form:αγγελος",
       },
     ])
   })
@@ -530,7 +530,7 @@ describe('Query: autoCompleteSuggestions', async () => {
           }
         },
         resultCount: null,
-        suggestedQuery: "#G00320#form:αγγελων",
+        suggestedQuery: "#G00320#form:αγγελω",
       },
       {
         from: "look-up",
@@ -541,7 +541,7 @@ describe('Query: autoCompleteSuggestions', async () => {
           }
         },
         resultCount: null,
-        suggestedQuery: "#G00320#form:αγγελω",
+        suggestedQuery: "#G00320#form:αγγελων",
       },
     ])
   })
