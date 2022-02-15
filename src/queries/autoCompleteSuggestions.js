@@ -187,9 +187,12 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
       })
     })
 
-  } else if(/#(not:)?[0-9a-z\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]+$/i.test(incompleteQuery)) {  // strongs
+  } else if(/#(not:)?[0-9a-z\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]+$|^[\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]+$/i.test(incompleteQuery)) {  // strongs
 
-    const [ x, queryStrProceedingDetail, negator='', partialDetail ] = incompleteQuery.match(/^(.*)#(not:)?([0-9a-z\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]+)$/i)
+    const [ x, queryStrProceedingDetail, negator='', partialDetail ] = (
+      incompleteQuery.match(/^(.*)#(not:)?([0-9a-z\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]+)$/i)
+      || incompleteQuery.match(/^()()([\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]+)$/i)
+    )
 
     let where
 

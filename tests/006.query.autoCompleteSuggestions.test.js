@@ -300,6 +300,61 @@ describe('Query: autoCompleteSuggestions', async () => {
     ])
   })
 
+  it('Search: λογ', async () => {
+    const autoCompleteSuggestions = await doQuery(`
+      autoCompleteSuggestions(incompleteQuery: "λογ", languageId: "eng") {
+        ${autoCompleteSuggestionsQuery}
+      }
+    `)
+
+    autoCompleteSuggestions.should.eql([
+      {
+        from: "look-up",
+        originalWords: {
+          G30480: {
+            gloss: "a collection, collecting",
+            lex: "λογία",
+          },
+        },
+        resultCount: 2,
+        suggestedQuery: "#G30480",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          G30490: {
+            gloss: "I reckon, count, decide",
+            lex: "λογίζομαι",
+          },
+        },
+        resultCount: 41,
+        suggestedQuery: "#G30490",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          G30500: {
+            gloss: "reasonable, rational, metaphorical",
+            lex: "λογικός",
+          },
+        },
+        resultCount: 2,
+        suggestedQuery: "#G30500",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          G30510: {
+            gloss: "divine communication",
+            lex: "λόγιον",
+          },
+        },
+        resultCount: 4,
+        suggestedQuery: "#G30510",
+      },
+    ])
+  })
+
   it('Search: =test', async () => {
     const autoCompleteSuggestions = await doQuery(`
       autoCompleteSuggestions(incompleteQuery: "=test", languageId: "eng") {
