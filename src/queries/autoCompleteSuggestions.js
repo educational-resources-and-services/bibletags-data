@@ -7,7 +7,7 @@ const safeifyForLike = str => str.replace(/_/g, ' ').replace(/%/g, '')
 
 const getStrongsFromQueryStr = str => (str.match(/#[GH][0-9]{5}/g) || []).map(s => s.replace(/^#/, ''))
 
-const getOriginalWordsFromStrongs = async ({ strongs, where, languageId, limit, models }) => {
+const getOriginalWordsFromStrongs = async ({ includeHits, strongs, where, languageId, limit, models }) => {
 
   const originalWords = {}
 
@@ -28,9 +28,12 @@ const getOriginalWordsFromStrongs = async ({ strongs, where, languageId, limit, 
     limit,
   })
 
-  definitions.forEach(({ id, lex, languageSpecificDefinitions=[] }) => {
+  definitions.forEach(({ id, lex, hits, languageSpecificDefinitions=[] }) => {
     const gloss = (languageSpecificDefinitions[0] || {}).gloss || ''
     originalWords[id] = { lex, gloss }
+    if(includeHits) {
+      originalWords[id].hits = hits
+    }
   })
 
   return originalWords
@@ -39,7 +42,7 @@ const getOriginalWordsFromStrongs = async ({ strongs, where, languageId, limit, 
 
 const getDefDetailArrayFromProceedingStrongs = async ({ queryStrProceedingDetail, detailType, partialDetail, limit, models }) => {
 
-  const [ strongDetailOnSameWord ] = queryStrProceedingDetail.split(' ').pop().match(strongsRegex) || []
+  const [ strongDetailOnSameWord ] = queryStrProceedingDetail.split(' ').pop().match(/#[GH][0-9]{5}/) || []
   let detailArray = null
 
   if(strongDetailOnSameWord) {
@@ -108,18 +111,19 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
   if(/(?:^ )=[^#+~*=[\]\/(). ]+$/i.test(incompleteQuery)) {  // translated to
     // TODO
 
-  } else if(/#(not:)?lemma:[^#+~*=[\]\/(). ]+$/i.test(incompleteQuery)) {  // lemma
+  } else if(/#(not:)?lemma:[^#+~*=[\]\/(). ]*$/i.test(incompleteQuery)) {  // lemma
     // lemmas matching partial naked lemma
     // table: lemmas
 
-    const [ x, queryStrProceedingDetail, negator='', partialDetail ] = incompleteQuery.match(/^(.*)#(not:)?lemma:([^#+~*=[\]\/(). ]+)$/i)
+    let [ x, queryStrProceedingDetail, negator='', partialDetail ] = incompleteQuery.match(/^(.*)#(not:)?lemma:([^#+~*=[\]\/(). ]*)$/i)
+    partialDetail = stripGreekAccents(stripHebrewVowelsEtc(partialDetail)).toLowerCase()
 
     const [ lemmas, originalWords ] = await Promise.all([
       (async () => {
 
         let lemmas = await getDefDetailArrayFromProceedingStrongs({ queryStrProceedingDetail, detailType: "lemmas", partialDetail, limit, models })
 
-        if(!lemmas) {  // i.e. there wasn't a proceeeding strongs
+        if(!lemmas && partialDetail) {  // i.e. there wasn't a proceeeding strongs
           lemmas = await models.lemma.findAll({
             where: {
               nakedLemma: {
@@ -130,7 +134,7 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
           })
         }
 
-        return lemmas
+        return lemmas || []
 
       })(),
       getOriginalWordsFromStrongs({ strongs: getStrongsFromQueryStr(queryStrProceedingDetail), languageId, models }),
@@ -144,20 +148,21 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
       })
     })
 
-  } else if(/#(not:)?form:[^#+~*=[\]\/(). ]+$/i.test(incompleteQuery)) {  // form
+  } else if(/#(not:)?form:[^#+~*=[\]\/(). ]*$/i.test(incompleteQuery)) {  // form
     // forms matching partial naked form
     // table: unitWords
 
-    const [ x, queryStrProceedingDetail, negator='', partialDetail ] = incompleteQuery.match(/^(.*)#(not:)?form:([^#+~*=[\]\/(). ]+)$/i)
+    let [ x, queryStrProceedingDetail, negator='', partialDetail ] = incompleteQuery.match(/^(.*)#(not:)?form:([^#+~*=[\]\/(). ]*)$/i)
+    partialDetail = stripGreekAccents(stripHebrewVowelsEtc(partialDetail)).toLowerCase()
 
     const [ forms, originalWords ] = await Promise.all([
       (async () => {
 
         let forms = await getDefDetailArrayFromProceedingStrongs({ queryStrProceedingDetail, detailType: "forms", partialDetail, limit, models })
 
-        if(!forms) {  // i.e. there wasn't a proceeeding strongs
+        if(!forms && partialDetail) {  // i.e. there wasn't a proceeeding strongs
           const versionId = containsHebrewChars(partialDetail) ? `uhb` : `ugnt`
-          forms = await models[`${versionId}UnitWords`].findAll({
+          forms = await models[`${versionId}UnitWord`].findAll({
             where: {
               id: {
                 [Op.like]: `verseNumber:form:${safeifyForLike(partialDetail)}%`
@@ -167,7 +172,7 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
           })
         }
 
-        return forms
+        return forms || []
 
       })(),
       getOriginalWordsFromStrongs({ strongs: getStrongsFromQueryStr(queryStrProceedingDetail), languageId, models }),
@@ -227,19 +232,23 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
       }
     }
 
+    const includeHits = (!queryStrProceedingDetail && !negator)
+
     const [ originalWords, originalWordsForSuggestions ] = await Promise.all([
       getOriginalWordsFromStrongs({ strongs: getStrongsFromQueryStr(queryStrProceedingDetail), languageId, models }),
-      getOriginalWordsFromStrongs({ where, languageId, limit, models }),
+      getOriginalWordsFromStrongs({ includeHits, where, languageId, limit, models }),
     ])
 
     for(let strongs in originalWordsForSuggestions) {
+      const { hits: resultCount, ...originalWordsInfo } = originalWordsForSuggestions[strongs]
       suggestions.push({
         from: `look-up`,
         suggestedQuery: `${queryStrProceedingDetail}#${negator}${strongs}`,
         originalWords: {
           ...originalWords,
-          [strongs]: originalWordsForSuggestions[strongs],
+          [strongs]: originalWordsInfo,
         },
+        ...(!resultCount ? {} : { resultCount }),
       })
     }
 

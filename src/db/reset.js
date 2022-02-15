@@ -23,6 +23,7 @@ const { setUpConnection } = require('./connect')
               'ugntUnitRange',
               'definition',
               'languageSpecificDefinition',
+              'lemma',
             ].includes(model)
           ))
           .map(model => `TRUNCATE table ${global.connection.models[model].tableName};`)
