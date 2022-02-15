@@ -1,4 +1,65 @@
-process.exit()  // I have modified these by hand and so cannot run this again
+require('dotenv').config()
+
+const mysql = require('mysql2/promise')
+const fs = require('fs').promises
+
+const utils = require('./utils')
+
+;(async() => {
+
+  const connection = await mysql.createConnection({
+    host: process.env.DB_NAME || "localhost",
+    database: process.env.HOST || 'bibletags',
+    user: process.env.USERNAME || "root",
+    password: process.env.PASSWORD || "",
+    multipleStatements: true,
+  })
+
+  console.log(`\nSTARTING createTempEngGloss...`)
+
+  const [[ hasRow ]] = await connection.query(`SELECT id FROM languageSpecificDefinitions LIMIT 1`)
+
+  if(!hasRow) {
+    const sqlImport = (await fs.readFile(`src/data/tempEnglishDefs.sql`)).toString()
+    await connection.query(sqlImport)
+  }
+
+  // NOTE: Following block was used to get the defs imported. They were then modified some and so this should not be run again.
+
+  // const [[ hasDodson ]] = await connection.query(`SHOW TABLES LIKE 'dodson'`)
+
+  // if(!hasDodson) {
+  //   const sqlImport = (await fs.readFile(`src/data/dodson.sql`)).toString()
+  //   await connection.query(sqlImport)
+  // }
+
+  // const [ dodsonRows ] = await connection.query(`SELECT id, def FROM dodson`)
+
+  // await Promise.all(dodsonRows.map(async ({ id, def }) => {
+  //   let endDigit
+  //   if(!/\+/.test(id)) endDigit = 0
+  //   if(/\+1/.test(id)) endDigit = 5
+  //   if(endDigit === undefined) return ``
+  //   const strongs = `G${`000${id.slice(1).replace(/\+.*$/, '')}`.slice(-4)}${endDigit}`
+
+  //   const [[ inDefinitionTable ]] = await connection.query(`SELECT id FROM definitions WHERE id='${strongs}'`)
+
+  //   if(inDefinitionTable) {
+  //     await connection.query(`INSERT INTO languageSpecificDefinitions (gloss, syn, rel, lexEntry, languageId, definitionId) VALUES ('${def}', '[]', '[]', 'null', 'eng', '${strongs}')`)
+  //   } else {
+  //     console.log(`Didnt find: ${strongs}`)
+  //   }
+
+  // }))
+
+  console.log(`\nCOMPLETED\n`)
+  process.exit()
+
+})()
+
+// I have modified this data by hand and so cannot run the below again
+
+/*
 
 require('dotenv').config()
 
@@ -120,3 +181,5 @@ connection.connect(async (err) => {
   process.exit()
 
 })
+
+*/

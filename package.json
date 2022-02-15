@@ -27,7 +27,7 @@
     "do-setup-db": "node src/db/setup.js && node src/db/seed.js",
     "do-imports": "node ./src/scripts/importUHBFromUsfm.js && node ./src/scripts/importUGNTFromUsfm.js",
     "do-unit-words": "node ./src/scripts/populateUHBUnitWordsTable.js && node ./src/scripts/populateUGNTUnitWordsTable.js",
-    "do-defs-and-lemma": "node ./src/scripts/createUHBDefAndPOS.js && node ./src/scripts/createUGNTDefAndPOS.js && node ./src/scripts/createLemmaTable.js",
+    "do-defs-and-lemma": "node ./src/scripts/createUHBDefAndPOS.js && node ./src/scripts/createUGNTDefAndPOS.js && node ./src/scripts/createLemmaTable.js && node ./src/scripts/createTempEngGloss.js",
     "reset-db": "npm run go-reset-db -s",
     "go-reset-db": "(echo '-------------------------\nResetting the database...\n-------------------------\n\n** WARNING **  This will wipe all current data except for uhbVerses, uhbWords, uhbUnitWord, uhbUnitRange, ugntVerses, ugntWords, ugntUnitWord, ugntUnitRange, and definitions tables!\n' && npm run confirm && npm run do-reset-db) || true",
     "do-reset-db": "node src/db/reset.js && node src/db/seed.js",
