@@ -193,6 +193,7 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
       incompleteQuery.match(/^(.*)#(not:)?([0-9a-z\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]+)$/i)
       || incompleteQuery.match(/^()()([\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]+)$/i)
     )
+    const previousOrigWordLanguageLetter = (queryStrProceedingDetail.match(/#([GH])[0-9]{5}/) || [])[1]
 
     let where
 
@@ -232,6 +233,11 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
         simplifiedVocal: {
           [Op.like]: `${safeifyForLike(stripVocalOfAccents(partialDetail))}%`,
         },
+        ...(!previousOrigWordLanguageLetter ? {} : {
+          id: {
+            [Op.like]: `${previousOrigWordLanguageLetter}%`,
+          },
+        }),
       }
     }
 
