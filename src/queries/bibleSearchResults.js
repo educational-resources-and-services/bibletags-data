@@ -3,7 +3,6 @@ const { getQueryAndFlagInfo, bibleSearch, bibleSearchFlagMap } = require('@bible
 
 const bibleSearchResults = async (args, req, queryInfo) => {
 
-let a = Date.now()
   const { query, flags } = getQueryAndFlagInfo({ ...args, FLAG_MAP: bibleSearchFlagMap })
 
   const { models } = global.connection
