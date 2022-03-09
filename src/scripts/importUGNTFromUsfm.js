@@ -48,7 +48,7 @@ connection.connect(async (err) => {
       }              
 
       filenames = files.filter(filename => filename.match(/^[0-9]{2}-\w{3}\.usfm$/))
-      // filenames = filenames.slice(1)
+      // filenames = files.slice(0,1)
 
       resolve()
     })
@@ -219,7 +219,7 @@ connection.connect(async (err) => {
 
         }
 
-        let pLine, nextChapter
+        let pLine, chLine, nextChapter
         usfm.split(/\n/g).forEach(line => {
 
           const chapterMatch = line.match(/^\\c ([0-9]+)/)
@@ -232,6 +232,7 @@ connection.connect(async (err) => {
 
           if(chapterMatch) {
             nextChapter = parseInt(chapterMatch[1], 10)
+            chLine = line
             return
           }
 
@@ -239,16 +240,16 @@ connection.connect(async (err) => {
             chapter = nextChapter
             verse = parseInt(verseMatch[1], 10)
             verseNumber++
-            return
           }
 
           if(line.match(/^\\p/)) {
             pLine = line
           }
 
-          if(line.match(/\\w |\\f |\\zApparatusJson /)) {
+          if(verseMatch || line.match(/\\w |\\f |\\zApparatusJson /)) {
             pLine && currentVerseContent.push(pLine)
-            pLine = undefined
+            chLine && currentVerseContent.push(chLine)
+            pLine = chLine = undefined
             currentVerseContent.push(line)
           }
 

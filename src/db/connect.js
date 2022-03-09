@@ -684,6 +684,13 @@ const setUpConnection = ({
           isEmail: true,
         },
       },
+      name: {
+        type: Sequelize.STRING(255),
+        notEmpty: true,
+      },
+      image: {
+        type: Sequelize.STRING(255),
+      },
       rating: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -718,6 +725,9 @@ const setUpConnection = ({
       ],
     },
   )
+
+  User.belongsTo(Language, required)
+  Language.hasMany(User)
 
   //////////////////////////////////////////////////////////////////
 
