@@ -1,6 +1,7 @@
 {
   "name": "@bibletags/bibletags-data",
   "version": "0.5.0",
+  "main": "app.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/educational-resources-and-services/bibletags-data.git"

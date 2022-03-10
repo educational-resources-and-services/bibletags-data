@@ -31,7 +31,7 @@ app.use(
   bodyParser.raw({ type: 'application/json' }),
 )
 app.use(bodyParser.json({ limit: '50mb' }))
-app.use(cors())
+app.use(cors({ origin: true }))
 app.use(authenticate({
   connectionObj,
   userTableColNameMap: {
