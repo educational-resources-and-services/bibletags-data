@@ -12,8 +12,10 @@ describe('Query: chapter', async () => {
 
     chapter.should.eql([
       {
-        id: "01001001-uhb",
+        id: '01001001-uhb',
         usfm: '\\p\n' +
+          '\\c 1\n' +
+          '\\v 1\n' +
           '\\w בְּ⁠רֵאשִׁ֖ית|lemma="רֵאשִׁית" strong="b:H72250" x-morph="He,R:Ncfsa" x-id="01h7N"\\w*\n' +
           '\\w בָּרָ֣א|lemma="בָּרָא" strong="H12541" x-morph="He,Vqp3ms" x-id="01RAp"\\w*\n' +
           '\\w אֱלֹהִ֑ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01cuO"\\w*\n' +
@@ -23,8 +25,9 @@ describe('Query: chapter', async () => {
           '\\w הָ⁠אָֽרֶץ|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="01VFX"\\w*׃'
       },
       {
-        id: "01001002-uhb",
-        usfm: '\\w וְ⁠הָ⁠אָ֗רֶץ|lemma="אֶרֶץ" strong="c:d:H07760" x-morph="He,C:Td:Ncbsa" x-id="01SU2"\\w*\n' +
+        id: '01001002-uhb',
+        usfm: '\\v 2\n' +
+          '\\w וְ⁠הָ⁠אָ֗רֶץ|lemma="אֶרֶץ" strong="c:d:H07760" x-morph="He,C:Td:Ncbsa" x-id="01SU2"\\w*\n' +
           '\\w הָיְתָ֥ה|lemma="הָיָה" strong="H19610" x-morph="He,Vqp3fs" x-id="01tJr"\\w*\n' +
           '\\w תֹ֨הוּ֙|lemma="תֹּהוּ" strong="H84140" x-morph="He,Ncmsa" x-id="01kYH"\\w*\n' +
           '\\w וָ⁠בֹ֔הוּ|lemma="בֹּהוּ" strong="c:H09220" x-morph="He,C:Ncmsa" x-id="01Aud"\\w*\n' +
@@ -38,16 +41,18 @@ describe('Query: chapter', async () => {
           '\\w הַ⁠מָּֽיִם|lemma="מַיִם" strong="d:H43250" x-morph="He,Td:Ncmpa" x-id="019DZ"\\w*׃'
       },
       {
-        id: "01001003-uhb",
-        usfm: '\\w וַ⁠יֹּ֥אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01UIu"\\w*\n' +
+        id: '01001003-uhb',
+        usfm: '\\v 3\n' +
+          '\\w וַ⁠יֹּ֥אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01UIu"\\w*\n' +
           '\\w אֱלֹהִ֖ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01RZO"\\w*\n' +
           '\\w יְהִ֣י|lemma="הָיָה" strong="H19610" x-morph="He,Vqj3ms" x-id="01XlI"\\w*\n' +
           '\\w א֑וֹר|lemma="אוֹר" strong="H02160" x-morph="He,Ncbsa" x-id="01w2J"\\w*\n' +
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01lLB"\\w*־\\w אֽוֹר|lemma="אוֹר" strong="H02160" x-morph="He,Ncbsa" x-id="01WWH"\\w*׃'
       },
       {
-        id: "01001004-uhb",
-        usfm: '\\w וַ⁠יַּ֧רְא|lemma="רָאָה" strong="c:H72000" x-morph="He,C:Vqw3ms" x-id="01AnW"\\w*\n' +
+        id: '01001004-uhb',
+        usfm: '\\v 4\n' +
+          '\\w וַ⁠יַּ֧רְא|lemma="רָאָה" strong="c:H72000" x-morph="He,C:Vqw3ms" x-id="01AnW"\\w*\n' +
           '\\w אֱלֹהִ֛ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01rzL"\\w*\n' +
           '\\w אֶת|lemma="אֵת" strong="H08530" x-morph="He,To" x-id="013RB"\\w*־\\w הָ⁠א֖וֹר|lemma="אוֹר" strong="d:H02160" x-morph="He,Td:Ncbsa" x-id="01lTA"\\w*\n' +
           '\\w כִּי|lemma="כִּי" strong="H35881" x-morph="He,C" x-id="01NCs"\\w*־\\w ט֑וֹב|lemma="טוֹב" strong="H28961" x-morph="He,Aamsa" x-id="019qr"\\w*\n' +
@@ -59,8 +64,9 @@ describe('Query: chapter', async () => {
           '\\w הַ⁠חֹֽשֶׁךְ|lemma="חֹשֶׁךְ" strong="d:H28220" x-morph="He,Td:Ncmsa" x-id="01EmI"\\w*׃'
       },
       {
-        id: "01001005-uhb",
-        usfm: '\\w וַ⁠יִּקְרָ֨א|lemma="קָרָא" strong="c:H71210" x-morph="He,C:Vqw3ms" x-id="016jD"\\w*\n' +
+        id: '01001005-uhb',
+        usfm: '\\v 5\n' +
+          '\\w וַ⁠יִּקְרָ֨א|lemma="קָרָא" strong="c:H71210" x-morph="He,C:Vqw3ms" x-id="016jD"\\w*\n' +
           '\\w אֱלֹהִ֤ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01Ba4"\\w* ׀\n' +
           '\\w לָ⁠אוֹר֙|lemma="אוֹר" strong="l:H02160" x-morph="He,Rd:Ncbsa" x-id="01ee6"\\w*\n' +
           '\\w י֔וֹם|lemma="יוֹם" strong="H31170" x-morph="He,Ncmsa" x-id="01ukF"\\w*\n' +
@@ -73,8 +79,10 @@ describe('Query: chapter', async () => {
           '\\w אֶחָֽד|lemma="אֶחָד" strong="H02590" x-morph="He,Acmsa" x-id="019BK"\\w*׃פ'
       },
       {
-        id: "01001006-uhb",
-        usfm: '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01OAf"\\w*\n' +
+        id: '01001006-uhb',
+        usfm: '\\p\n' +
+          '\\v 6\n' +
+          '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01OAf"\\w*\n' +
           '\\w אֱלֹהִ֔ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01dJL"\\w*\n' +
           '\\w יְהִ֥י|lemma="הָיָה" strong="H19610" x-morph="He,Vqj3ms" x-id="014dF"\\w*\n' +
           '\\w רָקִ֖יעַ|lemma="רָקִיעַ" strong="H75490" x-morph="He,Ncmsa" x-id="01KO8"\\w*\n' +
@@ -87,8 +95,9 @@ describe('Query: chapter', async () => {
           '\\w לָ⁠מָֽיִם|lemma="מַיִם" strong="l:H43250" x-morph="He,R:Ncmpa" x-id="01xvA"\\w*׃'
       },
       {
-        id: "01001007-uhb",
-        usfm: '\\w וַ⁠יַּ֣עַשׂ|lemma="עָשָׂה" strong="c:H62131" x-morph="He,C:Vqw3ms" x-id="01v3P"\\w*\n' +
+        id: '01001007-uhb',
+        usfm: '\\v 7\n' +
+          '\\w וַ⁠יַּ֣עַשׂ|lemma="עָשָׂה" strong="c:H62131" x-morph="He,C:Vqw3ms" x-id="01v3P"\\w*\n' +
           '\\w אֱלֹהִים֮|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01Yfq"\\w*\n' +
           '\\w אֶת|lemma="אֵת" strong="H08530" x-morph="He,To" x-id="018TW"\\w*־\\w הָ⁠רָקִיעַ֒|lemma="רָקִיעַ" strong="d:H75490" x-morph="He,Td:Ncmsa" x-id="01E3E"\\w*\n' +
           '\\w וַ⁠יַּבְדֵּ֗ל|lemma="בָּדַל" strong="c:H09140" x-morph="He,C:Vhw3ms" x-id="01Fy2"\\w*\n' +
@@ -105,8 +114,9 @@ describe('Query: chapter', async () => {
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01He0"\\w*־\\w כֵֽן|lemma="כֵּן" strong="H36513" x-morph="He,D" x-id="01V2u"\\w*׃'
       },
       {
-        id: "01001008-uhb",
-        usfm: '\\w וַ⁠יִּקְרָ֧א|lemma="קָרָא" strong="c:H71210" x-morph="He,C:Vqw3ms" x-id="01Fxp"\\w*\n' +
+        id: '01001008-uhb',
+        usfm: '\\v 8\n' +
+          '\\w וַ⁠יִּקְרָ֧א|lemma="קָרָא" strong="c:H71210" x-morph="He,C:Vqw3ms" x-id="01Fxp"\\w*\n' +
           '\\w אֱלֹהִ֛ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01Yun"\\w*\n' +
           '\\w לָֽ⁠רָקִ֖יעַ|lemma="רָקִיעַ" strong="l:H75490" x-morph="He,Rd:Ncmsa" x-id="01gZf"\\w*\n' +
           '\\w שָׁמָ֑יִם|lemma="שָׁמַיִם" strong="H80640" x-morph="He,Ncmpa" x-id="01dpe"\\w*\n' +
@@ -116,8 +126,10 @@ describe('Query: chapter', async () => {
           '\\w שֵׁנִֽי|lemma="שֵׁנִי" strong="H81450" x-morph="He,Aomsa" x-id="01uxw"\\w*׃פ'
       },
       {
-        id: "01001009-uhb",
-        usfm: '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01kxD"\\w*\n' +
+        id: '01001009-uhb',
+        usfm: '\\p\n' +
+          '\\v 9\n' +
+          '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01kxD"\\w*\n' +
           '\\w אֱלֹהִ֗ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01S9q"\\w*\n' +
           '\\w יִקָּו֨וּ|lemma="קָוָה" strong="H69602" x-morph="He,VNj3mp" x-id="01agC"\\w*\n' +
           '\\w הַ⁠מַּ֜יִם|lemma="מַיִם" strong="d:H43250" x-morph="He,Td:Ncmpa" x-id="01WB1"\\w*\n' +
@@ -130,8 +142,9 @@ describe('Query: chapter', async () => {
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01flp"\\w*־\\w כֵֽן|lemma="כֵּן" strong="H36513" x-morph="He,D" x-id="015sU"\\w*׃'
       },
       {
-        id: "01001010-uhb",
-        usfm: '\\w וַ⁠יִּקְרָ֨א|lemma="קָרָא" strong="c:H71210" x-morph="He,C:Vqw3ms" x-id="01MW5"\\w*\n' +
+        id: '01001010-uhb',
+        usfm: '\\v 10\n' +
+          '\\w וַ⁠יִּקְרָ֨א|lemma="קָרָא" strong="c:H71210" x-morph="He,C:Vqw3ms" x-id="01MW5"\\w*\n' +
           '\\w אֱלֹהִ֤ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="010Ra"\\w* ׀\n' +
           '\\w לַ⁠יַּבָּשָׁה֙|lemma="יַבָּשָׁה" strong="l:H30040" x-morph="He,Rd:Ncfsa" x-id="01O5B"\\w*\n' +
           '\\w אֶ֔רֶץ|lemma="אֶרֶץ" strong="H07760" x-morph="He,Ncbsa" x-id="01jTS"\\w*\n' +
@@ -144,8 +157,9 @@ describe('Query: chapter', async () => {
           '\\w כִּי|lemma="כִּי" strong="H35881" x-morph="He,C" x-id="01cFc"\\w*־\\w טֽוֹב|lemma="טוֹב" strong="H28961" x-morph="He,Aamsa" x-id="01r3H"\\w*׃'
       },
       {
-        id: "01001011-uhb",
-        usfm: '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01efe"\\w*\n' +
+        id: '01001011-uhb',
+        usfm: '\\v 11\n' +
+          '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01efe"\\w*\n' +
           '\\w אֱלֹהִ֗ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="013dr"\\w*\n' +
           '\\w תַּֽדְשֵׁ֤א|lemma="דָּשָׁא" strong="H18760" x-morph="He,Vhj3fs" x-id="01MbD"\\w*\n' +
           '\\w הָ⁠אָ֨רֶץ֙|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="01Lvu"\\w*\n' +
@@ -164,8 +178,9 @@ describe('Query: chapter', async () => {
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01HWI"\\w*־\\w כֵֽן|lemma="כֵּן" strong="H36513" x-morph="He,D" x-id="01HCk"\\w*׃'
       },
       {
-        id: "01001012-uhb",
-        usfm: '\\w וַ⁠תּוֹצֵ֨א|lemma="יָצָא" strong="c:H33180" x-morph="He,C:Vhw3fs" x-id="01dgl"\\w*\n' +
+        id: '01001012-uhb',
+        usfm: '\\v 12\n' +
+          '\\w וַ⁠תּוֹצֵ֨א|lemma="יָצָא" strong="c:H33180" x-morph="He,C:Vhw3fs" x-id="01dgl"\\w*\n' +
           '\\w הָ⁠אָ֜רֶץ|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="01cW9"\\w*\n' +
           '\\w דֶּ֠שֶׁא|lemma="דֶּשֶׁא" strong="H18770" x-morph="He,Ncmsa" x-id="01Uso"\\w*\n' +
           '\\w עֵ֣שֶׂב|lemma="עֶשֶׂב" strong="H62120" x-morph="He,Ncmsa" x-id="01jXM"\\w*\n' +
@@ -182,15 +197,18 @@ describe('Query: chapter', async () => {
           '\\w כִּי|lemma="כִּי" strong="H35881" x-morph="He,C" x-id="01fS5"\\w*־\\w טֽוֹב|lemma="טוֹב" strong="H28961" x-morph="He,Aamsa" x-id="01Tm7"\\w*׃'
       },
       {
-        id: "01001013-uhb",
-        usfm: '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01qVg"\\w*־\\w עֶ֥רֶב|lemma="עֶרֶב" strong="H61530" x-morph="He,Ncmsa" x-id="01ImJ"\\w*\n' +
+        id: '01001013-uhb',
+        usfm: '\\v 13\n' +
+          '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01qVg"\\w*־\\w עֶ֥רֶב|lemma="עֶרֶב" strong="H61530" x-morph="He,Ncmsa" x-id="01ImJ"\\w*\n' +
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01Xo4"\\w*־\\w בֹ֖קֶר|lemma="בֹּקֶר" strong="H12420" x-morph="He,Ncmsa" x-id="01Lyq"\\w*\n' +
           '\\w י֥וֹם|lemma="יוֹם" strong="H31170" x-morph="He,Ncmsa" x-id="010s1"\\w*\n' +
           '\\w שְׁלִישִֽׁי|lemma="שְׁלִישִׁי" strong="H79920" x-morph="He,Aomsa" x-id="017Ip"\\w*׃פ'
       },
       {
-        id: "01001014-uhb",
-        usfm: '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01mRU"\\w*\n' +
+        id: '01001014-uhb',
+        usfm: '\\p\n' +
+          '\\v 14\n' +
+          '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01mRU"\\w*\n' +
           '\\w אֱלֹהִ֗ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01ChP"\\w*\n' +
           '\\w יְהִ֤י|lemma="הָיָה" strong="H19610" x-morph="He,Vqj3ms" x-id="01ylW"\\w*\n' +
           '\\w מְאֹרֹת֙|lemma="מָאוֹר" strong="H39740" x-morph="He,Ncmpa" x-id="01CWJ"\\w*\n' +
@@ -208,8 +226,9 @@ describe('Query: chapter', async () => {
           '\\w וְ⁠שָׁנִֽים|lemma="שָׁנָה" strong="c:H81410" x-morph="He,C:Ncfpa" x-id="01hUJ"\\w*׃'
       },
       {
-        id: "01001015-uhb",
-        usfm: '\\w וְ⁠הָי֤וּ|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqq3cp" x-id="019So"\\w*\n' +
+        id: '01001015-uhb',
+        usfm: '\\v 15\n' +
+          '\\w וְ⁠הָי֤וּ|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqq3cp" x-id="019So"\\w*\n' +
           '\\w לִ⁠מְאוֹרֹת֙|lemma="מָאוֹר" strong="l:H39740" x-morph="He,R:Ncmpa" x-id="01hmE"\\w*\n' +
           '\\w בִּ⁠רְקִ֣יעַ|lemma="רָקִיעַ" strong="b:H75490" x-morph="He,R:Ncmsc" x-id="01S5y"\\w*\n' +
           '\\w הַ⁠שָּׁמַ֔יִם|lemma="שָׁמַיִם" strong="d:H80640" x-morph="He,Td:Ncmpa" x-id="01Gh4"\\w*\n' +
@@ -218,8 +237,9 @@ describe('Query: chapter', async () => {
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01qy3"\\w*־\\w כֵֽן|lemma="כֵּן" strong="H36513" x-morph="He,D" x-id="01Mbm"\\w*׃'
       },
       {
-        id: "01001016-uhb",
-        usfm: '\\w וַ⁠יַּ֣עַשׂ|lemma="עָשָׂה" strong="c:H62131" x-morph="He,C:Vqw3ms" x-id="01c7s"\\w*\n' +
+        id: '01001016-uhb',
+        usfm: '\\v 16\n' +
+          '\\w וַ⁠יַּ֣עַשׂ|lemma="עָשָׂה" strong="c:H62131" x-morph="He,C:Vqw3ms" x-id="01c7s"\\w*\n' +
           '\\w אֱלֹהִ֔ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="014NW"\\w*\n' +
           '\\w אֶת|lemma="אֵת" strong="H08530" x-morph="He,To" x-id="01KEp"\\w*־\\w שְׁנֵ֥י|lemma="שְׁנַיִם" strong="H81470" x-morph="He,Acmdc" x-id="01Bwa"\\w*\n' +
           '\\w הַ⁠מְּאֹרֹ֖ת|lemma="מָאוֹר" strong="d:H39740" x-morph="He,Td:Ncmpa" x-id="01UUu"\\w*\n' +
@@ -236,8 +256,9 @@ describe('Query: chapter', async () => {
           '\\w הַ⁠כּוֹכָבִֽים|lemma="כּוֹכָב" strong="d:H35560" x-morph="He,Td:Ncmpa" x-id="01X2V"\\w*׃'
       },
       {
-        id: "01001017-uhb",
-        usfm: '\\w וַ⁠יִּתֵּ֥ן|lemma="נָתַן" strong="c:H54140" x-morph="He,C:Vqw3ms" x-id="01Mg9"\\w*\n' +
+        id: '01001017-uhb',
+        usfm: '\\v 17\n' +
+          '\\w וַ⁠יִּתֵּ֥ן|lemma="נָתַן" strong="c:H54140" x-morph="He,C:Vqw3ms" x-id="01Mg9"\\w*\n' +
           '\\w אֹתָ֛⁠ם|lemma="אֵת" strong="H08530" x-morph="He,To:Sp3mp" x-id="01Az6"\\w*\n' +
           '\\w אֱלֹהִ֖ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01qyl"\\w*\n' +
           '\\w בִּ⁠רְקִ֣יעַ|lemma="רָקִיעַ" strong="b:H75490" x-morph="He,R:Ncmsc" x-id="010vc"\\w*\n' +
@@ -246,8 +267,9 @@ describe('Query: chapter', async () => {
           '\\w עַל|lemma="עַל" strong="H59211" x-morph="He,R" x-id="01BC8"\\w*־\\w הָ⁠אָֽרֶץ|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="018iK"\\w*׃'
       },
       {
-        id: "01001018-uhb",
-        usfm: '\\w וְ⁠לִ⁠מְשֹׁל֙|lemma="מָשַׁל" strong="c:l:H49100" x-morph="He,C:R:Vqc" x-id="01YuS"\\w*\n' +
+        id: '01001018-uhb',
+        usfm: '\\v 18\n' +
+          '\\w וְ⁠לִ⁠מְשֹׁל֙|lemma="מָשַׁל" strong="c:l:H49100" x-morph="He,C:R:Vqc" x-id="01YuS"\\w*\n' +
           '\\w בַּ⁠יּ֣וֹם|lemma="יוֹם" strong="b:H31170" x-morph="He,Rd:Ncmsa" x-id="01ExS"\\w*\n' +
           '\\w וּ⁠בַ⁠לַּ֔יְלָה|lemma="לַיִל" strong="c:b:H39150" x-morph="He,C:Rd:Ncmsa" x-id="01H38"\\w*\n' +
           '\\w וּֽ⁠לֲ⁠הַבְדִּ֔יל|lemma="בָּדַל" strong="c:l:H09140" x-morph="He,C:R:Vhc" x-id="01kwR"\\w*\n' +
@@ -260,15 +282,18 @@ describe('Query: chapter', async () => {
           '\\w כִּי|lemma="כִּי" strong="H35881" x-morph="He,C" x-id="01v2I"\\w*־\\w טֽוֹב|lemma="טוֹב" strong="H28961" x-morph="He,Aamsa" x-id="01qkn"\\w*׃'
       },
       {
-        id: "01001019-uhb",
-        usfm: '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01SKV"\\w*־\\w עֶ֥רֶב|lemma="עֶרֶב" strong="H61530" x-morph="He,Ncmsa" x-id="01Xlb"\\w*\n' +
+        id: '01001019-uhb',
+        usfm: '\\v 19\n' +
+          '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01SKV"\\w*־\\w עֶ֥רֶב|lemma="עֶרֶב" strong="H61530" x-morph="He,Ncmsa" x-id="01Xlb"\\w*\n' +
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01XUV"\\w*־\\w בֹ֖קֶר|lemma="בֹּקֶר" strong="H12420" x-morph="He,Ncmsa" x-id="012BE"\\w*\n' +
           '\\w י֥וֹם|lemma="יוֹם" strong="H31170" x-morph="He,Ncmsa" x-id="01gSq"\\w*\n' +
           '\\w רְבִיעִֽי|lemma="רְבִיעִי" strong="H72430" x-morph="He,Aomsa" x-id="01rKL"\\w*׃פ'
       },
       {
-        id: "01001020-uhb",
-        usfm: '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="015cM"\\w*\n' +
+        id: '01001020-uhb',
+        usfm: '\\p\n' +
+          '\\v 20\n' +
+          '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="015cM"\\w*\n' +
           '\\w אֱלֹהִ֔ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01bCp"\\w*\n' +
           '\\w יִשְׁרְצ֣וּ|lemma="שָׁרַץ" strong="H83170" x-morph="He,Vqi3mp" x-id="0185d"\\w*\n' +
           '\\w הַ⁠מַּ֔יִם|lemma="מַיִם" strong="d:H43250" x-morph="He,Td:Ncmpa" x-id="01nsz"\\w*\n' +
@@ -283,8 +308,9 @@ describe('Query: chapter', async () => {
           '\\w הַ⁠שָּׁמָֽיִם|lemma="שָׁמַיִם" strong="d:H80640" x-morph="He,Td:Ncmpa" x-id="01ueK"\\w*׃'
       },
       {
-        id: "01001021-uhb",
-        usfm: '\\w וַ⁠יִּבְרָ֣א|lemma="בָּרָא" strong="c:H12541" x-morph="He,C:Vqw3ms" x-id="01vUO"\\w*\n' +
+        id: '01001021-uhb',
+        usfm: '\\v 21\n' +
+          '\\w וַ⁠יִּבְרָ֣א|lemma="בָּרָא" strong="c:H12541" x-morph="He,C:Vqw3ms" x-id="01vUO"\\w*\n' +
           '\\w אֱלֹהִ֔ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01Itb"\\w*\n' +
           '\\w אֶת|lemma="אֵת" strong="H08530" x-morph="He,To" x-id="018X0"\\w*־\\w הַ⁠תַּנִּינִ֖ם|lemma="תַּנִּין" strong="d:H85772" x-morph="He,Td:Ncmpa" x-id="01BRT"\\w*\n' +
           '\\w הַ⁠גְּדֹלִ֑ים|lemma="גָּדוֹל" strong="d:H14191" x-morph="He,Td:Aampa" x-id="01yRi"\\w*\n' +
@@ -305,8 +331,9 @@ describe('Query: chapter', async () => {
           '\\w כִּי|lemma="כִּי" strong="H35881" x-morph="He,C" x-id="01vNM"\\w*־\\w טֽוֹב|lemma="טוֹב" strong="H28961" x-morph="He,Aamsa" x-id="017Xf"\\w*׃'
       },
       {
-        id: "01001022-uhb",
-        usfm: '\\w וַ⁠יְבָ֧רֶךְ|lemma="בָּרַךְ" strong="c:H12880" x-morph="He,C:Vpw3ms" x-id="01eDI"\\w*\n' +
+        id: '01001022-uhb',
+        usfm: '\\v 22\n' +
+          '\\w וַ⁠יְבָ֧רֶךְ|lemma="בָּרַךְ" strong="c:H12880" x-morph="He,C:Vpw3ms" x-id="01eDI"\\w*\n' +
           '\\w אֹתָ֛⁠ם|lemma="אֵת" strong="H08530" x-morph="He,To:Sp3mp" x-id="01lcu"\\w*\n' +
           '\\w אֱלֹהִ֖ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01IZn"\\w*\n' +
           '\\w לֵ⁠אמֹ֑ר|lemma="אָמַר" strong="l:H05590" x-morph="He,R:Vqc" x-id="01Ny2"\\w*\n' +
@@ -320,15 +347,18 @@ describe('Query: chapter', async () => {
           '\\w בָּ⁠אָֽרֶץ|lemma="אֶרֶץ" strong="b:H07760" x-morph="He,Rd:Ncbsa" x-id="017fn"\\w*׃'
       },
       {
-        id: "01001023-uhb",
-        usfm: '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01qN8"\\w*־\\w עֶ֥רֶב|lemma="עֶרֶב" strong="H61530" x-morph="He,Ncmsa" x-id="01XOk"\\w*\n' +
+        id: '01001023-uhb',
+        usfm: '\\v 23\n' +
+          '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01qN8"\\w*־\\w עֶ֥רֶב|lemma="עֶרֶב" strong="H61530" x-morph="He,Ncmsa" x-id="01XOk"\\w*\n' +
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="017Ap"\\w*־\\w בֹ֖קֶר|lemma="בֹּקֶר" strong="H12420" x-morph="He,Ncmsa" x-id="01l3s"\\w*\n' +
           '\\w י֥וֹם|lemma="יוֹם" strong="H31170" x-morph="He,Ncmsa" x-id="016Ci"\\w*\n' +
           '\\w חֲמִישִֽׁי|lemma="חֲמִישִׁי" strong="H25490" x-morph="He,Aomsa" x-id="01v5G"\\w*׃פ'
       },
       {
-        id: "01001024-uhb",
-        usfm: '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01RVD"\\w*\n' +
+        id: '01001024-uhb',
+        usfm: '\\p\n' +
+          '\\v 24\n' +
+          '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01RVD"\\w*\n' +
           '\\w אֱלֹהִ֗ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01Xbu"\\w*\n' +
           '\\w תּוֹצֵ֨א|lemma="יָצָא" strong="H33180" x-morph="He,Vhj3fs" x-id="01e1D"\\w*\n' +
           '\\w הָ⁠אָ֜רֶץ|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="01VnJ"\\w*\n' +
@@ -342,8 +372,9 @@ describe('Query: chapter', async () => {
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01WI2"\\w*־\\w כֵֽן|lemma="כֵּן" strong="H36513" x-morph="He,D" x-id="01wZD"\\w*׃'
       },
       {
-        id: "01001025-uhb",
-        usfm: '\\w וַ⁠יַּ֣עַשׂ|lemma="עָשָׂה" strong="c:H62131" x-morph="He,C:Vqw3ms" x-id="01CPa"\\w*\n' +
+        id: '01001025-uhb',
+        usfm: '\\v 25\n' +
+          '\\w וַ⁠יַּ֣עַשׂ|lemma="עָשָׂה" strong="c:H62131" x-morph="He,C:Vqw3ms" x-id="01CPa"\\w*\n' +
           '\\w אֱלֹהִים֩|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01pvK"\\w*\n' +
           '\\w אֶת|lemma="אֵת" strong="H08530" x-morph="He,To" x-id="01IZe"\\w*־\\w חַיַּ֨ת|lemma="חַי" strong="H24163" x-morph="He,Ncfsc" x-id="01HMe"\\w*\n' +
           '\\w הָ⁠אָ֜רֶץ|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="01jpf"\\w*\n' +
@@ -359,8 +390,9 @@ describe('Query: chapter', async () => {
           '\\w כִּי|lemma="כִּי" strong="H35881" x-morph="He,C" x-id="01Cgx"\\w*־\\w טֽוֹב|lemma="טוֹב" strong="H28961" x-morph="He,Aamsa" x-id="01Bxn"\\w*׃'
       },
       {
-        id: "01001026-uhb",
-        usfm: '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01DyS"\\w*\n' +
+        id: '01001026-uhb',
+        usfm: '\\v 26\n' +
+          '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01DyS"\\w*\n' +
           '\\w אֱלֹהִ֔ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01VMe"\\w*\n' +
           '\\w נַֽעֲשֶׂ֥ה|lemma="עָשָׂה" strong="H62131" x-morph="He,Vqi1cp" x-id="01TqE"\\w*\n' +
           '\\w אָדָ֛ם|lemma="אָדָם" strong="H01200" x-morph="He,Ncmsa" x-id="01Wjf"\\w*\n' +
@@ -378,8 +410,9 @@ describe('Query: chapter', async () => {
           '\\w עַל|lemma="עַל" strong="H59211" x-morph="He,R" x-id="015tq"\\w*־\\w הָ⁠אָֽרֶץ|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="01Gpw"\\w*׃'
       },
       {
-        id: "01001027-uhb",
-        usfm: '\\w וַ⁠יִּבְרָ֨א|lemma="בָּרָא" strong="c:H12541" x-morph="He,C:Vqw3ms" x-id="01a88"\\w*\n' +
+        id: '01001027-uhb',
+        usfm: '\\v 27\n' +
+          '\\w וַ⁠יִּבְרָ֨א|lemma="בָּרָא" strong="c:H12541" x-morph="He,C:Vqw3ms" x-id="01a88"\\w*\n' +
           '\\w אֱלֹהִ֤ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01Wb4"\\w* ׀\n' +
           '\\w אֶת|lemma="אֵת" strong="H08530" x-morph="He,To" x-id="01JUq"\\w*־\\w הָֽ⁠אָדָם֙|lemma="אָדָם" strong="d:H01200" x-morph="He,Td:Ncmsa" x-id="01AvX"\\w*\n' +
           '\\w בְּ⁠צַלְמ֔⁠וֹ|lemma="צֶלֶם" strong="b:H67540" x-morph="He,R:Ncmsc:Sp3ms" x-id="01xNp"\\w*\n' +
@@ -393,8 +426,9 @@ describe('Query: chapter', async () => {
           '\\w אֹתָֽ⁠ם|lemma="אֵת" strong="H08530" x-morph="He,To:Sp3mp" x-id="018zT"\\w*׃'
       },
       {
-        id: "01001028-uhb",
-        usfm: '\\w וַ⁠יְבָ֣רֶךְ|lemma="בָּרַךְ" strong="c:H12880" x-morph="He,C:Vpw3ms" x-id="01irU"\\w*\n' +
+        id: '01001028-uhb',
+        usfm: '\\v 28\n' +
+          '\\w וַ⁠יְבָ֣רֶךְ|lemma="בָּרַךְ" strong="c:H12880" x-morph="He,C:Vpw3ms" x-id="01irU"\\w*\n' +
           '\\w אֹתָ⁠ם֮|lemma="אֵת" strong="H08530" x-morph="He,To:Sp3mp" x-id="01QS7"\\w*\n' +
           '\\w אֱלֹהִים֒|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01u4R"\\w*\n' +
           '\\w וַ⁠יֹּ֨אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01xR2"\\w*\n' +
@@ -415,8 +449,9 @@ describe('Query: chapter', async () => {
           '\\w עַל|lemma="עַל" strong="H59211" x-morph="He,R" x-id="01gU5"\\w*־\\w הָ⁠אָֽרֶץ|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="014sm"\\w*׃'
       },
       {
-        id: "01001029-uhb",
-        usfm: '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01xPy"\\w*\n' +
+        id: '01001029-uhb',
+        usfm: '\\v 29\n' +
+          '\\w וַ⁠יֹּ֣אמֶר|lemma="אָמַר" strong="c:H05590" x-morph="He,C:Vqw3ms" x-id="01xPy"\\w*\n' +
           '\\w אֱלֹהִ֗ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01Dii"\\w*\n' +
           '\\w הִנֵּה֩|lemma="הִנֵּה" strong="H20090" x-morph="He,Tm" x-id="018ge"\\w*\n' +
           '\\w נָתַ֨תִּי|lemma="נָתַן" strong="H54140" x-morph="He,Vqp1cs" x-id="01tuP"\\w*\n' +
@@ -437,8 +472,9 @@ describe('Query: chapter', async () => {
           '\\w לְ⁠אָכְלָֽה|lemma="אׇכְלָה" strong="l:H04020" x-morph="He,R:Ncfsa" x-id="01m00"\\w*׃'
       },
       {
-        id: "01001030-uhb",
-        usfm: '\\w וּֽ⁠לְ⁠כָל|lemma="כֹּל" strong="c:l:H36050" x-morph="He,C:R:Ncmsc" x-id="01dAl"\\w*־\\w חַיַּ֣ת|lemma="חַי" strong="H24163" x-morph="He,Ncfsc" x-id="01zCe"\\w*\n' +
+        id: '01001030-uhb',
+        usfm: '\\v 30\n' +
+          '\\w וּֽ⁠לְ⁠כָל|lemma="כֹּל" strong="c:l:H36050" x-morph="He,C:R:Ncmsc" x-id="01dAl"\\w*־\\w חַיַּ֣ת|lemma="חַי" strong="H24163" x-morph="He,Ncfsc" x-id="01zCe"\\w*\n' +
           '\\w הָ֠⁠אָרֶץ|lemma="אֶרֶץ" strong="d:H07760" x-morph="He,Td:Ncbsa" x-id="01qa0"\\w*\n' +
           '\\w וּ⁠לְ⁠כָל|lemma="כֹּל" strong="c:l:H36050" x-morph="He,C:R:Ncmsc" x-id="01e5q"\\w*־\\w ע֨וֹף|lemma="עוֹף" strong="H57750" x-morph="He,Ncmsc" x-id="017LJ"\\w*\n' +
           '\\w הַ⁠שָּׁמַ֜יִם|lemma="שָׁמַיִם" strong="d:H80640" x-morph="He,Td:Ncmpa" x-id="01zeh"\\w*\n' +
@@ -454,8 +490,9 @@ describe('Query: chapter', async () => {
           '\\w וַֽ⁠יְהִי|lemma="הָיָה" strong="c:H19610" x-morph="He,C:Vqw3ms" x-id="01n6a"\\w*־\\w כֵֽן|lemma="כֵּן" strong="H36513" x-morph="He,D" x-id="01vE1"\\w*׃'
       },
       {
-        id: "01001031-uhb",
-        usfm: '\\w וַ⁠יַּ֤רְא|lemma="רָאָה" strong="c:H72000" x-morph="He,C:Vqw3ms" x-id="013Lh"\\w*\n' +
+        id: '01001031-uhb',
+        usfm: '\\v 31\n' +
+          '\\w וַ⁠יַּ֤רְא|lemma="רָאָה" strong="c:H72000" x-morph="He,C:Vqw3ms" x-id="013Lh"\\w*\n' +
           '\\w אֱלֹהִים֙|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01Bn8"\\w*\n' +
           '\\w אֶת|lemma="אֵת" strong="H08530" x-morph="He,To" x-id="01JuP"\\w*־\\w כָּל|lemma="כֹּל" strong="H36050" x-morph="He,Ncmsc" x-id="01x0M"\\w*־\\w אֲשֶׁ֣ר|lemma="אֲשֶׁר" strong="H08341" x-morph="He,Tr" x-id="01EwD"\\w*\n' +
           '\\w עָשָׂ֔ה|lemma="עָשָׂה" strong="H62131" x-morph="He,Vqp3ms" x-id="01mWe"\\w*\n' +
@@ -481,6 +518,8 @@ describe('Query: chapter', async () => {
       {
         id: '66022001-ugnt',
         usfm: '\\p\n' +
+          '\\c 22\n' +
+          '\\v 1\n' +
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66TOB"\\w*\n' +
           '\\w ἔδειξέν|lemma="δεικνύω" strong="G11660" x-morph="Gr,V,IAA3,,S," x-id="66FNk"\\w*\n' +
           '\\w μοι|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1D,S," x-id="66PXU"\\w*\n' +
@@ -499,11 +538,12 @@ describe('Query: chapter', async () => {
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66yTv"\\w*\n' +
           '\\w τοῦ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,GNS," x-id="66Cgt"\\w*\n' +
           '\\w Ἀρνίου|lemma="ἀρνίον" strong="G07210" x-morph="Gr,N,,,,,GNSD" x-id="66sAu"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"666st","w":"καθαρον"},{"id":"66lao","w":"εδειξε"},"εδιξεν","υδατοσ","ζωησ","ωσ","εκπορευομενο¯","=θυ","υδατο%σ%","ζ%ωη%σ%","κρυσταλλον%","θρον%ου%","τ%ο%υ%","=θ^υ"],"critical":["WH,NA,SBL","RP:1-4,+1,5-18","ST:1,+2,3,+1,4-18","KJTR:1-3,+1,4-18"],"ancient":["01:1,+3,3-4,+4-5,7,+6,9,+7,11,13,12,+8,1,12,18","02:1-4,+9-10,7,+6,+11,10-12,+12-14,1,12,18"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"666st","w":"καθαρον"},{"id":"66lao","w":"εδειξε"},"εδιξεν","εκπορευομενο¯","=θυ","υδατο%σ%","ζ%ωη%σ%","κρυσταλλον%","θρον%ου%","τ%ο%υ%","=θ^υ"],"critical":["WH,NA,SBL","RP:1-4,+1,5-18","ST:1,+2,3,+1,4-18","KJTR:1-3,+1,4-18"],"ancient":["01:1,+3,3-9,+4,11,13,12,+5,1,12,18","02:1-4,+6-7,7-8,+8,10-12,+9-11,1,12,18"]}\\zApparatusJson*'
       },
       {
         id: '66022002-ugnt',
-        usfm: '\\w ἐν|lemma="ἐν" strong="G17220" x-morph="Gr,P,,,,,D,,," x-id="66ZLA"\\w*\n' +
+        usfm: '\\v 2\n' +
+          '\\w ἐν|lemma="ἐν" strong="G17220" x-morph="Gr,P,,,,,D,,," x-id="66ZLA"\\w*\n' +
           '\\w μέσῳ|lemma="μέσος" strong="G33190" x-morph="Gr,NS,,,,DNS," x-id="664rS"\\w*\n' +
           '\\w τῆς|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,GFS," x-id="66DU8"\\w*\n' +
           '\\w πλατείας|lemma="πλατεῖα" strong="G41130" x-morph="Gr,N,,,,,GFS," x-id="66mFV"\\w*\n' +
@@ -535,11 +575,12 @@ describe('Query: chapter', async () => {
           '\\w θεραπείαν|lemma="θεραπεία" strong="G23220" x-morph="Gr,N,,,,,AFS," x-id="66PYQ"\\w*\n' +
           '\\w τῶν|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,GNP," x-id="66Tf2"\\w*\n' +
           '\\w ἐθνῶν|lemma="ἔθνος" strong="G14840" x-morph="Gr,N,,,,,GNP," x-id="660ep"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66ZiG","w":"αποδιδουν"},{"id":"66rV0","w":"τον"},{"id":"66yFP","w":"καρπον"},{"id":"66kGU","w":"εντευθεν"},{"id":"66Nvy","w":"ενα"},"ε¯","τησ","πλατιασ","αυτησ","ενθεν","καρπουσ","$ιβ","αποδιδουσ","τουσ","ξυλων","εισ","εμ","τη%σ","π%λατε^ι^α^σ^","ποταμου%","εντευθεν%","ζωησ","ποιων","μηναν","α%υτου","θερα%π%ε%ιαν%"],"critical":["WH,KJTR,NA,SBL:1-19,+1-3,23-32","RP:1-20,+2-3,23-32","ST:1-10,+4,12-18,+5,19,+1-3,23-32"],"ancient":["01:+6,2,+7-9,6-8,+10,6,14,+11-12,17-19,+13-14,+11,23,6,25-26,31,+15-16,30,32","02:+17,2,+18-19,+9,6-7,+20-21,6,11-12,+22-23,+11,16-17,+24,19,+1-3,+25,6,25-26,7,28,+16,+26,31-32"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66ZiG","w":"αποδιδουν"},{"id":"66rV0","w":"τον"},{"id":"66yFP","w":"καρπον"},{"id":"66kGU","w":"εντευθεν"},{"id":"66Nvy","w":"ενα"},"ε¯","πλατιας","ενθεν","$ιβ","ξυλων","εμ","τη%ς","π%λατε^ι^α^σ^","ποταμου%","εντευθεν%","ποιων","μηναν","α%υτου","θερα%π%ε%ιαν%"],"critical":["WH,KJTR,NA,SBL:1-19,+1-3,23-32","RP:1-20,+2-3,23-32","ST:1-10,+4,12-18,+5,19,+1-3,23-32"],"ancient":["01:+6,2-3,+7,5-8,+8,6,14-15,+9,17-21,15,23,6,25-26,31,+10,29-30,32","02:+11,2,+12-13,5-7,+14-15,6,11-13,+16,15-17,+17,19,+1-3,+18,6,25-26,7,28-29,+19,31-32"]}\\zApparatusJson*'
       },
       {
         id: '66022003-ugnt',
-        usfm: '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66r76"\\w*\n' +
+        usfm: '\\v 3\n' +
+          '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66r76"\\w*\n' +
           '\\w πᾶν|lemma="πᾶς" strong="G39560" x-morph="Gr,EQ,,,,NNS," x-id="66sf5"\\w*\n' +
           '\\w κατάθεμα|lemma="κατάθεμα" strong="G26520" x-morph="Gr,N,,,,,NNS," x-id="661Ds"\\w*\n' +
           '\\w οὐκ|lemma="οὐ" strong="G37560" x-morph="Gr,D,,,,,,,,," x-id="66DeY"\\w*\n' +
@@ -562,11 +603,12 @@ describe('Query: chapter', async () => {
           '\\w αὐτοῦ|lemma="αὐτός" strong="G08460" x-morph="Gr,RP,,,3GMS," x-id="66NLz"\\w*\n' +
           '\\w λατρεύσουσιν|lemma="λατρεύω" strong="G30000" x-morph="Gr,V,IFA3,,P," x-id="66J88"\\w*\n' +
           '\\w αὐτῷ|lemma="αὐτός" strong="G08460" x-morph="Gr,RP,,,3DMS," x-id="66QMS"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66IHv","w":"καταναθεμα"},"καταγμα","θρονοσ","=θυ"],"critical":["WH,RP,KJTR,NA,SBL","ST:1-2,+1,4-23"],"ancient":["01:1-2,+2,4-5,1,+3,10,+4,1,10,14-16,5,1,19-23","02:1-6,1,8,+3,10,+4,1,10,14-16,5,1,19-23"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66IHv","w":"καταναθεμα"},"καταγμα","=θυ"],"critical":["WH,RP,KJTR,NA,SBL","ST:1-2,+1,4-23"],"ancient":["01:1-2,+2,4-5,1,9-10,+3,1,10,14-16,5,1,19-23","02:1-6,1,8-10,+3,1,10,14-16,5,1,19-23"]}\\zApparatusJson*'
       },
       {
         id: '66022004-ugnt',
-        usfm: '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66S0e"\\w*\n' +
+        usfm: '\\v 4\n' +
+          '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66S0e"\\w*\n' +
           '\\w ὄψονται|lemma="ὁράω" strong="G37080" x-morph="Gr,V,IFM3,,P," x-id="66nlz"\\w*\n' +
           '\\w τὸ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,ANS," x-id="66pkD"\\w*\n' +
           '\\w πρόσωπον|lemma="πρόσωπον" strong="G43830" x-morph="Gr,N,,,,,ANS," x-id="66MX3"\\w*\n' +
@@ -583,7 +625,8 @@ describe('Query: chapter', async () => {
       },
       {
         id: '66022005-ugnt',
-        usfm: '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66j0v"\\w*\n' +
+        usfm: '\\v 5\n' +
+          '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66j0v"\\w*\n' +
           '\\w νὺξ|lemma="νύξ" strong="G35710" x-morph="Gr,N,,,,,NFS," x-id="66ecZ"\\w*\n' +
           '\\w οὐκ|lemma="οὐ" strong="G37560" x-morph="Gr,D,,,,,,,,," x-id="666Jm"\\w*\n' +
           '\\w ἔσται|lemma="εἰμί" strong="G15100" x-morph="Gr,V,IFM3,,S," x-id="66yIG"\\w*\n' +
@@ -611,11 +654,12 @@ describe('Query: chapter', async () => {
           '\\w αἰῶνας|lemma="αἰών" strong="G01650" x-morph="Gr,N,,,,,AMP," x-id="669JI"\\w*\n' +
           '\\w τῶν|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,GMP," x-id="66XQD"\\w*\n' +
           '\\w αἰώνων|lemma="αἰών" strong="G01650" x-morph="Gr,N,,,,,GMP," x-id="66VdQ"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66mHJ","w":"φως"},{"id":"66qs0","w":"φωτισει"},{"id":"66uN9","w":"[επ]"},{"id":"66FlI","w":"εκει"},{"id":"66uBY","w":"εχουσι"},{"id":"66QXC","w":"φωτιζει"},"χρεια¯","φωτοσ","ϗ","=κσ","=θσ","αυτουσ","εισ","τουσ","αιωνασ","τω¯","ουχ","εξουσι¯","χριαν","φωσ"],"critical":["WH:1-12,+1,14-18,+2-3,21-28","RP:1-4,+4,6,9,7-8,11-19,21-28","ST:1-4,+4,6,9,7,+5,11-18,+6,21-28","KJTR:1-4,+4,6,9,7-8,11-18,+6,21-28","NA:1-18,+2,20-28","SBL:1-12,+1,14-18,+2,20-28"],"ancient":["01:1-5,1,3,8,+7-8,11,+9,+8,14-15,+10,17,+11,19-20,+12,1,23,+13-16,28","02:1-5,1,+17-19,+8,11,1,+20,14-15,+10,17,+11,+2,20,+12,1,23,+13-15,27-28"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66mHJ","w":"φως"},{"id":"66qs0","w":"φωτισει"},{"id":"66uN9","w":"[επ]"},{"id":"66FlI","w":"εκει"},{"id":"66uBY","w":"εχουσι"},{"id":"66QXC","w":"φωτιζει"},"χρεια¯","ϗ","=κς","=θς","τω¯","ουχ","εξουσι¯","χριαν"],"critical":["WH:1-12,+1,14-18,+2-3,21-28","RP:1-4,+4,6,9,7-8,11-19,21-28","ST:1-4,+4,6,9,7,+5,11-18,+6,21-28","KJTR:1-4,+4,6,9,7-8,11-18,+6,21-28","NA:1-18,+2,20-28","SBL:1-12,+1,14-18,+2,20-28"],"ancient":["01:1-5,1,3,8,+7,10-11,+8,10,14-15,+9,17,+10,19-21,1,23-26,+11,28","02:1-5,1,+12-14,10-11,1,+1,14-15,+9,17,+10,+2,20-21,1,23-28"]}\\zApparatusJson*'
       },
       {
         id: '66022006-ugnt',
         usfm: '\\p\n' +
+          '\\v 6\n' +
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66G0Z"\\w*\n' +
           '\\w εἶπέν|lemma="λέγω" strong="G30040" x-morph="Gr,V,IAA3,,S," x-id="665x4"\\w*\n' +
           '\\w μοι|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1D,S," x-id="66JGo"\\w*,\n' +
@@ -647,11 +691,12 @@ describe('Query: chapter', async () => {
           '\\w γενέσθαι|lemma="γίνομαι" strong="G10960" x-morph="Gr,V,NAM,,,,," x-id="66nlt"\\w*\n' +
           '\\w ἐν|lemma="ἐν" strong="G17220" x-morph="Gr,P,,,,,D,,," x-id="66O4G"\\w*\n' +
           '\\w τάχει|lemma="τάχος" strong="G50340" x-morph="Gr,N,,,,,DNS," x-id="66dkI"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66Tns","w":"λεγει"},{"id":"66A3K","w":"ειπε"},{"id":"66tOl","w":"αγιων"},{"id":"66Gsr","w":"απεστειλε"},"=κσ","=θσ","=πνατων","απεστιλε¯","με","διξαι","τοισ","δουλοισ","δι","αληθεινοι","x{�πεστειλεν}","{απεστειλεν}","αγγελο¯"],"critical":["WH,NA,SBL","RP:1,+1,3-10,12,11,14-31","ST:1,+2,3-10,12,11,14-15,+3,18,+4,20-31","KJTR:1-10,12,11,14-15,+3,18-31"],"ancient":["01:1-7,1,9,1,11,+5,11,+6,15,+7,15,18,+8-9,20-22,+10-12,22,27,+13,29-31","02:1-7,1,+14,1,11,+5,11,+6,15-16,15,18,+15-16,20,+17,22-23,+11-12,22,27-31"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66Tns","w":"λεγει"},{"id":"66A3K","w":"ειπε"},{"id":"66tOl","w":"αγιων"},{"id":"66Gsr","w":"απεστειλε"},"=κς","=θς","=πνατων","απεστιλε¯","με","διξαι","δι","αληθεινοι","x{�πεστειλεν}","{απεστειλεν}","αγγελο¯"],"critical":["WH,NA,SBL","RP:1,+1,3-10,12,11,14-31","ST:1,+2,3-10,12,11,14-15,+3,18,+4,20-31","KJTR:1-10,12,11,14-15,+3,18-31"],"ancient":["01:1-7,1,9,1,11,+5,11,+6,15,+7,15,18,+8-9,20-22,+10,24-25,22,27,+11,29-31","02:1-7,1,+12,1,11,+5,11,+6,15-16,15,18,+13-14,20,+15,22-25,22,27-31"]}\\zApparatusJson*'
       },
       {
         id: '66022007-ugnt',
-        usfm: '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66Y96"\\w*\n' +
+        usfm: '\\v 7\n' +
+          '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66Y96"\\w*\n' +
           '\\w ἰδοὺ|lemma="ὁράω" strong="G37080" x-morph="Gr,IDMAA2,,S," x-id="66FFk"\\w*,\n' +
           '\\w ἔρχομαι|lemma="ἔρχομαι" strong="G20640" x-morph="Gr,V,IPM1,,S," x-id="66IzK"\\w*\n' +
           '\\w ταχύ|lemma="ταχύ" strong="G50350" x-morph="Gr,D,,,,,,,,," x-id="66tgD"\\w*.\n' +
@@ -665,11 +710,12 @@ describe('Query: chapter', async () => {
           '\\w τοῦ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,GNS," x-id="66n5Y"\\w*\n' +
           '\\w βιβλίου|lemma="βιβλίον" strong="G09750" x-morph="Gr,N,,,,,GNS," x-id="66TnF"\\w*\n' +
           '\\w τούτου|lemma="οὗτος" strong="G37780" x-morph="Gr,ED,,,,GNS," x-id="66w1i"\\w*.\n' +
-          '\\zApparatusJson {"words":["μακαριοσ","τηρω¯","τουσ","λογουσ","τησ","x{προφητασ}","{προφητι%ασ}","προφητειασ"],"critical":["WH,RP,NA,SBL","ST,KJTR:2-14"],"ancient":["01:1-4,+1,6,+2-7,12-14","02:1-4,+1,6-7,+3-5,+8,12-14"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":["τηρω¯","x{προφητασ}","{προφητι%ασ}"],"critical":["WH,RP,NA,SBL","ST,KJTR:2-14"],"ancient":["01:1-6,+1,8-10,+2-3,12-14","02"]}\\zApparatusJson*'
       },
       {
         id: '66022008-ugnt',
         usfm: '\\p\n' +
+          '\\v 8\n' +
           '\\w κἀγὼ|lemma="κἀγώ" strong="G25040" x-morph="Gr,RP,,,1N,S," x-id="66JhR"\\w*\n' +
           '\\w Ἰωάννης|lemma="Ἰωάννης" strong="G24910" x-morph="Gr,N,,,,,NMS," x-id="66uGg"\\w*\n' +
           '\\w ὁ|lemma="ὁ" strong="G35880" x-morph="Gr,RD,,,,NMS," x-id="666dv"\\w*\n' +
@@ -693,11 +739,12 @@ describe('Query: chapter', async () => {
           '\\w δεικνύοντός|lemma="δεικνύω" strong="G11660" x-morph="Gr,V,PPA,GMS," x-id="66cdJ"\\w*\n' +
           '\\w μοι|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1D,S," x-id="66gPP"\\w*\n' +
           '\\w ταῦτα|lemma="οὗτος" strong="G37780" x-morph="Gr,RD,,,,ANP," x-id="66mQn"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"662IL","w":"επεσον"},{"id":"66Qkn","w":"και"},{"id":"66RHz","w":"εγω"},{"id":"66sgz","w":"και"},"ιωαννησ","δικνυντοσ","εβλεπον","προ","διγνυοντοσ"],"critical":["WH,NA,SBL:1-3,7,6,4-5,8-23","RP:1-3,7,6,4-5,8-12,+1,14-23","ST:+2-3,2-7,+4,9-23","KJTR"],"ancient":["01:1,+5,3-4,6-7,5-6,9-10,6,12-19,18,+6,22,5","02:1,+5,3,7,6,4-6,9-10,6,+7,13-14,+8,17-19,18,+9,22,5"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"662IL","w":"επεσον"},{"id":"66Qkn","w":"και"},{"id":"66RHz","w":"εγω"},{"id":"66sgz","w":"και"},"δικνυντος","εβλεπον","προ","διγνυοντος"],"critical":["WH,NA,SBL:1-3,7,6,4-5,8-23","RP:1-3,7,6,4-5,8-12,+1,14-23","ST:+2-3,2-7,+4,9-23","KJTR"],"ancient":["01:1-4,6-7,5-6,9-10,6,12-19,18,+5,22,5","02:1-3,7,6,4-6,9-10,6,+6,13-14,+7,17-19,18,+8,22,5"]}\\zApparatusJson*'
       },
       {
         id: '66022009-ugnt',
-        usfm: '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="669DD"\\w*\n' +
+        usfm: '\\v 9\n' +
+          '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="669DD"\\w*\n' +
           '\\w λέγει|lemma="λέγω" strong="G30040" x-morph="Gr,V,IPA3,,S," x-id="66Ygo"\\w*\n' +
           '\\w μοι|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1D,S," x-id="66Bhf"\\w*,\n' +
           '\\w ὅρα|lemma="ὁράω" strong="G37080" x-morph="Gr,V,MPA2,,S," x-id="662ci"\\w*\n' +
@@ -722,11 +769,12 @@ describe('Query: chapter', async () => {
           '\\w τῷ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,DMS," x-id="66MBL"\\w*\n' +
           '\\w Θεῷ|lemma="θεός" strong="G23160" x-morph="Gr,N,,,,,DMS," x-id="66e4a"\\w*\n' +
           '\\w προσκύνησον|lemma="προσκυνέω" strong="G43520" x-morph="Gr,V,MAA2,,S," x-id="66WkO"\\w*!\n' +
-          '\\zApparatusJson {"words":[{"id":"66oTS","w":"γαρ"},"συνδουλοσ","τω¯","τουσ","λογουσ","=θω","προφητω¯","προσκυνησ%ο%ν%"],"critical":["WH,RP,NA,SBL","ST,KJTR:1-7,+1,8-25"],"ancient":["01:1-5,+2,7-8,1,+3,11,7,+3,14,1,10,17,+4-5,20-23,+6,25","02:1-5,+2,7-8,1,10-11,7,10,+7,1,10,17,+4-5,20-23,+6,+8"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66oTS","w":"γαρ"},"τω¯","=θω","προφητω¯","προσκυνησ%ο%ν%"],"critical":["WH,RP,NA,SBL","ST,KJTR:1-7,+1,8-25"],"ancient":["01:1-8,1,+2,11,7,+2,14,1,10,17-23,+3,25","02:1-8,1,10-11,7,10,+4,1,10,17-23,+3,+5"]}\\zApparatusJson*'
       },
       {
         id: '66022010-ugnt',
         usfm: '\\p\n' +
+          '\\v 10\n' +
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66GJ0"\\w*\n' +
           '\\w λέγει|lemma="λέγω" strong="G30040" x-morph="Gr,V,IPA3,,S," x-id="66l71"\\w*\n' +
           '\\w μοι|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1D,S," x-id="665jG"\\w*,\n' +
@@ -744,11 +792,12 @@ describe('Query: chapter', async () => {
           '\\w γὰρ|lemma="γάρ" strong="G10630" x-morph="Gr,CC,,,,,,,," x-id="66nD7"\\w*\n' +
           '\\w ἐγγύς|lemma="ἐγγύς" strong="G14510" x-morph="Gr,D,,,,,,,,," x-id="665q0"\\w*\n' +
           '\\w ἐστιν|lemma="εἰμί" strong="G15100" x-morph="Gr,V,IPA3,,S," x-id="666kj"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"664t5","w":"οτι"},"σφραγισησ","τουσ","λογουσ","x{τουτουσ}","{}","τησ","προφητειασ","καιροσ","ενγυσ","β%ι%β%λ%ι%ο%υ%","εγγυσ","εστι¯"],"critical":["WH,RP,NA,SBL","ST,KJTR:1-12,+1,13-14,16-17"],"ancient":["01:1-4,+2-8,10-13,+9,15,+10,17","02:1-4,+2-4,+7-8,10,+11,12-13,+9,15,+12-13"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"664t5","w":"οτι"},"x{τουτουσ}","{}","ενγυς","β%ι%β%λ%ι%ο%υ%","εστι¯"],"critical":["WH,RP,NA,SBL","ST,KJTR:1-12,+1,13-14,16-17"],"ancient":["01:1-7,+2-3,8-15,+4,17","02:1-10,+5,12-16,+6"]}\\zApparatusJson*'
       },
       {
         id: '66022011-ugnt',
-        usfm: '\\w ὁ|lemma="ὁ" strong="G35880" x-morph="Gr,RD,,,,NMS," x-id="66EKw"\\w*\n' +
+        usfm: '\\v 11\n' +
+          '\\w ὁ|lemma="ὁ" strong="G35880" x-morph="Gr,RD,,,,NMS," x-id="66EKw"\\w*\n' +
           '\\w ἀδικῶν|lemma="ἀδικέω" strong="G00910" x-morph="Gr,V,PPA,NMS," x-id="66wps"\\w*,\n' +
           '\\w ἀδικησάτω|lemma="ἀδικέω" strong="G00910" x-morph="Gr,V,MAA3,,S," x-id="66X4M"\\w*\n' +
           '\\w ἔτι|lemma="ἔτι" strong="G20890" x-morph="Gr,D,,,,,,,,," x-id="66cym"\\w*;\n' +
@@ -768,11 +817,12 @@ describe('Query: chapter', async () => {
           '\\w ἅγιος|lemma="ἅγιος" strong="G00400" x-morph="Gr,NS,,,,NMS," x-id="66O8j"\\w*,\n' +
           '\\w ἁγιασθήτω|lemma="ἁγιάζω" strong="G00370" x-morph="Gr,V,MAP3,,S," x-id="66Gww"\\w*\n' +
           '\\w ἔτι|lemma="ἔτι" strong="G20890" x-morph="Gr,D,,,,,,,,," x-id="665Vs"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66lYk","w":"ρυπαρευθητω"},{"id":"66vaO","w":"ρυπων"},{"id":"66h1x","w":"ρυπωσατω"},{"id":"66av6","w":"δικαιωθητω"},"ρυπαροσ","δικαιοσ","αγιοσ"],"critical":["WH,NA","RP,SBL:1-7,+1,9-20","ST:1-6,+2-3,9-12,+4,15-20","KJTR:1-12,+4,15-20"],"ancient":["01:1-5,1,+5,8,4-5,1,+6,13-14,4-5,1,+7,19,4","02:1-5,1,+6,13-14,4-5,1,+7,19,4"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66lYk","w":"ρυπαρευθητω"},{"id":"66vaO","w":"ρυπων"},{"id":"66h1x","w":"ρυπωσατω"},{"id":"66av6","w":"δικαιωθητω"}],"critical":["WH,NA","RP,SBL:1-7,+1,9-20","ST:1-6,+2-3,9-12,+4,15-20","KJTR:1-12,+4,15-20"],"ancient":["01:1-5,1,7-8,4-5,1,12-14,4-5,1,18-19,4","02:1-5,1,12-14,4-5,1,18-19,4"]}\\zApparatusJson*'
       },
       {
         id: '66022012-ugnt',
         usfm: '\\p\n' +
+          '\\v 12\n' +
           '\\w ἰδοὺ|lemma="ὁράω" strong="G37080" x-morph="Gr,IDMAA2,,S," x-id="66JnF"\\w*,\n' +
           '\\w ἔρχομαι|lemma="ἔρχομαι" strong="G20640" x-morph="Gr,V,IPM1,,S," x-id="66fQ4"\\w*\n' +
           '\\w ταχύ|lemma="ταχύ" strong="G50350" x-morph="Gr,D,,,,,,,,," x-id="66lGx"\\w*,\n' +
@@ -789,11 +839,12 @@ describe('Query: chapter', async () => {
           '\\w ἔργον|lemma="ἔργον" strong="G20410" x-morph="Gr,N,,,,,NNS," x-id="66rua"\\w*\n' +
           '\\w ἐστὶν|lemma="εἰμί" strong="G15100" x-morph="Gr,V,IPA3,,S," x-id="66DzD"\\w*\n' +
           '\\w αὐτοῦ|lemma="αὐτός" strong="G08460" x-morph="Gr,RP,,,3GMS," x-id="66vMa"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"667Qj","w":"εσται"},{"id":"66oq7","w":"και"},"μισθοσ","αποδοθηναι","ωσ","εστι¯"],"critical":["WH,NA,SBL","RP:1-14,+1,16","ST,KJTR:+2,1-14,16,+1"],"ancient":["01:1-5,+3,7-9,+4,11,+5,13-14,+6,16","02:1-5,+3,7-11,+5,13-16"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"667Qj","w":"εσται"},{"id":"66oq7","w":"και"},"αποδοθηναι","εστι¯"],"critical":["WH,NA,SBL","RP:1-14,+1,16","ST,KJTR:+2,1-14,16,+1"],"ancient":["01:1-9,+3,11-14,+4,16","02"]}\\zApparatusJson*'
       },
       {
         id: '66022013-ugnt',
-        usfm: '\\w ἐγὼ|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1N,S," x-id="66atE"\\w*\n' +
+        usfm: '\\v 13\n' +
+          '\\w ἐγὼ|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1N,S," x-id="66atE"\\w*\n' +
           '\\w τὸ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,NNS," x-id="66Fz2"\\w*\n' +
           '\\w Ἄλφα|lemma="ἄλφα" strong="G00010" x-morph="Gr,N,,,,,NNSI" x-id="6638x"\\w*\n' +
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66Fcy"\\w*\n' +
@@ -809,11 +860,12 @@ describe('Query: chapter', async () => {
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66a5Y"\\w*\n' +
           '\\w τὸ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,NNS," x-id="66fL3"\\w*\n' +
           '\\w τέλος|lemma="τέλος" strong="G50560" x-morph="Gr,N,,,,,NNS," x-id="66B9s"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66C7O","w":"ειμι"},{"id":"66SjB","w":"α"},"πρωτοσ","ϗ","εσχατοσ","τελοσ"],"critical":["WH,RP,NA,SBL","ST:1,+1,2,+2,4-6,13,9,16,7-8,14,10-11","KJTR:1,+1,2-6,13,9,16,7-8,14,10-11"],"ancient":["01:1-4,2,6-7,+3-4,7,+5,12-13,+4,2,+6","02:1-4,2,6,+3,4,+5,12-13,4,2,+6"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66C7O","w":"ειμι"},{"id":"66SjB","w":"α"},"ϗ"],"critical":["WH,RP,NA,SBL","ST:1,+1,2,+2,4-6,13,9,16,7-8,14,10-11","KJTR:1,+1,2-6,13,9,16,7-8,14,10-11"],"ancient":["01:1-4,2,6-8,+3,7,11-13,+3,2,16","02:1-4,2,6,8,4,11-13,4,2,16"]}\\zApparatusJson*'
       },
       {
         id: '66022014-ugnt',
         usfm: '\\p\n' +
+          '\\v 14\n' +
           '\\w μακάριοι|lemma="μακάριος" strong="G31070" x-morph="Gr,NP,,,,NMP," x-id="66Itf"\\w*\n' +
           '\\w οἱ|lemma="ὁ" strong="G35880" x-morph="Gr,RD,,,,NMP," x-id="66IOz"\\w*\n' +
           '\\w πλύνοντες|lemma="πλύνω" strong="G41500" x-morph="Gr,V,PPA,NMP," x-id="66ZFU"\\w*\n' +
@@ -837,11 +889,12 @@ describe('Query: chapter', async () => {
           '\\w εἰς|lemma="εἰς" strong="G15190" x-morph="Gr,P,,,,,A,,," x-id="66wKj"\\w*\n' +
           '\\w τὴν|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,AFS," x-id="66DEC"\\w*\n' +
           '\\w πόλιν|lemma="πόλις" strong="G41720" x-morph="Gr,N,,,,,AFS," x-id="66Q6z"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66wNT","w":"ποιουντες"},{"id":"66yEo","w":"εντολας"},{"id":"664nm","w":"αυτου"},"πλυνοντεσ","τασ","στολασ","αυτω¯","ωσ","δε","τησ","ζωησ","τοισ","εισ","μακαρι%οι","σ%τ%ολασ","αυτω%ν","πολι¯"],"critical":["WH,NA,SBL","RP,ST,KJTR:1-2,+1,4,+2-3,7-23"],"ancient":["01:1-2,+4-6,6-10,+7-9,9-10,12-14,+10-11,17,+12,19-20,+13,22-23","02:+14,2,+4-5,+15,6-10,+16,12-14,+10-11,17,+12,19-20,+13,22,+17"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66wNT","w":"ποιουντες"},{"id":"66yEo","w":"εντολας"},{"id":"664nm","w":"αυτου"},"αυτω¯","ως","δε","μακαρι%οι","σ%τ%ολας","αυτω%ν","πολι¯"],"critical":["WH,NA,SBL","RP,ST,KJTR:1-2,+1,4,+2-3,7-23"],"ancient":["01:1-10,+4-6,9-10,12-23","02:+7,2-4,+8,6-10,+9,12-22,+10"]}\\zApparatusJson*'
       },
       {
         id: '66022015-ugnt',
-        usfm: '\\w ἔξω|lemma="ἔξω" strong="G18540" x-morph="Gr,D,,,,,,,,," x-id="66Cvb"\\w*\n' +
+        usfm: '\\v 15\n' +
+          '\\w ἔξω|lemma="ἔξω" strong="G18540" x-morph="Gr,D,,,,,,,,," x-id="66Cvb"\\w*\n' +
           '\\w οἱ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,NMP," x-id="66naw"\\w*\n' +
           '\\w κύνες|lemma="κύων" strong="G29650" x-morph="Gr,N,,,,,NMP," x-id="66Smc"\\w*,\n' +
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66cz6"\\w*\n' +
@@ -862,11 +915,12 @@ describe('Query: chapter', async () => {
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66HgJ"\\w*\n' +
           '\\w ποιῶν|lemma="ποιέω" strong="G41600" x-morph="Gr,V,PPA,NMS," x-id="66Kbg"\\w*\n' +
           '\\w ψεῦδος|lemma="ψεῦδος" strong="G55790" x-morph="Gr,N,,,,,ANS," x-id="66NPq"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66LcQ","w":"δε"},{"id":"66Ome","w":"ο"},"κυνεσ","φονεισ","ιδωλολατραι","πασ","ψευδοσ"],"critical":["WH,RP,NA,SBL","ST,KJTR:1,+1,2-17,+2,18-21"],"ancient":["01:1-2,+3,4,2,6,4,2,9,4,2,+4,4,2,+5,4,+6,20,4,18,+7","02:1-2,+3,4,2,6,4,2,9,4,2,+4,4,2,+5,4,+6,18,4,20,+7"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66LcQ","w":"δε"},{"id":"66Ome","w":"ο"},"ιδωλολατραι"],"critical":["WH,RP,NA,SBL","ST,KJTR:1,+1,2-17,+2,18-21"],"ancient":["01:1-4,2,6,4,2,9,4,2,12,4,2,+3,4,17,20,4,18,21","02:1-4,2,6,4,2,9,4,2,12,4,2,+3,4,17-18,4,20-21"]}\\zApparatusJson*'
       },
       {
         id: '66022016-ugnt',
         usfm: '\\p\n' +
+          '\\v 16\n' +
           '\\w ἐγὼ|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1N,S," x-id="66sxp"\\w*,\n' +
           '\\w Ἰησοῦς|lemma="Ἰησοῦς" strong="G24240" x-morph="Gr,N,,,,,NMS," x-id="66g0F"\\w*,\n' +
           '\\w ἔπεμψα|lemma="πέμπω" strong="G39920" x-morph="Gr,V,IAA1,,S," x-id="66N8N"\\w*\n' +
@@ -893,11 +947,12 @@ describe('Query: chapter', async () => {
           '\\w λαμπρός|lemma="λαμπρός" strong="G29860" x-morph="Gr,AR,,,,NMS," x-id="66BDV"\\w*,\n' +
           '\\w ὁ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,NMS," x-id="66OQF"\\w*\n' +
           '\\w πρωϊνός|lemma="πρωϊνός" strong="G44070" x-morph="Gr,AR,,,,NMS," x-id="66mZH"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66OCp","w":"δαυιδ"},{"id":"66CrR","w":"του"},{"id":"66Qiz","w":"δαβιδ"},{"id":"66Kzi","w":"και"},{"id":"66i8U","w":"ορθρινος"},"=ισ","το¯","ταισ","εκκλησιαισ","γενοσ","=δαδ","λαμπροσ","πρωινοσ","εν","προινοσ"],"critical":["WH","RP,NA,SBL:1-19,+1,21-26","ST:1-19,+2-3,21-24,+4-5","KJTR:1-19,+1,21-24,+4-5"],"ancient":["01:1,+6,3,+7,5-10,+8-9,1,14-18,+10-11,21-22,21,+12,21,+13","02:1,+6,3-9,+14,+8-9,1,14-18,+10-11,21-22,21,+12,17,21,+15"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66OCp","w":"δαυιδ"},{"id":"66CrR","w":"του"},{"id":"66Qiz","w":"δαβιδ"},{"id":"66Kzi","w":"και"},{"id":"66i8U","w":"ορθρινος"},"=ις","το¯","=δαδ","εν","προινος"],"critical":["WH","RP,NA,SBL:1-19,+1,21-26","ST:1-19,+2-3,21-24,+4-5","KJTR:1-19,+1,21-24,+4-5"],"ancient":["01:1,+6,3,+7,5-12,1,14-19,+8,21-22,21,24,21,26","02:1,+6,3-9,+9,11-12,1,14-19,+8,21-22,21,24,17,21,+10"]}\\zApparatusJson*'
       },
       {
         id: '66022017-ugnt',
-        usfm: '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66OJ3"\\w*\n' +
+        usfm: '\\v 17\n' +
+          '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66OJ3"\\w*\n' +
           '\\w τὸ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,NNS," x-id="66cN3"\\w*\n' +
           '\\w Πνεῦμα|lemma="πνεῦμα" strong="G41510" x-morph="Gr,N,,,,,NNS," x-id="66Fi2"\\w*\n' +
           '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66c7v"\\w*\n' +
@@ -920,11 +975,12 @@ describe('Query: chapter', async () => {
           '\\w ὕδωρ|lemma="ὕδωρ" strong="G52040" x-morph="Gr,N,,,,,ANS," x-id="66X08"\\w*\n' +
           '\\w ζωῆς|lemma="ζωή" strong="G22220" x-morph="Gr,N,,,,,GFS," x-id="66U3R"\\w*\n' +
           '\\w δωρεάν|lemma="δωρεάν" strong="G14320" x-morph="Gr,D,,,,,,,,," x-id="66q6t"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66iFN","w":"ελθε"},{"id":"66Pao","w":"ελθε"},{"id":"66aXo","w":"ελθετω"},{"id":"66Odo","w":"και"},{"id":"66S3Q","w":"λαμβανετω"},{"id":"66XyX","w":"το"},"x{=ππνα}","{=πνα}","λεγουσι¯","ζωησ","=πνα","θελω¯"],"critical":["WH,RP,NA,SBL","ST,KJTR:1-7,+1,9-12,+2,14-16,+3-4,18-19,+5-6,21-23"],"ancient":["01:1,+7-8,1,6,+9,8,1,10-12,8,1,10,16-17,10,19-21,+10,23","02:1-2,+11,1,5-8,1,10-12,8,1,10,16-17,10,+12,20-21,+10,23"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66iFN","w":"ελθε"},{"id":"66Pao","w":"ελθε"},{"id":"66aXo","w":"ελθετω"},{"id":"66Odo","w":"και"},{"id":"66S3Q","w":"λαμβανετω"},{"id":"66XyX","w":"το"},"x{=ππνα}","{=πνα}","λεγουσι¯","=πνα","θελω¯"],"critical":["WH,RP,NA,SBL","ST,KJTR:1-7,+1,9-12,+2,14-16,+3-4,18-19,+5-6,21-23"],"ancient":["01:1,+7-8,1,6,+9,8,1,10-12,8,1,10,16-17,10,19-23","02:1-2,+10,1,5-8,1,10-12,8,1,10,16-17,10,+11,20-23"]}\\zApparatusJson*'
       },
       {
         id: '66022018-ugnt',
         usfm: '\\p\n' +
+          '\\v 18\n' +
           '\\w μαρτυρῶ|lemma="μαρτυρέω" strong="G31400" x-morph="Gr,V,IPA1,,S," x-id="662Yd"\\w*\n' +
           '\\w ἐγὼ|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1N,S," x-id="66v65"\\w*\n' +
           '\\w παντὶ|lemma="πᾶς" strong="G39560" x-morph="Gr,RI,,,,DMS," x-id="66YM2"\\w*\n' +
@@ -955,11 +1011,12 @@ describe('Query: chapter', async () => {
           '\\w τῷ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,DNS," x-id="667uA"\\w*\n' +
           '\\w βιβλίῳ|lemma="βιβλίον" strong="G09750" x-morph="Gr,N,,,,,DNS," x-id="66ja3"\\w*\n' +
           '\\w τούτῳ|lemma="οὗτος" strong="G37780" x-morph="Gr,ED,,,,DNS," x-id="66g9F"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"668rK","w":"επιθησαι"},{"id":"66I4Q","w":"συμμαρτυρουμαι"},{"id":"66Ww2","w":"γαρ"},{"id":"66X9q","w":"επιτιθη"},{"id":"66UaE","w":"προς"},{"id":"66VTl","w":"ταυτα"},"η","τουσ","λογουσ","τησ","προφητειασ","τισ","=θσ","τασ","πληγασ","γεγραμμενασ","ε¯","x{}","{επ","αυτω}"],"critical":["WH,NA,SBL","RP:1-17,+1,19-30","ST,KJTR:+2-3,3,5-14,+4-6,18-27,29-30"],"ancient":["01:+7,1-5,+8-11,10-13,+12,18,16,22,19,+13-15,+14,+16-17,4,29-30","02:1-5,+8-11,10-13,+12,15-19,+13,+18-20,+14-15,+14,+16,27,4,29-30"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"668rK","w":"επιθησαι"},{"id":"66I4Q","w":"συμμαρτυρουμαι"},{"id":"66Ww2","w":"γαρ"},{"id":"66X9q","w":"επιτιθη"},{"id":"66UaE","w":"προς"},{"id":"66VTl","w":"ταυτα"},"η","=θς","ε¯","x{}","{επ","αυτω}"],"critical":["WH,NA,SBL","RP:1-17,+1,19-30","ST,KJTR:+2-3,3,5-14,+4-6,18-27,29-30"],"ancient":["01:+7,1-14,18,16,22,19,+8,23-24,23,26,+9,4,29-30","02:1-19,+8,+10-12,23-24,23,26-27,4,29-30"]}\\zApparatusJson*'
       },
       {
         id: '66022019-ugnt',
-        usfm: '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66HTB"\\w*\n' +
+        usfm: '\\v 19\n' +
+          '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66HTB"\\w*\n' +
           '\\w ἐάν|lemma="ἐάν" strong="G14370" x-morph="Gr,CS,,,,,,,," x-id="66K3E"\\w*\n' +
           '\\w τις|lemma="τις" strong="G51000" x-morph="Gr,RI,,,,NMS," x-id="66hja"\\w*\n' +
           '\\w ἀφέλῃ|lemma="ἀφαιρέω" strong="G08510" x-morph="Gr,V,SAA3,,S," x-id="66CMX"\\w*\n' +
@@ -994,11 +1051,12 @@ describe('Query: chapter', async () => {
           '\\w τῷ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,DNS," x-id="66svT"\\w*\n' +
           '\\w βιβλίῳ|lemma="βιβλίον" strong="G09750" x-morph="Gr,N,,,,,DNS," x-id="66bvC"\\w*\n' +
           '\\w τούτῳ|lemma="οὗτος" strong="G37780" x-morph="Gr,ED,,,,DNS," x-id="664zJ"\\w*.\n' +
-          '\\zApparatusJson {"words":[{"id":"66DAp","w":"αφελοι"},{"id":"66lNn","w":"αφαιρη"},{"id":"66yKq","w":"βιβλου"},{"id":"66gs7","w":"αφαιρησει"},{"id":"66by8","w":"βιβλου"},{"id":"66eik","w":"και"},"αν","τισ","τουτων","τησ","προφητιασ","ταυτησ","αφελι","=θσ","μεροσ","ζωησ","πολεωσ","αγιασ","προφητειασ"],"critical":["WH,NA,SBL","RP:1-12,+1,14-35","ST:1-3,+2,5-7,+3,10-12,+4,14-19,+5,22-29,+6,30-32,34-35","KJTR:1-7,+3,10-19,+5,22-29,+6,30-32,34-35"],"ancient":["01:1,+7-8,4-7,+9,8-9,+10-13,14,+14,16,+15,18,5,8,21,+10,+16,1,25,+10,+17,+10,+18,6,31-35","02:1-2,+8,4-9,+10,+19,+12,13-14,+14,16,+15,18,5,8,21,+10,+16,1,+10,+17,+10,+18,6,31-35"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66DAp","w":"αφελοι"},{"id":"66lNn","w":"αφαιρη"},{"id":"66yKq","w":"βιβλου"},{"id":"66gs7","w":"αφαιρησει"},{"id":"66by8","w":"βιβλου"},{"id":"66eik","w":"και"},"αν","τουτων","προφητιας","αφελι","=θς"],"critical":["WH,NA,SBL","RP:1-12,+1,14-35","ST:1-3,+2,5-7,+3,10-12,+4,14-19,+5,22-29,+6,30-32,34-35","KJTR:1-7,+3,10-19,+5,22-29,+6,30-32,34-35"],"ancient":["01:1,+7,3-7,+8,8-10,+9,12,+10,14,+11,16-18,5,8,21,10,23,1,25,10,27,10,29,6,31-35","02:1-14,+11,16-18,5,8,21,10,23,1,10,27,10,29,6,31-35"]}\\zApparatusJson*'
       },
       {
         id: '66022020-ugnt',
         usfm: '\\p\n' +
+          '\\v 20\n' +
           '\\w λέγει|lemma="λέγω" strong="G30040" x-morph="Gr,V,IPA3,,S," x-id="66wLv"\\w*\n' +
           '\\w ὁ|lemma="ὁ" strong="G35880" x-morph="Gr,RD,,,,NMS," x-id="660OE"\\w*\n' +
           '\\w μαρτυρῶν|lemma="μαρτυρέω" strong="G31400" x-morph="Gr,V,PPA,NMS," x-id="66Agh"\\w*\n' +
@@ -1015,6 +1073,7 @@ describe('Query: chapter', async () => {
       {
         id: '66022021-ugnt',
         usfm: '\\p\n' +
+          '\\v 21\n' +
           '\\w ἡ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,NFS," x-id="66Lpd"\\w*\n' +
           '\\w χάρις|lemma="χάρις" strong="G54850" x-morph="Gr,N,,,,,NFS," x-id="66rzv"\\w*\n' +
           '\\w τοῦ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,GMS," x-id="661Qo"\\w*\n' +
@@ -1024,7 +1083,7 @@ describe('Query: chapter', async () => {
           '\\w τῶν|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,GMP," x-id="66sCX"\\w*\n' +
           '\\w ἁγίων|lemma="ἅγιος" strong="G00400" x-morph="Gr,NS,,,,GMP," x-id="66gBo"\\w*.\n' +
           '\\w ἀμήν|lemma="ἀμήν" strong="G02810" x-morph="Gr,IE,,,,,,,," x-id="66A93"\\w*!\n' +
-          '\\zApparatusJson {"words":[{"id":"66Yuu","w":"[χριστου]"},{"id":"66Yuu","w":"χριστου"},{"id":"66Yyh","w":"παντων"},{"id":"66nG8","w":"ημων"},{"id":"66Yuu","w":"χριστου"},{"id":"6695b","w":"υμων"},{"id":"66Yuu","w":"χριστου"},"χαρισ","=κυ","=ιυ"],"critical":["WH:1-5,+1,6-8","RP:1-5,+2,6,+3,7-9","ST:1-4,+4,5,+5,6,+3,+6,9","KJTR:1-4,+4,5,+7,6,+3,+6,9","NA,SBL:1-6,+3"],"ancient":["01:1,+8,3,+9-10,6-9","02:1,+8,3,+9-10,6,+3"]}\\zApparatusJson*'
+          '\\zApparatusJson {"words":[{"id":"66Yuu","w":"[χριστου]"},{"id":"66Yuu","w":"χριστου"},{"id":"66Yyh","w":"παντων"},{"id":"66nG8","w":"ημων"},{"id":"66Yuu","w":"χριστου"},{"id":"6695b","w":"υμων"},{"id":"66Yuu","w":"χριστου"},"=κυ","=ιυ"],"critical":["WH:1-5,+1,6-8","RP:1-5,+2,6,+3,7-9","ST:1-4,+4,5,+5,6,+3,+6,9","KJTR:1-4,+4,5,+7,6,+3,+6,9","NA,SBL:1-6,+3"],"ancient":["01:1-3,+8-9,6-9","02:1-3,+8-9,6,+3"]}\\zApparatusJson*'
       }
     ])
   })

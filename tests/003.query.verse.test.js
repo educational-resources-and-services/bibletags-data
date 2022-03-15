@@ -13,6 +13,8 @@ describe('Query: verse', async () => {
     verse.should.eql({
       id: "01001001-uhb",
       usfm: '\\p\n' +
+        '\\c 1\n' +
+        '\\v 1\n' +
         '\\w בְּ⁠רֵאשִׁ֖ית|lemma="רֵאשִׁית" strong="b:H72250" x-morph="He,R:Ncfsa" x-id="01h7N"\\w*\n' +
         '\\w בָּרָ֣א|lemma="בָּרָא" strong="H12541" x-morph="He,Vqp3ms" x-id="01RAp"\\w*\n' +
         '\\w אֱלֹהִ֑ים|lemma="אֱלֹהִים" strong="H04300" x-morph="He,Ncmpa" x-id="01cuO"\\w*\n' +
@@ -34,6 +36,8 @@ describe('Query: verse', async () => {
     verse.should.eql({
       id: '66022001-ugnt',
       usfm: '\\p\n' +
+        '\\c 22\n' +
+        '\\v 1\n' +
         '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66TOB"\\w*\n' +
         '\\w ἔδειξέν|lemma="δεικνύω" strong="G11660" x-morph="Gr,V,IAA3,,S," x-id="66FNk"\\w*\n' +
         '\\w μοι|lemma="ἐγώ" strong="G14730" x-morph="Gr,RP,,,1D,S," x-id="66PXU"\\w*\n' +
@@ -52,7 +56,7 @@ describe('Query: verse', async () => {
         '\\w καὶ|lemma="καί" strong="G25320" x-morph="Gr,CC,,,,,,,," x-id="66yTv"\\w*\n' +
         '\\w τοῦ|lemma="ὁ" strong="G35880" x-morph="Gr,EA,,,,GNS," x-id="66Cgt"\\w*\n' +
         '\\w Ἀρνίου|lemma="ἀρνίον" strong="G07210" x-morph="Gr,N,,,,,GNSD" x-id="66sAu"\\w*.\n' +
-        '\\zApparatusJson {"words":[{"id":"666st","w":"καθαρον"},{"id":"66lao","w":"εδειξε"},"εδιξεν","υδατοσ","ζωησ","ωσ","εκπορευομενο¯","=θυ","υδατο%σ%","ζ%ωη%σ%","κρυσταλλον%","θρον%ου%","τ%ο%υ%","=θ^υ"],"critical":["WH,NA,SBL","RP:1-4,+1,5-18","ST:1,+2,3,+1,4-18","KJTR:1-3,+1,4-18"],"ancient":["01:1,+3,3-4,+4-5,7,+6,9,+7,11,13,12,+8,1,12,18","02:1-4,+9-10,7,+6,+11,10-12,+12-14,1,12,18"]}\\zApparatusJson*'
+        '\\zApparatusJson {"words":[{"id":"666st","w":"καθαρον"},{"id":"66lao","w":"εδειξε"},"εδιξεν","εκπορευομενο¯","=θυ","υδατο%σ%","ζ%ωη%σ%","κρυσταλλον%","θρον%ου%","τ%ο%υ%","=θ^υ"],"critical":["WH,NA,SBL","RP:1-4,+1,5-18","ST:1,+2,3,+1,4-18","KJTR:1-3,+1,4-18"],"ancient":["01:1,+3,3-9,+4,11,13,12,+5,1,12,18","02:1-4,+6-7,7-8,+8,10-12,+9-11,1,12,18"]}\\zApparatusJson*'
     })
   })
 
