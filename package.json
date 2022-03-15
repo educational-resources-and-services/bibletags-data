@@ -1,6 +1,6 @@
 {
   "name": "@bibletags/bibletags-data",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "main": "app.js",
   "repository": {
     "type": "git",
