@@ -315,9 +315,10 @@ const setUpConnection = ({
 
   const greekType = {  // includes the pos to remove ambiguity
     type: Sequelize.ENUM(
-      'AS', 'AP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER',
-      'ET', 'PD', 'PE', 'PP', 'PC', 'PI', 'PR', 'PT', 'VT', 'VI', 'VL', 'VM',
-      'VP', 'IE', 'ID', 'IR', 'DI', 'DO', 'CC', 'CS', 'CO', 'FF'
+      'AS', 'AP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER', 'ET',
+      'PD', 'PE', 'PP', 'PC', 'PI', 'PR', 'PT',  // these are R_ in the usfm, but changed to P_ in importUGNTFromUsfm to match UHB
+      'VT', 'VI', 'VL', 'VM', 'VP',  // these presently are not used, but perhaps they will be in the future
+      'IE', 'ID', 'IR', 'DI', 'DO', 'CC', 'CS', 'CO', 'FF'
     ),
   }
 
