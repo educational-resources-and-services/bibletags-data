@@ -35,9 +35,15 @@ const inputs = `
   }
 
   input TagInput {
-    origWordsInfo: [String]!
+    origWordsInfo: [OrigWordsInfo]!
     translationWordsInfo: [TranslationWordsInfo]!
     alignmentType: String!  ${/* ENUM: affirmation, correction, without-suggestion */ ""}
+  }
+
+  input OrigWordsInfo {
+    uhbWordId: ID
+    ugntWordId: ID
+    wordPartNumber: Int
   }
 
   input TranslationWordsInfo {

@@ -1,44 +1,93 @@
 const submitTagSet = async (args, req, queryInfo) => {
 
   const { input } = args
-  const { loc, versionId, wordsHash, embeddingAppId, tagSubmissions } = input
-  // look for auth, else use the id of the user with email = user-[deviceId]@bibletags.org
-  let origLangVersion
+  const { loc, versionId, wordsHash, deviceId, embeddingAppId, tagSubmissions } = input
+
+  const { models } = global.connection
+
+  // TODO: look for auth, else use the id of the user with email = user-[deviceId]@bibletags.org
+  let [ user, embeddingApp ] = await Promise.all([
+    models.user.findByPk(`user-${deviceId}@bibletags.org`),
+    models.embeddingApp.findByPk(embeddingAppId),
+  ])
+
+  if(!embeddingApp) {
+    throw `Invalid embeddingAppId. Please register via bibletags.org.`
+  }
 
   if(!tagSubmissions || tagSubmissions.length === 0) {
     throw `No tags submitted.`
   }
 
+  let origLangVersion
   tagSubmissions.forEach(tagSubmission => {
-    const { uhbWordId, ugntWordId } = tagSubmission
 
-    if(!uhbWordId === !ugntWordId) {
-      throw `Each tag must contain either a uhbWordId or ugntWordId, but not both.`
+    if(tagSubmission.origWordsInfo.length === 0) {
+      throw `All tags must include origWordsInfo with at least 1 item.`
     }
 
-    const thisOrigLangVersion = uhbWordId ? 'uhb' : 'ugnt'
-    
-    if(origLangVersion && origLangVersion !== thisOrigLangVersion) {
-      throw `All tags in a single tagSet submission must relate to a single original language text.`
+    if(tagSubmission.translationWordsInfo.length === 0) {
+      throw `All tags must include translationWordsInfo with at least 1 item.`
     }
-    
-    origLangVersion = thisOrigLangVersion
+
+    tagSubmission.origWordsInfo.forEach(({ uhbWordId, ugntWordId }) => {
+
+      if(!uhbWordId === !ugntWordId) {
+        throw `Each tag must contain either a uhbWordId or ugntWordId, but not both. uhbWordId: ${uhbWordId} / ugntWordId: ${ugntWordId}`
+      }
+
+      const thisOrigLangVersion = uhbWordId ? 'uhb' : 'ugnt'
+
+      if(origLangVersion && origLangVersion !== thisOrigLangVersion) {
+        throw `All tags in a single tagSet submission must relate to a single original language text.`
+      }
+
+      origLangVersion = thisOrigLangVersion
+
+    })
   })
 
   delete input.tagSubmissions
 
-  const { models } = global.connection
-
   await global.connection.transaction(async t => {
 
+    if(!user) {
+      user = await models.user.create({
+        id: `user-${deviceId}@bibletags.org`,
+        email: `user-${deviceId}@bibletags.org`,
+        name: `ANONYMOUS`,
+        languageId: `eng`,  // TODO
+      })
+    }
+
+    input.userId = user.id
+
     const tagSetSubmission = await models.tagSetSubmission.create(input, {transaction: t})
+    const tagSetSubmissionId = tagSetSubmission.id
 
-    tagSubmissions.forEach(tagSubmission => {
-      tagSubmission.tagSetSubmissionId = tagSetSubmission.id
-      tagSubmission.embeddingAppId = embeddingAppId  // do I need this data repeated here?
-    })
+    await Promise.all(tagSubmissions.map(async tagSubmission => {
 
-    await models[`${origLangVersion}TagSubmission`].bulkCreate(tagSubmissions, {transaction: t})
+      const tagSetSubmissionItem = await models.tagSetSubmissionItem.create({ tagSetSubmissionId }, {transaction: t})
+      const tagSetSubmissionItemId = tagSetSubmissionItem.id
+
+      await Promise.all([
+        models.tagSetSubmissionItemTranslationWord.bulkCreate(
+          tagSubmission.translationWordsInfo.map(translationWordInfo => ({
+            ...translationWordInfo,
+            tagSetSubmissionItemId,
+          })),
+          {transaction: t},
+        ),
+        models[`${origLangVersion}TagSubmission`].bulkCreate(
+          tagSubmission.origWordsInfo.map(origWordInfo => ({
+            ...origWordInfo,
+            tagSetSubmissionItemId,
+          })),
+          {transaction: t},
+        ),
+      ])
+
+    }))
 
     // Recalculate tagSets here
 

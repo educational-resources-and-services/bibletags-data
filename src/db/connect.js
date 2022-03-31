@@ -230,6 +230,11 @@ const setUpConnection = ({
     },
   }
 
+  const wordNumberInVerse = {
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
+  }
+
   const wordComboHash = {
     type: Sequelize.STRING(24),
     allowNull: false,
@@ -678,7 +683,11 @@ const setUpConnection = ({
   const User = connection.define(
     'user',
     {
-      email: {  // for non-authenticated users: [uuid]@bibletags.org
+      id: {  // received from session-sync-auth OR user-[deviceId]@bibletags.org (for non-authenticated users)
+        type: Sequelize.STRING(255),
+        primaryKey: true,
+      },
+      email: {  // for non-authenticated users: user-[deviceId]@bibletags.org
         type: Sequelize.STRING(255),
         allowNull: false,
         validate: {
@@ -700,6 +709,7 @@ const setUpConnection = ({
       ratingHistory: {  // each adjustment (with description) on a separate line
         type: Sequelize.TEXT,
         allowNull: false,
+        defaultValue: ``,
       },
       flaggedForAbuse: {
         type: Sequelize.BOOLEAN,
@@ -863,6 +873,50 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: none
+  // changes often
+  const TagSetSubmissionItem = connection.define(
+    'tagSetSubmissionItem',
+    {},
+    {
+      indexes: [
+        { fields: ['tagSetSubmissionId'] },
+      ],
+      timestamps: false,  // timestamps for this data kept in related TagSetSubmission row
+    },
+  )
+
+  TagSetSubmissionItem.belongsTo(TagSetSubmission, required)
+  TagSetSubmission.hasMany(TagSetSubmissionItem)
+
+  //////////////////////////////////////////////////////////////////
+
+  // needed: none
+  // changes often
+  const TagSetSubmissionItemTranslationWord = connection.define(
+    'tagSetSubmissionItemTranslationWord',
+    {
+      wordNumberInVerse,
+      word: {
+        type: Sequelize.STRING(translationWordLength),
+        allowNull: false,
+        notEmpty: true,
+      },
+    },
+    {
+      indexes: [
+        { fields: ['tagSetSubmissionItemId'], name: 'tagSetSubmissionItemId' },
+        { fields: ['word'] },
+      ],
+      timestamps: false,  // timestamps for this data kept in related TagSetSubmission row
+    },
+  )
+
+  TagSetSubmissionItemTranslationWord.belongsTo(TagSetSubmissionItem, required)
+  TagSetSubmissionItem.hasMany(TagSetSubmissionItemTranslationWord)
+
+  //////////////////////////////////////////////////////////////////
+
   // This table and the next used in the auto-tagging process
   // since we do now know the actual (copyrighted) words of the translations.
 
@@ -904,10 +958,7 @@ const setUpConnection = ({
   const WordHashesSubmission = connection.define(
     'wordHashesSubmission',
     {
-      wordNumberInVerse: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        allowNull: false,
-      },
+      wordNumberInVerse,
       hash: { ...wordComboHash },
       withBeforeHash: { ...wordComboHash },
       withAfterHash: { ...wordComboHash },
@@ -1227,25 +1278,22 @@ const setUpConnection = ({
     'uhbTagSubmission',
     {
       wordPartNumber,
-      translationWordNumberInVerse,
-      translationWord,
     },
     {
       indexes: [
         {
-          fields: ['uhbWordId', 'wordPartNumber', 'tagSetSubmissionId', 'translationWordNumberInVerse'],
+          fields: ['uhbWordId', 'wordPartNumber', 'tagSetSubmissionItemId'],
           unique: true,
-          name: 'uhbWordId_wordPartNumber_tagSetSubmissionId__',
+          name: 'uhbWordId_wordPartNumber_tagSetSubmissionItemId',
         },
-        { fields: ['tagSetSubmissionId', 'translationWordNumberInVerse'], name: 'tagSetSubmissionId_translationWordNumberInVerse' },
-        { fields: ['translationWord'] },
+        { fields: ['tagSetSubmissionItemId'] },
       ],
       timestamps: false,  // timestamps for this data kep in related TagSetSubmission row
     },
   )
 
-  uhbTagSubmission.belongsTo(TagSetSubmission, required)
-  TagSetSubmission.hasMany(uhbTagSubmission)
+  uhbTagSubmission.belongsTo(TagSetSubmissionItem, required)
+  TagSetSubmissionItem.hasMany(uhbTagSubmission)
 
   uhbTagSubmission.belongsTo(uhbWord, required)
   uhbWord.hasMany(uhbTagSubmission)
@@ -1443,26 +1491,22 @@ const setUpConnection = ({
   // changes often
   const ugntTagSubmission = connection.define(
     'ugntTagSubmission',
-    {
-      translationWordNumberInVerse,
-      translationWord,
-    },
+    {},
     {
       indexes: [
         {
-          fields: ['ugntWordId', 'tagSetSubmissionId', 'translationWordNumberInVerse'],
+          fields: ['ugntWordId', 'tagSetSubmissionItemId'],
           unique: true,
-          name: 'ugntWordId_tagSetSubmissionId__',
+          name: 'ugntWordId_tagSetSubmissionItemId',
         },
-        { fields: ['tagSetSubmissionId', 'translationWordNumberInVerse'], name: 'tagSetSubmissionId_translationWordNumberInVerse' },
-        { fields: ['translationWord'] },
+        { fields: ['tagSetSubmissionItemId'] },
       ],
       timestamps: false,  // timestamps for this data kep in related TagSetSubmission row
     },
   )
 
-  ugntTagSubmission.belongsTo(TagSetSubmission, required)
-  TagSetSubmission.hasMany(ugntTagSubmission)
+  ugntTagSubmission.belongsTo(TagSetSubmissionItem, required)
+  TagSetSubmissionItem.hasMany(ugntTagSubmission)
 
   ugntTagSubmission.belongsTo(ugntWord, required)
   ugntWord.hasMany(ugntTagSubmission)

@@ -48,6 +48,15 @@ const { setUpConnection } = require('./connect')
     },
   ])
 
+  await models.embeddingApp.bulkCreate([
+    {
+      "id": 1,
+      "uri": "https://biblearc.com",
+      "createdAt": "2022-01-01 00:00:00 GMT",
+      "updatedAt": "2022-01-01 00:00:00 GMT",
+    },
+  ])
+
   console.log('...DB seeded.\n')
 
   process.exit()
