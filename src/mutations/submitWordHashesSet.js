@@ -1,54 +1,57 @@
+const calculateTagSets = require('../calculateTagSets')
+const tagSet = require('../queries/tagSet')
+
 const submitWordHashesSet = async (args, req, queryInfo) => {
 
   const { input } = args
-  const { loc, versionId, wordsHash, wordHashes } = input
+  const { loc, versionId, wordsHash, wordHashes, embeddingAppId } = input
   delete input.wordHashes
 
   const { models } = global.connection
 
-  await connection.transaction(t => {
+  const embeddingApp = await models.embeddingApp.findByPk(embeddingAppId)
 
-    const wordHashesSetSubmission = await models.wordHashesSetSubmission.create(input, {transaction: t})
+  if(!embeddingApp) {
+    throw `Invalid embeddingAppId. Please register via bibletags.org.`
+  }
 
-    wordHashes.forEach(wordHashGroup => {
-      wordHashGroup.wordHashesSetSubmissionId = wordHashesSetSubmission.id
+  try {
+
+    await connection.transaction(async t => {
+
+      const wordHashesSetSubmission = await models.wordHashesSetSubmission.create(input, {transaction: t})
+
+      wordHashes.forEach(wordHashGroup => {
+        wordHashGroup.wordHashesSetSubmissionId = wordHashesSetSubmission.id
+      })
+
+      await models.wordHashesSubmission.bulkCreate(
+        wordHashes,
+        {
+          validate: true,
+          transaction: t,
+        },
+      )
+
+      // calculate tagSet
+      await calculateTagSets({
+        loc,
+        wordsHash,
+        versionId,
+        t,
+      })
+
     })
 
-    await models.wordHashesSubmission.bulkCreate(wordHashes, {transaction: t})
-
-    const newTagSet = {
-      loc,
-      tags: [],
-      status: 'incomplete',
-      wordsHash,
-      versionId,
+  } catch(err) {
+    // gracefully handle duplicate by simply not creating
+    if(err.name !== 'SequelizeUniqueConstraintError') {
+      throw err
     }
-
-    // TODO: calculate tagSet here
-
-    if(false) {  // if we were able to guess at them all
-      newTagSet.status = "unconfirmed"
-    }
-
-    await models.tagSet.create(newTagSet, {transaction: t})
-
-  })
-
-  const where = {
-    loc,
-    versionId,
-    wordsHash,
   }
 
-  const tagSet = await models.tagSet.findOne({
-    where,
-  })
+  return tagSet({ id: `${loc}-${versionId}-${wordsHash}` }, req, queryInfo)
 
-  return {
-    id: `${loc}-${versionId}-${wordsHash}`,
-    tags: tagSet ? tagSet.tags : [],
-    status: tagSet ? tagSet.status : 'none',
-  }
 }
 
 module.exports = submitWordHashesSet

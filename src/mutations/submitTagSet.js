@@ -1,3 +1,8 @@
+const calculateTagSets = require('../calculateTagSets')
+const tagSet = require('../queries/tagSet')
+const getWordInfoByIdAndPart = require('../getWordInfoByIdAndPart')
+const { equalObjs , getTagsJson} = require('../utils')
+
 const submitTagSet = async (args, req, queryInfo) => {
 
   const { input } = args
@@ -22,12 +27,8 @@ const submitTagSet = async (args, req, queryInfo) => {
   let origLangVersion
   tagSubmissions.forEach(tagSubmission => {
 
-    if(tagSubmission.origWordsInfo.length === 0) {
-      throw `All tags must include origWordsInfo with at least 1 item.`
-    }
-
-    if(tagSubmission.translationWordsInfo.length === 0) {
-      throw `All tags must include translationWordsInfo with at least 1 item.`
+    if(tagSubmission.origWordsInfo.length === 0 && tagSubmission.translationWordsInfo.length === 0) {
+      throw `All tags must include either origWordsInfo or translationWordsInfo with at least 1 item.`
     }
 
     tagSubmission.origWordsInfo.forEach(({ uhbWordId, ugntWordId }) => {
@@ -47,6 +48,53 @@ const submitTagSet = async (args, req, queryInfo) => {
     })
   })
 
+  const version = await models.version.findByPk(versionId)
+  const submissionOrigWordIdAndPartSets = []
+  const submissionTranslationWordNumberSets = []
+  tagSubmissions.forEach(({ origWordsInfo, translationWordsInfo }) => {
+    submissionOrigWordIdAndPartSets.push(origWordsInfo.map(({ uhbWordId, ugntWordId, wordPartNumber }) => ugntWordId || `${uhbWordId}|${wordPartNumber}`))
+    submissionTranslationWordNumberSets.push(translationWordsInfo.map(({ wordNumberInVerse }) => wordNumberInVerse))
+  })
+
+  // validate that every part of every orig word is covered, without repeats
+  const wordInfoByIdAndPart = await getWordInfoByIdAndPart({ version, loc })
+  if(
+    !equalObjs(
+      Object.keys(wordInfoByIdAndPart).sort(),
+      submissionOrigWordIdAndPartSets.flat().sort(),
+    )
+  ) {
+    throw `All original language word parts must be covered in tag set.`
+  }
+
+  // validate that every translation word is covered, without repeats
+  const wordHashesSetSubmission = await models.wordHashesSetSubmission.findOne({
+    attributes: [ 'id' ],
+    where: {
+      loc,
+      versionId,
+      wordsHash,
+    },
+    include: [
+      {
+        model: models.wordHashesSubmission,
+        attributes: [ 'id', 'wordNumberInVerse' ],
+        require: true,
+      },
+    ],
+  })
+  if(!wordHashesSetSubmission) {
+    throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
+  }
+  if(
+    !equalObjs(
+      wordHashesSetSubmission.wordHashesSubmissions.map(({ wordNumberInVerse }) => wordNumberInVerse).sort(),
+      submissionTranslationWordNumberSets.flat().sort(),
+    )
+  ) {
+    throw `All translation word numbers must be covered in tag set.`
+  }
+
   delete input.tagSubmissions
 
   await global.connection.transaction(async t => {
@@ -62,6 +110,19 @@ const submitTagSet = async (args, req, queryInfo) => {
 
     input.userId = user.id
 
+    const existingTagSetSubmission = await models.tagSetSubmission.findOne({
+      where: {
+        loc,
+        versionId,
+        wordsHash,
+      },
+      transaction: t,
+    })
+
+    if(existingTagSetSubmission) {
+      await existingTagSetSubmission.destroy({transaction: t})
+    }
+
     const tagSetSubmission = await models.tagSetSubmission.create(input, {transaction: t})
     const tagSetSubmissionId = tagSetSubmission.id
 
@@ -76,32 +137,37 @@ const submitTagSet = async (args, req, queryInfo) => {
             ...translationWordInfo,
             tagSetSubmissionItemId,
           })),
-          {transaction: t},
+          {
+            validate: true,
+            transaction: t,
+          },
         ),
         models[`${origLangVersion}TagSubmission`].bulkCreate(
           tagSubmission.origWordsInfo.map(origWordInfo => ({
             ...origWordInfo,
             tagSetSubmissionItemId,
           })),
-          {transaction: t},
+          {
+            validate: true,
+            transaction: t,
+          },
         ),
       ])
 
     }))
 
     // Recalculate tagSets here
+    await calculateTagSets({
+      loc,
+      wordsHash,
+      versionId,
+      t,
+    })
 
   })
 
-  const where = {
-    loc,
-    versionId,
-    wordsHash,
-  }
+  return await tagSet({ id: `${loc}-${versionId}-${wordsHash}` }, req, queryInfo)
 
-  return models.tagSet.findOne({
-    where,
-  })
 }
 
 module.exports = submitTagSet

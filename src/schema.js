@@ -40,7 +40,9 @@ const addKeysToRoot = ({ schemaString, type }) => {
           try {
             return await require(`./${type}/${query}`)(...params)
           } catch(err) {
-            console.error(`Error in ${type} - ${query}\n`, err)
+            if(!global.skipConsoleLogError) {
+              console.error(`Error in ${type} - ${query}\n`, err)
+            }
             throw (
               typeof err === 'string'
                 ? new Error(err)

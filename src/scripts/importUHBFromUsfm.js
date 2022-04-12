@@ -5,6 +5,7 @@ const fs = require('fs')
 const { getMainWordPartIndex, stripHebrewVowelsEtc } = require('@bibletags/bibletags-ui-helper')
 
 const utils = require('./utils')
+const specialDefinitions = require('./specialDefinitions')
 
 const connection = mysql.createConnection({
   host: process.env.DB_NAME || "localhost",
@@ -12,6 +13,20 @@ const connection = mysql.createConnection({
   user: process.env.USERNAME || "root",
   password: process.env.PASSWORD || "",
   multipleStatements: true,
+})
+
+const getDefinitionInsert = definitionId => ({
+  id: definitionId,
+  lex: "",
+  nakedLex: "",
+  lexUnique: 0,
+  vocal: "",
+  simplifiedVocal: "",
+  hits: 0,
+  lxx: JSON.stringify([]),
+  lemmas: JSON.stringify([]),
+  forms: JSON.stringify([]),
+  ...(specialDefinitions[definitionId] || {}),
 })
 
 connection.connect(async (err) => {
@@ -37,6 +52,39 @@ connection.connect(async (err) => {
     })
 
   })
+
+  // add in special definitions 
+
+  console.log(`====================================================================================`)
+  console.log(`  Add in special definitions...`)
+
+  const numRowsUpdated = await utils.doUpdatesInChunksAsync({
+    connection,
+    updates: (
+      ['b','l','k','m','s','c','d','i','Sn','Sp','Sd','Sh']
+        .map(definitionId => {
+          const { pos, gloss, ...definitionInsert } = getDefinitionInsert(definitionId)
+          return [
+            `
+              INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
+              VALUES ('${Object.values(definitionInsert).join("', '")}')
+            `,
+            ...(pos.map(p => {
+              const posInsert = {
+                pos: p,
+                definitionId,  
+              }
+              return `
+                INSERT INTO partOfSpeeches (${Object.keys(posInsert).join(", ")})
+                VALUES ('${Object.values(posInsert).join("', '")}')
+              `
+            })),
+          ]
+        })
+        .flat()
+    ),
+  })
+  console.log(`\n  ${numRowsUpdated} rows inserted.\n`)
 
   await new Promise(resolve => {
 
@@ -205,18 +253,7 @@ connection.connect(async (err) => {
               if(definitionId) {
                 wordInsert.definitionId = definitionId
 
-                const definitionInsert = {
-                  id: definitionId,
-                  lex: "",
-                  nakedLex: "",
-                  lexUnique: 0,
-                  vocal: "",
-                  simplifiedVocal: "",
-                  hits: 0,
-                  lxx: JSON.stringify([]),
-                  lemmas: JSON.stringify([]),
-                  forms: JSON.stringify([]),
-                }
+                const definitionInsert = getDefinitionInsert(definitionId)
 
                 if(!definitionUpdates[definitionId]) {
                   definitionUpdates[definitionId] = true

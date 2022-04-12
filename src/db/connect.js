@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize')
 const retry = require('retry-as-promised')
+const { isValidBibleSearch } = require('@bibletags/bibletags-ui-helper')
 
 const {
   wordIdRegEx,
@@ -43,6 +44,7 @@ const setUpConnection = ({
       host: connectionObj.host,
       port: connectionObj.port,
       logging: (query, msEllapsed) => (
+        // console.log(`Query: ${query}`)
         msEllapsed > 1000 ? console.log(`WARNING: Slow query (${msEllapsed/1000} seconds). ${query}`) : null
       ),
       benchmark: true,
@@ -191,6 +193,22 @@ const setUpConnection = ({
         throw new Error(`Invalid versification rule. ${key}: ${obj[key]}`)
       }
     })
+  }
+
+  const isDefinitionFormPreferences = ary => {
+
+    if(!(ary instanceof Array)) {
+      throw new Error('Must be an array.')
+    }
+
+    if(
+      ary.some(query => (
+        typeof query !== 'string'
+        || !isValidBibleSearch({ query })
+      ))
+    ) {
+      throw new Error('Must be an array of original language searches.')
+    }
   }
 
   const createdAt = {
@@ -359,30 +377,9 @@ const setUpConnection = ({
     type: Sequelize.ENUM('C', 'S', 'D', 'I'),
   }
 
-  const type = {
-    type: Sequelize.ENUM(
-      'imported',  // i.e. imported from some data set, without very strong rating or secondary confirmation
-      'submitted',  // i.e. submitted by user, without very strong rating or secondary confirmation
-      'deduced',  // i.e. determined by user submissions in other verses, without secondary confirmation
-      'confirmed'  // i.e. cross-checked in 2+ ways, or submitted by user/import with very strong rating
-    ),
-    allowNull: false,
-  }
-
   const wordPartNumber = {
     type: Sequelize.INTEGER.UNSIGNED,
     allowNull: false,
-  }
-
-  const translationWordNumberInVerse = {
-    type: Sequelize.INTEGER.UNSIGNED,
-    allowNull: false,
-  }
-
-  const translationWord = {
-    type: Sequelize.STRING(translationWordLength),
-    allowNull: false,
-    notEmpty: true,
   }
 
   const translation = {
@@ -420,6 +417,13 @@ const setUpConnection = ({
       englishName: {
         type: Sequelize.STRING(languageNameLength),
         allowNull: false,
+      },
+      definitionPreferencesForVerbs: {
+        type: Sequelize.JSON,  // an array of search criteria; eg. ["#infinitive-construct","#infinitive","#participle#1st#singular","#present#1st#singular"]
+        allowNull: false,
+        validate: {
+          isDefinitionFormPreferences,
+        },
       },
       createdAt,
       updatedAt,
@@ -503,62 +507,28 @@ const setUpConnection = ({
         { fields: ['lexUnique'] },
         { fields: ['hits'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
   ////////////////////////////////////////////////////////////////////
 
-  // needed: app (partial), biblearc (partial)
-  // changes some
-  const LanguageSpecificDefinition = connection.define(
-    'languageSpecificDefinition',
-    {
-      gloss: {
-        type: Sequelize.STRING(glossLength),
-        allowNull: false,
-      },
-      syn: {
-        type: Sequelize.JSON,
-        allowNull: false,
-        validate: {
-          isArrayOfWordObjs,
-        },
-      },
-      rel: {
-        type: Sequelize.JSON,
-        allowNull: false,
-        validate: {
-          isArrayOfWordObjs,
-        },
-      },
-      lexEntry: {
-        type: Sequelize.JSON,
-        allowNull: false,
-        validate: {
-          isLexEntry,
-        },
-      },
-    },
+  // needed: none
+  // changes often
+  const DefinitionUpdateItem = connection.define(
+    'definitionUpdateItem',
+    {},
     {
       indexes: [
-        {
-          fields: ['languageId', 'definitionId'],
-          unique: true,
-          name: 'languageId_definitionId',
-        },
-        { fields: ['gloss'] },
-        { fields: ['definitionId'] },
+        { fields: ['createdAt'] },
+        { fields: ['definitionId', 'createdAt'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      updatedAt: false,
     },
   )
 
-  LanguageSpecificDefinition.belongsTo(Language, required)
-  Language.hasMany(LanguageSpecificDefinition)
-
-  LanguageSpecificDefinition.belongsTo(Definition, required)
-  Definition.hasMany(LanguageSpecificDefinition)
+  DefinitionUpdateItem.belongsTo(Definition, required)
+  Definition.hasMany(DefinitionUpdateItem)
 
   //////////////////////////////////////////////////////////////////
 
@@ -577,7 +547,7 @@ const setUpConnection = ({
         { fields: ['pos'] },
         { fields: ['definitionId'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
@@ -654,7 +624,11 @@ const setUpConnection = ({
   const EmbeddingApp = connection.define(
     'embeddingApp',
     {
-      // will need a default row (id=1) where uri=import
+      // will need a default row where uri=import
+      id: {
+        type: Sequelize.UUID,
+        primaryKey: true,
+      },
       uri: {
         type: Sequelize.STRING(255),
         allowNull: false,
@@ -683,6 +657,7 @@ const setUpConnection = ({
   const User = connection.define(
     'user',
     {
+      // will need a default row where id=import, with rating of 5
       id: {  // received from session-sync-auth OR user-[deviceId]@bibletags.org (for non-authenticated users)
         type: Sequelize.STRING(255),
         primaryKey: true,
@@ -704,7 +679,7 @@ const setUpConnection = ({
       rating: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 2,
       },
       ratingHistory: {  // each adjustment (with description) on a separate line
         type: Sequelize.TEXT,
@@ -740,6 +715,63 @@ const setUpConnection = ({
   User.belongsTo(Language, required)
   Language.hasMany(User)
 
+  ////////////////////////////////////////////////////////////////////
+
+  // needed: app (partial), biblearc (partial)
+  // changes some
+  const LanguageSpecificDefinition = connection.define(
+    'languageSpecificDefinition',
+    {
+      gloss: {
+        type: Sequelize.STRING(glossLength),
+        allowNull: false,
+      },
+      syn: {
+        type: Sequelize.JSON,
+        allowNull: false,
+        validate: {
+          isArrayOfWordObjs,
+        },
+      },
+      rel: {
+        type: Sequelize.JSON,
+        allowNull: false,
+        validate: {
+          isArrayOfWordObjs,
+        },
+      },
+      lexEntry: {
+        type: Sequelize.JSON,
+        allowNull: false,
+        validate: {
+          isLexEntry,
+        },
+      },
+    },
+    {
+      indexes: [
+        {
+          fields: ['languageId', 'definitionId'],
+          unique: true,
+          name: 'languageId_definitionId',
+        },
+        { fields: ['gloss'] },
+        { fields: ['definitionId', 'editorId'] },
+        { fields: ['editorId'] },
+      ],
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
+    },
+  )
+
+  LanguageSpecificDefinition.belongsTo(Language, required)
+  Language.hasMany(LanguageSpecificDefinition)
+
+  LanguageSpecificDefinition.belongsTo(Definition, required)
+  Definition.hasMany(LanguageSpecificDefinition)
+
+  LanguageSpecificDefinition.belongsTo(User, { as: 'editor' })
+  User.hasMany(LanguageSpecificDefinition, { as: 'languageSpecificDefinitionsWhereIAmEditor', foreignKey: 'editorId' })
+
   //////////////////////////////////////////////////////////////////
 
   // needed: none
@@ -748,15 +780,14 @@ const setUpConnection = ({
     'userEmbeddingApp',
     {
       createdAt,
-      updatedAt,
     },
     {
       indexes: [
         { fields: ['userId'] },
         { fields: ['embeddingAppId'] },
         { fields: ['createdAt'] },
-        { fields: ['updatedAt'] },
       ],
+      updatedAt: false,
     },
   )
 
@@ -778,15 +809,14 @@ const setUpConnection = ({
         type: Sequelize.TEXT,
       },
       createdAt,
-      updatedAt,
     },
     {
       indexes: [
         { fields: ['adjustment'] },
         { fields: ['userId'] },
         { fields: ['createdAt'] },
-        { fields: ['updatedAt'] },
       ],
+      updatedAt: false,
     },
   )
 
@@ -805,11 +835,15 @@ const setUpConnection = ({
         type: Sequelize.JSON,
         allowNull: false,
       },
+      autoMatchScores: {  // NOT included in offline version; this array matches tags item for item
+        type: Sequelize.JSON,
+        // null indicates it is based on a human submission
+      },
       status: {
         type: Sequelize.ENUM(
-          'incomplete',
-          'unconfirmed',
-          'confirmed'
+          'automatch',  // no human submission yet
+          'unconfirmed',  // contains human submission, but contains at least some tags which are not confirmed strongly enough
+          'confirmed'  // contains human submission and is strongly confirmed
         ),
         allowNull: false,
       },
@@ -827,7 +861,7 @@ const setUpConnection = ({
         { fields: ['wordsHash'] },
         { fields: ['status'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
@@ -844,7 +878,6 @@ const setUpConnection = ({
       loc,
       wordsHash,
       createdAt,
-      updatedAt,
     },
     {
       indexes: [
@@ -857,8 +890,8 @@ const setUpConnection = ({
         { fields: ['loc'] },
         { fields: ['embeddingAppId'] },
         { fields: ['createdAt'] },
-        { fields: ['updatedAt'] },
       ],
+      updatedAt: false,
     },
   )
 
@@ -886,7 +919,7 @@ const setUpConnection = ({
     },
   )
 
-  TagSetSubmissionItem.belongsTo(TagSetSubmission, required)
+  TagSetSubmissionItem.belongsTo(TagSetSubmission, requiredWithCascadeDelete)
   TagSetSubmission.hasMany(TagSetSubmissionItem)
 
   //////////////////////////////////////////////////////////////////
@@ -912,7 +945,7 @@ const setUpConnection = ({
     },
   )
 
-  TagSetSubmissionItemTranslationWord.belongsTo(TagSetSubmissionItem, required)
+  TagSetSubmissionItemTranslationWord.belongsTo(TagSetSubmissionItem, requiredWithCascadeDelete)
   TagSetSubmissionItem.hasMany(TagSetSubmissionItemTranslationWord)
 
   //////////////////////////////////////////////////////////////////
@@ -928,7 +961,6 @@ const setUpConnection = ({
       loc,
       wordsHash,
       createdAt,
-      updatedAt,
     },
     {
       indexes: [
@@ -940,8 +972,8 @@ const setUpConnection = ({
         { fields: ['loc'] },
         { fields: ['embeddingAppId'] },
         { fields: ['createdAt'] },
-        { fields: ['updatedAt'] },
       ],
+      updatedAt: false,
     },
   )
 
@@ -990,7 +1022,7 @@ const setUpConnection = ({
   // does not mean that such things could not be indicated as footnotes
   // in the text.
 
-  // needed: ??
+  // needed: none
   // doesn't change
   const uhbWord = connection.define(
     'uhbWord',
@@ -1153,7 +1185,7 @@ const setUpConnection = ({
         { fields: ['suffixNumber', 'bookId', 'wordNumber'] },
         { fields: ['definitionId', 'bookId', 'wordNumber'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Derived from import files.
     },
   )
 
@@ -1233,42 +1265,9 @@ const setUpConnection = ({
     {
       indexes: [
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
-
-  //////////////////////////////////////////////////////////////////
-
-  // needed: none
-  // changes often
-  const uhbTag = connection.define(
-    'uhbTag',
-    {
-      wordPartNumber,
-      translationWordNumberInVerse,
-      wordsHash,
-      type,
-    },
-    {
-      indexes: [
-        {
-          fields: ['uhbWordId', 'wordPartNumber', 'versionId', 'wordsHash', 'translationWordNumberInVerse'],
-          unique: true,
-          name: 'uhbWordId_wordPartNumber_versionId__',
-        },
-        { fields: ['versionId', 'wordsHash', 'translationWordNumberInVerse', 'type'], name: 'versionId_wordsHash_translationWordNumberInVerse__' },
-        { fields: ['uhbWordId', 'wordPartNumber','type'] },
-        { fields: ['type'] },
-      ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
-    },
-  )
-
-  uhbTag.belongsTo(Version, required)
-  Version.hasMany(uhbTag)
-
-  uhbTag.belongsTo(uhbWord, required)
-  uhbWord.hasMany(uhbTag)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1292,7 +1291,7 @@ const setUpConnection = ({
     },
   )
 
-  uhbTagSubmission.belongsTo(TagSetSubmissionItem, required)
+  uhbTagSubmission.belongsTo(TagSetSubmissionItem, requiredWithCascadeDelete)
   TagSetSubmissionItem.hasMany(uhbTagSubmission)
 
   uhbTagSubmission.belongsTo(uhbWord, required)
@@ -1300,7 +1299,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: ??
+  // needed: none
   // doesn't change
   const ugntWord = connection.define(
     'ugntWord',
@@ -1371,7 +1370,7 @@ const setUpConnection = ({
         { fields: ['attribute', 'bookId', 'wordNumber'] },
         { fields: ['definitionId', 'bookId', 'wordNumber'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Derived from import files.
     },
   )
 
@@ -1449,41 +1448,9 @@ const setUpConnection = ({
     {
       indexes: [
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
-
-  //////////////////////////////////////////////////////////////////
-
-  // needed: none
-  // changes often
-  const ugntTag = connection.define(
-    'ugntTag',
-    {
-      translationWordNumberInVerse,
-      wordsHash,
-      type,
-    },
-    {
-      indexes: [
-        {
-          fields: ['ugntWordId', 'versionId', 'wordsHash', 'translationWordNumberInVerse'],
-          unique: true,
-          name: 'ugntWordId_versionId_wordsHash__',
-        },
-        { fields: ['versionId', 'wordsHash', 'translationWordNumberInVerse', 'type'], name: 'versionId_wordsHash_translationWordNumberInVerse__' },
-        { fields: ['ugntWordId','type'] },
-        { fields: ['type'] },
-      ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
-    },
-  )
-
-  ugntTag.belongsTo(Version, required)
-  Version.hasMany(ugntTag)
-
-  ugntTag.belongsTo(ugntWord, required)
-  ugntWord.hasMany(ugntTag)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1505,7 +1472,7 @@ const setUpConnection = ({
     },
   )
 
-  ugntTagSubmission.belongsTo(TagSetSubmissionItem, required)
+  ugntTagSubmission.belongsTo(TagSetSubmissionItem, requiredWithCascadeDelete)
   TagSetSubmissionItem.hasMany(ugntTagSubmission)
 
   ugntTagSubmission.belongsTo(ugntWord, required)
@@ -1513,7 +1480,7 @@ const setUpConnection = ({
   
   //////////////////////////////////////////////////////////////////
 
-  // needed: ??
+  // needed: none
   // doesn't change
   const lxxWord = connection.define(
     'lxxWord',
@@ -1556,7 +1523,7 @@ const setUpConnection = ({
         { fields: ['attribute'] },
         { fields: ['definitionId'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Derived from import files.
     },
   )
 
@@ -1578,7 +1545,7 @@ const setUpConnection = ({
     {
       indexes: [
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
@@ -1606,7 +1573,7 @@ const setUpConnection = ({
       indexes: [
         { fields: ['nakedLemma', 'id'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
@@ -1625,24 +1592,42 @@ const setUpConnection = ({
     },
     {
       indexes: [
-        {
-          fields: ['definitionId', 'versionId', 'translation'],
-          unique: true,
-          name: 'definitionId_versionId_translation',
-        },
         { fields: ['translation', 'hits'] },
         { fields: ['versionId', 'translation', 'hits'] },
         { fields: ['hits'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
-  WordTranslation.belongsTo(Definition, required)
-  Definition.hasMany(WordTranslation)
-
   WordTranslation.belongsTo(Version, required)
   Version.hasMany(WordTranslation)
+
+  //////////////////////////////////////////////////////////////////
+
+  // needed: app, biblearc
+  // changes often
+  const WordTranslationDefinition = connection.define(
+    'wordTranslationDefinition',
+    {},
+    {
+      indexes: [
+        {
+          fields: ['definitionId', 'wordTranslationId'],
+          unique: true,
+          name: 'definitionId_wordTranslationId',
+        },
+        { fields: ['wordTranslationId'] },
+      ],
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
+    },
+  )
+
+  WordTranslationDefinition.belongsTo(WordTranslation, requiredWithCascadeDelete)
+  WordTranslation.hasMany(WordTranslationDefinition)
+
+  WordTranslationDefinition.belongsTo(Definition, required)
+  Definition.hasMany(WordTranslationDefinition)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1664,7 +1649,7 @@ const setUpConnection = ({
         { fields: ['scope'] },
         { fields: ['hits'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
@@ -1695,7 +1680,7 @@ const setUpConnection = ({
         { fields: ['form'] },
         { fields: ['hits'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
@@ -1722,7 +1707,7 @@ const setUpConnection = ({
         { fields: ['scope'] },
         { fields: ['hits'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
@@ -1777,11 +1762,11 @@ const setUpConnection = ({
         { fields: ['translation'] },
         { fields: ['languageId'] },
       ],
-      timestamps: false,  // Used in tables which can be completed derived from other tables and base import files.
+      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
-  UiWord.belongsTo(UiEnglishWord, required)
+  UiWord.belongsTo(UiEnglishWord, requiredWithCascadeDelete)
   UiEnglishWord.hasMany(UiWord)
 
   UiWord.belongsTo(Language, required)
@@ -1796,7 +1781,6 @@ const setUpConnection = ({
     {
       translation,
       createdAt,
-      updatedAt,
     },
     {
       indexes: [
@@ -1808,15 +1792,15 @@ const setUpConnection = ({
         { fields: ['embeddingAppId'] },
         { fields: ['translation'] },
         { fields: ['createdAt'] },
-        { fields: ['updatedAt'] },
       ],
+      updatedAt: false,
     },
   )
 
   UiWordSubmission.belongsTo(User, required)
   User.hasMany(UiWordSubmission)
 
-  UiWordSubmission.belongsTo(UiEnglishWord, required)
+  UiWordSubmission.belongsTo(UiEnglishWord, requiredWithCascadeDelete)
   UiEnglishWord.hasMany(UiWordSubmission)
 
   UiWordSubmission.belongsTo(Language, required)

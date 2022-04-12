@@ -19,7 +19,10 @@ const submitUIWords = async (args, req, queryInfo) => {
         ...input,
         ...word,
       })),
-      {transaction: t},
+      {
+        validate: true,
+        transaction: t,
+      },
     )
     // Recalculate uiWords here
 

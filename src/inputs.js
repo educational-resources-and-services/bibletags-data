@@ -13,7 +13,7 @@ const inputs = `
     loc: String!
     versionId: String!
     wordsHash: String!
-    embeddingAppId: Int!
+    embeddingAppId: String!
     wordHashes: [WordHashesInput]!
   }
 
@@ -30,7 +30,7 @@ const inputs = `
     versionId: String!
     wordsHash: String!
     deviceId: String!
-    embeddingAppId: Int!
+    embeddingAppId: String!
     tagSubmissions: [TagInput]!
   }
 
@@ -54,7 +54,7 @@ const inputs = `
   input UIWordsInput {
     languageId: String!
     deviceId: String!
-    embeddingAppId: Int!
+    embeddingAppId: String!
     words: [UIWordInput]!
   }
 

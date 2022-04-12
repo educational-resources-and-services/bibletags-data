@@ -1,3 +1,6 @@
+const cloneObj = obj => JSON.parse(JSON.stringify(obj))
+const equalObjs = (obj1, obj2) => JSON.stringify(obj1) === JSON.stringify(obj2)
+
 module.exports = {
 
   getOrigLangVersionIdFromLoc: loc => (
@@ -27,6 +30,39 @@ module.exports = {
       req.user = user.dataValues
     }
     next()
+  },
+
+  cloneObj,
+  equalObjs,
+
+  getObjFromArrayOfObjs: (array, key='id', valueKey) => {
+    if(!array) return null
+    const itemsByKey = {}
+    array.forEach(item => {
+      itemsByKey[item[key]] = valueKey ? item[valueKey] : item
+    })
+    return itemsByKey
+  },
+
+  // tag order doesn’t really matter except that it must be consistent
+  deepSortTagSetTags: tags => {
+    // first sort o and t keys
+    tags.forEach(tag => {
+      tag.o.sort()
+      tag.t.sort()
+    })
+    // then sort tags
+    tags.sort((a,b) => {
+      const aT1 = a.t[0] || Infinity
+      const bT1 = b.t[0] || Infinity
+      if(aT1 === bT1) {
+        return a.o[0] > b.o[0] ? 1 : -1
+      } else if(aT1 > bT1) {
+        return 1
+      } else {
+        return -1
+      }
+    })
   },
 
 }

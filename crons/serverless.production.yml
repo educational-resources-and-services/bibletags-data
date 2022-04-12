@@ -1,0 +1,13 @@
+org: resourcingeducation
+component: aws-lambda-cron
+name: bibletags-data-crons
+
+inputs:
+  src: ../
+  schedule: rate(1 minute)
+  env:
+    RDS_HOST: ${param:RDS_HOST}
+    RDS_USERNAME: ${param:RDS_USERNAME}
+    RDS_PASSWORD: ${param:RDS_PASSWORD}
+    RDS_DATABASE: ${param:RDS_DATABASE}
+    LOCAL: ''

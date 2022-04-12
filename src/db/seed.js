@@ -18,6 +18,12 @@ const { setUpConnection } = require('./connect')
       "id": "eng",
       "name": "English",
       "englishName": "English",
+      "definitionPreferencesForVerbs": [
+        "#infinitive-construct",
+        "#infinitive",
+        "#participle#1st#singular",
+        "#present#1st#singular",
+      ],
       "createdAt": "2022-01-01 00:00:00 GMT",
       "updatedAt": "2022-01-01 00:00:00 GMT",
     },
@@ -25,6 +31,12 @@ const { setUpConnection } = require('./connect')
       "id": "spa",
       "name": "Español",
       "englishName": "Spanish",
+      "definitionPreferencesForVerbs": [
+        "#infinitive-construct",
+        "#infinitive",
+        "#participle#3rd#singular",
+        "#present#3rd#singular",
+      ],
       "createdAt": "2022-01-01 00:00:00 GMT",
       "updatedAt": "2022-01-01 00:00:00 GMT",
     },
@@ -50,10 +62,28 @@ const { setUpConnection } = require('./connect')
 
   await models.embeddingApp.bulkCreate([
     {
-      "id": 1,
+      "id": "6ec0bd7f-11c0-43da-975e-2a8ad9ebae0b",
+      "uri": "import",
+      "createdAt": "2022-01-01 00:00:00 GMT",
+      "updatedAt": "2022-01-01 00:00:00 GMT",
+    },
+    {
+      "id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
       "uri": "https://biblearc.com",
       "createdAt": "2022-01-01 00:00:00 GMT",
       "updatedAt": "2022-01-01 00:00:00 GMT",
+    },
+  ])
+
+  await models.user.bulkCreate([
+    {
+      "id": "import",
+      "email": "import@bibletags.org",
+      "rating": 5,
+      "ratingHistory": "",
+      "createdAt": "2022-01-01 00:00:00 GMT",
+      "updatedAt": "2022-01-01 00:00:00 GMT",
+      "languageId": "eng",
     },
   ])
 
