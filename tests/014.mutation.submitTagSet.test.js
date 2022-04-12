@@ -196,4 +196,23 @@ describe('Mutation: submitTagSet', async () => {
     })
   })
 
+  it('Genesis 1:3 ESV (prior to word hashes submit)', async () => {
+
+    global.skipConsoleLogError = true
+
+    const tagSubmissions = JSON.stringify(rawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
+
+    const submitTagSet = await doMutation(`
+      submitTagSet(input: { loc: "01001003", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "123", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
+        id
+        tags
+        status
+      }
+    `)
+
+    ;(submitTagSet === null).should.eql(true)
+    global.skipConsoleLogError = false
+    
+  })
+
 })

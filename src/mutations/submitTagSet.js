@@ -48,6 +48,7 @@ const submitTagSet = async (args, req, queryInfo) => {
     })
   })
 
+  // prep for next couple validations
   const version = await models.version.findByPk(versionId)
   const submissionOrigWordIdAndPartSets = []
   const submissionTranslationWordNumberSets = []
@@ -55,19 +56,6 @@ const submitTagSet = async (args, req, queryInfo) => {
     submissionOrigWordIdAndPartSets.push(origWordsInfo.map(({ uhbWordId, ugntWordId, wordPartNumber }) => ugntWordId || `${uhbWordId}|${wordPartNumber}`))
     submissionTranslationWordNumberSets.push(translationWordsInfo.map(({ wordNumberInVerse }) => wordNumberInVerse))
   })
-
-  // validate that every part of every orig word is covered, without repeats
-  const wordInfoByIdAndPart = await getWordInfoByIdAndPart({ version, loc })
-  const dataWordIdAndParts = Object.keys(wordInfoByIdAndPart).sort()
-  const submittedWordIdAndParts = submissionOrigWordIdAndPartSets.flat().sort()
-  if(!equalObjs(submittedWordIdAndParts, dataWordIdAndParts)) {
-    if(!global.skipConsoleLogError) {
-      console.log('Bad submitTagSet orig language parts comparison:', submittedWordIdAndParts, dataWordIdAndParts)
-    }
-    throw `All original language word parts must be covered in tag set.`
-  }
-
-  // validate that every translation word is covered, without repeats
   const wordHashesSetSubmission = await models.wordHashesSetSubmission.findOne({
     attributes: [ 'id' ],
     where: {
@@ -86,6 +74,19 @@ const submitTagSet = async (args, req, queryInfo) => {
   if(!wordHashesSetSubmission) {
     throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
   }
+
+  // validate that every part of every orig word is covered, without repeats
+  const wordInfoByIdAndPart = await getWordInfoByIdAndPart({ version, loc })
+  const dataWordIdAndParts = Object.keys(wordInfoByIdAndPart).sort()
+  const submittedWordIdAndParts = submissionOrigWordIdAndPartSets.flat().sort()
+  if(!equalObjs(submittedWordIdAndParts, dataWordIdAndParts)) {
+    if(!global.skipConsoleLogError) {
+      console.log('Bad submitTagSet orig language parts comparison:', submittedWordIdAndParts, dataWordIdAndParts)
+    }
+    throw `All original language word parts must be covered in tag set.`
+  }
+
+  // validate that every translation word is covered, without repeats
   const submittedTranslationWordNumbers = wordHashesSetSubmission.wordHashesSubmissions.map(({ wordNumberInVerse }) => wordNumberInVerse).sort()
   const dataTranslationWordNumbers = submissionTranslationWordNumberSets.flat().sort()
   if(!equalObjs(submittedTranslationWordNumbers, dataTranslationWordNumbers)) {
