@@ -38,6 +38,8 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
             // find every languageSpecificDefinition with this definition in its syn or rel (two new tables needed for this)
               // update them
 
+          // after: delete all definitionUpdateItems with this definitionId
+
     await global.connection.transaction(async t => {
 
 

@@ -419,7 +419,7 @@ const calculateTagSets = async ({
       const words = [ ...tag.o, ...tag.t ]
       if(!words.some(w => usedWords[w])) {
         newTagSetTags.push(tag)
-        newTagSetRatings.push(rating)
+        newTagSetRatings.push(Math.min(rating, 99999))
         words.forEach(w => {
           usedWords[w] = true
         })
@@ -611,92 +611,17 @@ const calculateTagSets = async ({
 
   }
 
-
-  // what to calculate
-    // new tagSet submission
-
-      // all
-        // run specific loc/versionId/wordsHash on all combos, unless this proves to take forever, in which case I should find shortcuts
-
-      // specific loc/versionId/wordsHash
-        // (a) evaluate all submissions for this loc/versionId/wordsHash
-        // (b) update tagSets and update/insert tagSetItems, if any have changed
-        // (c) [if changed, then]
-
-          // for each tag
-            // get all the tagSetItem sets where
-              // version.languageId matches (doesn't have to be same versionId or wordsHash)  
-              // ids match each other
-              // sets contain all hashes in the tag, in the same order
-              // match level is not already highest possible
-              // only tagSet.loc's where vs contains all the definitionIds in the tag
-            // if it is a better match, update it
-
-            // match levels sumation
-              // matches parsings = 1000000
-              // exact word number progression (translation and original) = 500000
-              // one of
-                // withBeforeAndAfterHash match = 200000
-                // withBeforeHash match = 100000
-                // withAfterHash match = 100000
-              // rating = rating (max out at 99999)
-
-
-              // matches parsings + exact word number progression (translation and original) + withBeforeAndAfterHash match
-              // matches parsings + exact word number progression (translation and original) + withBeforeHash match
-              // matches parsings + exact word number progression (translation and original) + withAfterHash match
-              // matches parsings + exact word number progression (translation and original) + hash match
-              // matches parsings + withBeforeAndAfterHash match
-              // matches parsings + withBeforeHash match
-              // matches parsings + withAfterHash match
-              // matches parsings + hash match
-              // exact word number progression (translation and original) + withBeforeAndAfterHash match
-              // exact word number progression (translation and original) + withBeforeHash match
-              // exact word number progression (translation and original) + withAfterHash match
-              // exact word number progression (translation and original) + hash match
-              // withBeforeAndAfterHash match
-              // withBeforeHash match
-              // withAfterHash match
-              // hash match
-
-          // for definitionId of all words in updated verse
-            // update wordTranslations as appropriate (for all relevant versions)
-            // recalculate languageSpecificDefinitions
-            // update languageSpecificDefinitions if changed
-
-    // new wordHashesSetSubmission
-      // for each word, get relevant loc/versionId/wordsHash combos and run (c) above, but only on this loc
-
-
-  // tables drawing from
-    // tagSetSubmissions
-    // tagSetSubmissionItems
-    // tagSetSubmissionItemTranslationWords
-    // uhbTagSubmissions
-    // ugntTagSubmissions
-    // users
-    // userRatingAdjustments
-    // wordHashesSubmissions
-    // wordHashesSetSubmissions
-
-  // tables being created
-    // tagSets
-    // wordTranslations
-    // languageSpecificDefinitions
-      // allow editor version
-
-  // ** weed out bad embedding apps!
-
 }
 
 module.exports = calculateTagSets
 
-
-// autoMatchScore calculation
-  // matches parsings = 1000000
-  // exact word number progression (translation and original) = 300000 each
-  // one of
-    // withBeforeAndAfterHash match = 200000
-    // withBeforeHash match = 100000
-    // withAfterHash match = 100000
-  // rating = rating (max out at 99999)
+/*
+  NOTES on autoMatchScore calculation:
+    matches parsings = 1000000
+    exact word number progression (translation and original) = 300000 each
+    one of...
+      withBeforeAndAfterHash match = 200000
+      withBeforeHash match = 100000
+      withAfterHash match = 100000
+    rating = rating (max out at 99999)
+*/
