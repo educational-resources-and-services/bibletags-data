@@ -112,6 +112,7 @@ const calculateTagSets = async ({
     versionsById,
     baseWordInfoByIdAndPart,
     baseWordHashesSubmissions,
+    baseWordNumberInVerse,
     tag,
     newTagSetRating=0,
     wordHashesSetSubmissions,
@@ -165,7 +166,6 @@ const calculateTagSets = async ({
         wordHashesSubmissionsArray = Object.values(wordHashesSubmissions)
       } else if(tag.t.length === 1) {
         wordHashesSubmissionsArray = [{
-          wordNumberInVerse,
           withBeforeHash,
           withAfterHash,
           withBeforeAndAfterHash,
@@ -174,7 +174,8 @@ const calculateTagSets = async ({
         return
         // TODO: to be able to get multi-translation-word tags upon word hash submission, I need to 
         // add in code here to (1) get the hashes of the other words in the found tag, (2) look 
-        // in the verseToUpdateInfo spot to see if we have all those words, (3) form this array
+        // in the verseToUpdateInfo spot to see if we have all those words, (3) form the array,
+        // including wordNumberInVerse for forming newTag.t below.
       }
 
       const thisRowWordInfoByIdAndPart = await getWordInfoByIdAndPart({
@@ -259,7 +260,7 @@ const calculateTagSets = async ({
       newAutoMatchScore += bestMatchOptionInfo.totalScoreAddition
 
       // form newTag.t
-      newTag.t = wordHashesSubmissionsArray.map(({ wordNumberInVerse }) => wordNumberInVerse)
+      newTag.t = startFromTag ? wordHashesSubmissionsArray.map(({ wordNumberInVerse }) => wordNumberInVerse) : [ baseWordNumberInVerse ]
 
       // add to auto-match score for exact translation word number progression
       const extraEntriesBetweenEachWordHash = wordHashesSubmissionsArray.slice(1).map(({ wordNumberInVerse }, idx) => (
@@ -273,7 +274,7 @@ const calculateTagSets = async ({
       const matchesHash = hashType => (
         tag.t.every(wordNumberInVerse => (
           wordHashesSubmissionsArray.some(wordHashesSubmission => (
-            baseWordHashesSubmissions[wordNumberInVerse-1][hashType] === wordHashesSubmission[hashType]
+            baseWordHashesSubmissions[(baseWordNumberInVerse || wordNumberInVerse) - 1][hashType] === wordHashesSubmission[hashType]
           ))
         ))
       )
@@ -361,7 +362,7 @@ const calculateTagSets = async ({
         alteredTags
           .map(tag => (
             tag.o.map(wordIdAndPart => ({
-              definitionId: baseWordInfoByIdAndPart[wordIdAndPart].strongPart,
+              definitionId: baseWordInfoByIdAndPart[wordIdAndPart].strongPart.replace(/^Sp.*$/, 'Sp'),
             }))
           ))
           .flat()
@@ -502,7 +503,7 @@ const calculateTagSets = async ({
             WHERE whss.versionId IN (:versionIds)
               AND (ts.id IS NULL OR (ts.status = "automatch" AND ts.autoMatchScores IS NOT NULL))
               ${tag.t.map((wordNumberInVerse, idx) => `
-                AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse])}"
+                AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase())}"
                 ${idx === 0 ? `` : `
                   AND whs${idx}.wordNumberInVerse > whs${idx-1}.wordNumberInVerse
                 `}
@@ -581,6 +582,7 @@ const calculateTagSets = async ({
         versionsById,
         baseWordInfoByIdAndPart,
         baseWordHashesSubmissions,
+        baseWordNumberInVerse: wordHashesSubmission.wordNumberInVerse,
         wordHashesSetSubmissions,
         verseToUpdateInfo: {
           loc,

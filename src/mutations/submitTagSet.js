@@ -58,12 +58,12 @@ const submitTagSet = async (args, req, queryInfo) => {
 
   // validate that every part of every orig word is covered, without repeats
   const wordInfoByIdAndPart = await getWordInfoByIdAndPart({ version, loc })
-  if(
-    !equalObjs(
-      Object.keys(wordInfoByIdAndPart).sort(),
-      submissionOrigWordIdAndPartSets.flat().sort(),
-    )
-  ) {
+  const dataWordIdAndParts = Object.keys(wordInfoByIdAndPart).sort()
+  const submittedWordIdAndParts = submissionOrigWordIdAndPartSets.flat().sort()
+  if(!equalObjs(submittedWordIdAndParts, dataWordIdAndParts)) {
+    if(!global.skipConsoleLogError) {
+      console.log('Bad submitTagSet orig language parts comparison:', submittedWordIdAndParts, dataWordIdAndParts)
+    }
     throw `All original language word parts must be covered in tag set.`
   }
 
@@ -86,12 +86,12 @@ const submitTagSet = async (args, req, queryInfo) => {
   if(!wordHashesSetSubmission) {
     throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
   }
-  if(
-    !equalObjs(
-      wordHashesSetSubmission.wordHashesSubmissions.map(({ wordNumberInVerse }) => wordNumberInVerse).sort(),
-      submissionTranslationWordNumberSets.flat().sort(),
-    )
-  ) {
+  const submittedTranslationWordNumbers = wordHashesSetSubmission.wordHashesSubmissions.map(({ wordNumberInVerse }) => wordNumberInVerse).sort()
+  const dataTranslationWordNumbers = submissionTranslationWordNumberSets.flat().sort()
+  if(!equalObjs(submittedTranslationWordNumbers, dataTranslationWordNumbers)) {
+    if(!global.skipConsoleLogError) {
+      console.log('Bad submitTagSet translation word numbers comparison:', submittedTranslationWordNumbers, dataTranslationWordNumbers)
+    }
     throw `All translation word numbers must be covered in tag set.`
   }
 

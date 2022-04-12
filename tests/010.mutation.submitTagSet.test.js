@@ -66,7 +66,7 @@ const rawTagSubmissions = [
     ],
     translationWordsInfo: [
       {
-        word: "god",
+        word: "God",
         wordNumberInVerse: 4,
       },
     ],
