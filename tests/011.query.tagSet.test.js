@@ -41,13 +41,12 @@ describe('Query: tagSet', async () => {
     tagSet.should.eql({
       id: "01001002-esv-pHhSp3/AP8vlyrvlm3p3O3j81ci/j8Ziwzj8rki/rrp3mfO3j81ci/j8dS",
       tags: [
-        {o:["01SU2|2"],t:[1]},
-        {o:["01SU2|3"],t:[2]},
-        {o:["01SU2|1"],t:[6]},
-        {o:["01Aud|1"],t:[8]},
-        {o:["019DZ|1"],t:[12]},
-        {o:["018H0|1"],t:[17]},
-        {o:["01AyJ|1"],t:[21]},
+        {o:["01SU2|2"],t:[1]},  // וְ⁠הָ⁠אָ֗רֶץ
+        {o:["01SU2|3"],t:[2]},  // וְ⁠הָ⁠אָ֗רֶץ
+        {o:["01Aud|1"],t:[8]},  // וָ⁠בֹ֔הוּ  - this is the wrong guess, but the algorithm is working right
+        {o:["01FbN|1"],t:[17]},  // וְ⁠ר֣וּחַ
+        {o:["01AyJ|1"],t:[21]},  // אֱלֹהִ֔ים
+        {o:["019DZ|1"],t:[28]},  // הַ⁠מָּֽיִם
       ],
       status: "automatch",
     })

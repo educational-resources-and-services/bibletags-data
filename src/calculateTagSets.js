@@ -113,14 +113,13 @@ const calculateTagSets = async ({
     baseWordInfoByIdAndPart,
     baseWordHashesSubmissions,
     baseWordNumberInVerse,
-    tag,
+    baseTag,
     newTagSetRating=0,
     wordHashesSetSubmissions,
     verseToUpdateInfo,
   }) => {
 
-    const startFromTag = !!tag
-    const usedWordIdAndPartNumbers = {}
+    const startFromTag = !!baseTag
 
     let fixedUniqueKey
     if(!startFromTag && !autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey]) {
@@ -148,6 +147,7 @@ const calculateTagSets = async ({
         // following relevant for new tag submission call only
         wordHashesSubmissions=[],
         autoMatchScores=[],
+        numTranslationWords,
 
         // following relevant for new word hashes submission only
         wordNumberInVerse,
@@ -157,7 +157,7 @@ const calculateTagSets = async ({
 
       } = wordHashesSetSubmission
 
-      tag = tag || tags.find(tag => tag.t.includes(wordNumberInVerse))
+      const tag = baseTag || tags.find(tag => tag.t.includes(wordNumberInVerse))
 
       if(tag.o.length === 0 || tag.t.length === 0) return
 
@@ -199,7 +199,7 @@ const calculateTagSets = async ({
         const updatedMatchOptions = []
 
         searchRowWordInfos.forEach(wordInfo => {
-          if(!usedWordIdAndPartNumbers[wordInfo.wordIdAndPartNumber] && wordInfo.strongPart === strongPart) {
+          if(wordInfo.strongPart === strongPart) {
 
             const matchOptionWord = {
               wordIdAndPartNumber: wordInfo.wordIdAndPartNumber,
@@ -235,32 +235,35 @@ const calculateTagSets = async ({
 
       if(origMatchOptions.length === 0) return
 
-      // add to auto-match score for options with exact word number progression
+      const newTag = {}
+      let newAutoMatchScore = newTagSetRating
+
+      // form newTag.t
+      newTag.t = startFromTag ? wordHashesSubmissionsArray.map(({ wordNumberInVerse }) => wordNumberInVerse) : [ baseWordNumberInVerse ]
+      
+      // add to auto-match score and select best match
+      const totalTranslationWordsInVerse = startFromTag ? numTranslationWords : baseWordHashesSubmissions.length
+      const totalOrigWordsInVerse = searchRowWordInfos.length
       const bestMatchOptionInfo = { totalScoreAddition: -1 }
+      const translationWordsPlacementPercentage = newTag.t.reduce((total,item) => total + item/totalTranslationWordsInVerse, 0) / newTag.t.length
       origMatchOptions.forEach(origMatchOption => {
         const extraWordPartsBetween = origMatchOption.slice(1).map(({ wordPartNumberInVerse }, idx) => wordPartNumberInVerse - origMatchOption[idx].wordPartNumberInVerse)
         let totalScoreAddition = origMatchOption.reduce((a,b) => a + b.scoreAddition, 0)
         if(equalObjs(extraWordPartsBetweenEachOriginalWord, extraWordPartsBetween)) {
           totalScoreAddition += 300000
         }
+        const origWordsPlacementPercentage = origMatchOption.reduce((total, { wordPartNumberInVerse }) => total + wordPartNumberInVerse/totalOrigWordsInVerse, 0) / newTag.t.length
+        const differenceInWordPlacementPercentage = Math.abs(origWordsPlacementPercentage - translationWordsPlacementPercentage)
+        totalScoreAddition += parseInt(2500 / Math.max(.01, differenceInWordPlacementPercentage) - 2500, 10)  // will yield between 0-247500
         if(totalScoreAddition > bestMatchOptionInfo.totalScoreAddition) {
           bestMatchOptionInfo.totalScoreAddition = totalScoreAddition
           bestMatchOptionInfo.wordIdAndPartNumbers = origMatchOption.map(({ wordIdAndPartNumber }) => wordIdAndPartNumber)
         }
       })
 
-      let newAutoMatchScore = newTagSetRating
-      const newTag = {}
-
       // form newTag.o
-      bestMatchOptionInfo.wordIdAndPartNumbers.forEach(wordIdAndPartNumber => {
-        usedWordIdAndPartNumbers[wordIdAndPartNumber] = true
-      })
       newTag.o = bestMatchOptionInfo.wordIdAndPartNumbers
       newAutoMatchScore += bestMatchOptionInfo.totalScoreAddition
-
-      // form newTag.t
-      newTag.t = startFromTag ? wordHashesSubmissionsArray.map(({ wordNumberInVerse }) => wordNumberInVerse) : [ baseWordNumberInVerse ]
 
       // add to auto-match score for exact translation word number progression
       const extraEntriesBetweenEachWordHash = wordHashesSubmissionsArray.slice(1).map(({ wordNumberInVerse }, idx) => (
@@ -419,7 +422,7 @@ const calculateTagSets = async ({
       const words = [ ...tag.o, ...tag.t ]
       if(!words.some(w => usedWords[w])) {
         newTagSetTags.push(tag)
-        newTagSetRatings.push(Math.min(rating, 99999))
+        newTagSetRatings.push(Math.min(rating, 9999))
         words.forEach(w => {
           usedWords[w] = true
         })
@@ -472,7 +475,7 @@ const calculateTagSets = async ({
 
       const { versionsById, baseWordInfoByIdAndPart, baseWordHashesSubmissions } = await getBaseAutoMatchTagInfo()
 
-      await Promise.all(newTagSetTags.map(async (tag, newTagSetIdx) => {
+      await Promise.all(newTagSetTags.map(async (baseTag, newTagSetIdx) => {
 
         const newTagSetRating = newTagSetRatings[newTagSetIdx]
 
@@ -483,7 +486,8 @@ const calculateTagSets = async ({
               whss.loc,
               whss.versionId,
               whss.wordsHash,
-              ${tag.t.map((x, idx) => `
+              (SELECT COUNT(*) FROM wordHashesSubmissions as whs WHERE whs.wordHashesSetSubmissionId = whss.id) AS numTranslationWords,
+              ${baseTag.t.map((x, idx) => `
                 whs${idx}.wordNumberInVerse AS 'wordHashesSubmissions.${idx}.wordNumberInVerse',
                 ${/* whs${idx}.hash AS 'wordHashesSubmissions.${idx}.hash', */ ""}
                 whs${idx}.withBeforeHash AS 'wordHashesSubmissions.${idx}.withBeforeHash',
@@ -496,13 +500,13 @@ const calculateTagSets = async ({
 
             FROM wordHashesSetSubmissions as whss
               LEFT JOIN tagSets as ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
-              ${tag.t.map((x, idx) => `
+              ${baseTag.t.map((x, idx) => `
                 LEFT JOIN wordHashesSubmissions as whs${idx} ON (whs${idx}.wordHashesSetSubmissionId = whss.id)
               `).join("")}
 
             WHERE whss.versionId IN (:versionIds)
               AND (ts.id IS NULL OR (ts.status = "automatch" AND ts.autoMatchScores IS NOT NULL))
-              ${tag.t.map((wordNumberInVerse, idx) => `
+              ${baseTag.t.map((wordNumberInVerse, idx) => `
                 AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase())}"
                 ${idx === 0 ? `` : `
                   AND whs${idx}.wordNumberInVerse > whs${idx-1}.wordNumberInVerse
@@ -525,7 +529,7 @@ const calculateTagSets = async ({
           versionsById,
           baseWordInfoByIdAndPart,
           baseWordHashesSubmissions,
-          tag,
+          baseTag,
           newTagSetRating,
           wordHashesSetSubmissions,
         })
@@ -623,5 +627,6 @@ module.exports = calculateTagSets
       withBeforeAndAfterHash match = 200000
       withBeforeHash match = 100000
       withAfterHash match = 100000
-    rating = rating (max out at 99999)
+    comparably small word placement percentage difference between orig and translation = 0-150000
+    rating = rating (max out at 9999)
 */
