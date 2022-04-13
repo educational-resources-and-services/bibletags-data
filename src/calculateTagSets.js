@@ -1,12 +1,13 @@
 const { hash64 } = require('@bibletags/bibletags-ui-helper')
 
-const { getOrigLangVersionIdFromLoc, equalObjs, getObjFromArrayOfObjs, deepSortTagSetTags } = require('./utils')
+const { getOrigLangVersionIdFromLoc, equalObjs, getObjFromArrayOfObjs, deepSortTagSetTags, cloneObj } = require('./utils')
 const getWordInfoByIdAndPart = require('./getWordInfoByIdAndPart')
 
 const calculateTagSets = async ({
   loc,
   versionId,
   wordsHash,
+  justSubmittedUserId,
   t,
 }) => {
 
@@ -382,6 +383,7 @@ const calculateTagSets = async ({
 
     // each tag gets a rating
     const tagsByTagStr = {}
+    const tagsByUserId = {}
     const wordByNumberInVerse = []
     tagSetSubmissions.forEach(tagSetSubmission => {
 
@@ -395,13 +397,14 @@ const calculateTagSets = async ({
 
       const tags = getTagsJson(tagSetSubmission)
       const { rating } = tagSetSubmission.user
+      tagsByUserId[tagSetSubmission.user.id] = cloneObj(tags)
       if(rating < 2) return  // folks with ratings < 2 (they get more wrong than right!) are discounted
 
       tags.forEach(tag => {
         const tagAsStr = JSON.stringify(tag)
         if(tagsByTagStr[tagAsStr]) {
           tagsByTagStr[tagAsStr].rating *= rating
-          tagsByTagStr[tagAsStr].numberOrAffirmations
+          tagsByTagStr[tagAsStr].numberOrAffirmations++
         } else {
           tagsByTagStr[tagAsStr] = {
             rating,
@@ -426,7 +429,11 @@ const calculateTagSets = async ({
         words.forEach(w => {
           usedWords[w] = true
         })
-        confirmed = confirmed && numberOrAffirmations >= 2 && rating >= 50
+        confirmed = (
+          confirmed
+          && numberOrAffirmations - (tagSetSubmissions.length - numberOrAffirmations) >= 2  // at least 2 more have chosen this than an alternative
+          && rating >= 50
+        )
       }
     })
     const newStatus = confirmed ? 'confirmed' : 'unconfirmed'
@@ -443,11 +450,37 @@ const calculateTagSets = async ({
 
     if(!tagSet) throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
 
+    if(tagSet.status !== newStatus && (tagSet.status === `confirmed` || newStatus === `confirmed`)) {
+      // update user ratings if status is changing
+      await Promise.all(Object.keys(tagsByUserId).map(async userId => {
+        deepSortTagSetTags(tagsByUserId[userId])
+        const changeAmt = (
+          newStatus === 'confirmed'
+            ? equalObjs(tagsByUserId[userId], newTagSetTags) ? 1 : -1  // if now confirmed, reward and penalize
+            : equalObjs(tagsByUserId[userId], tagSet.tags) ? -1 : 1  // if being reverted to unconfirmed, remove those rewards/penalties
+        )
+        if(newStatus === 'unconfirmed' && userId === justSubmittedUserId) return  // no rewards/penalties to revert
+        const ratingHistoryAddition = `\n${changeAmt >= 0 ? `+`: ``}${changeAmt} (${loc} ${versionId.toUpperCase()} ${newStatus} ${new Date().toDateString().replace(/^[^ ]+ /, '')})`
+        await models.user.update(
+          {
+            ratingHistory: global.connection.fn(`CONCAT`, global.connection.col(`ratingHistory`), ratingHistoryAddition),
+            rating: global.connection.literal(`\`rating\` + ${changeAmt}`) ,
+          },
+          {
+            where: {
+              id: userId,
+            },
+            transaction: t,
+          },
+        )
+      }))
+    }
+
     if(equalObjs(newTagSetTags, tagSet.tags)) {
 
       if(tagSet.status !== newStatus) {
         tagSet.status = newStatus
-        await tagSet.update({transaction: t})
+        await tagSet.save({transaction: t})
       }
 
     } else {

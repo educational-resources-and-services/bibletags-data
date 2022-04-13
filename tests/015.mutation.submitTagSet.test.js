@@ -570,7 +570,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(rawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01021014", versionId: "esv", wordsHash: "4uya/NKzE7j8x8vlpQ26vlDMN8i/lGvlD1DRAbaABtDR7SpDegZsI6j8G3vleJpD77wznruwvlk5E7j8BKi/Jb", deviceId: "123", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
+      submitTagSet(input: { loc: "01021014", versionId: "esv", wordsHash: "4uya/NKzE7j8x8vlpQ26vlDMN8i/lGvlD1DRAbaABtDR7SpDegZsI6j8G3vleJpD77wznruwvlk5E7j8BKi/Jb", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
         id
         tags
         status

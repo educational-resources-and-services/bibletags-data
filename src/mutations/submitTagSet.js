@@ -116,6 +116,7 @@ const submitTagSet = async (args, req, queryInfo) => {
         loc,
         versionId,
         wordsHash,
+        userId: user.id,
       },
       transaction: t,
     })
@@ -129,12 +130,20 @@ const submitTagSet = async (args, req, queryInfo) => {
 
     await Promise.all(tagSubmissions.map(async tagSubmission => {
 
-      const tagSetSubmissionItem = await models.tagSetSubmissionItem.create({ tagSetSubmissionId }, {transaction: t})
+      const { alignmentType, translationWordsInfo, origWordsInfo } = tagSubmission
+
+      const tagSetSubmissionItem = await models.tagSetSubmissionItem.create(
+        {
+          alignmentType,
+          tagSetSubmissionId,
+        },
+        {transaction: t}
+      )
       const tagSetSubmissionItemId = tagSetSubmissionItem.id
 
       await Promise.all([
         models.tagSetSubmissionItemTranslationWord.bulkCreate(
-          tagSubmission.translationWordsInfo.map(translationWordInfo => ({
+          translationWordsInfo.map(translationWordInfo => ({
             ...translationWordInfo,
             tagSetSubmissionItemId,
           })),
@@ -144,7 +153,7 @@ const submitTagSet = async (args, req, queryInfo) => {
           },
         ),
         models[`${origLangVersion}TagSubmission`].bulkCreate(
-          tagSubmission.origWordsInfo.map(origWordInfo => ({
+          origWordsInfo.map(origWordInfo => ({
             ...origWordInfo,
             tagSetSubmissionItemId,
           })),
@@ -162,6 +171,7 @@ const submitTagSet = async (args, req, queryInfo) => {
       loc,
       wordsHash,
       versionId,
+      justSubmittedUserId: user.id,
       t,
     })
 

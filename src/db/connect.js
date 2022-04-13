@@ -684,7 +684,7 @@ const setUpConnection = ({
       ratingHistory: {  // each adjustment (with description) on a separate line
         type: Sequelize.TEXT,
         allowNull: false,
-        defaultValue: ``,
+        defaultValue: `Initial: 2`,
       },
       flaggedForAbuse: {
         type: Sequelize.BOOLEAN,
@@ -910,10 +910,16 @@ const setUpConnection = ({
   // changes often
   const TagSetSubmissionItem = connection.define(
     'tagSetSubmissionItem',
-    {},
+    {
+      alignmentType: {
+        type: Sequelize.ENUM('affirmation', 'correction', 'without-suggestion'),
+        allowNull: false,
+      },
+    },
     {
       indexes: [
-        { fields: ['tagSetSubmissionId'] },
+        { fields: ['tagSetSubmissionId', 'alignmentType'] },
+        { fields: ['alignmentType'] },
       ],
       timestamps: false,  // timestamps for this data kept in related TagSetSubmission row
     },

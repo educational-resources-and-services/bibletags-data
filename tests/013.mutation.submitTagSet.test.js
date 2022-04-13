@@ -1,175 +1,18 @@
 const { doMutation } = require('./testUtils')
-
-const rawTagSubmissions = [
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01h7N",
-        wordPartNumber: 1,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "in",
-        wordNumberInVerse: 1,
-      },
-      {
-        word: "the",
-        wordNumberInVerse: 2,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01h7N",
-        wordPartNumber: 2,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "beginning",
-        wordNumberInVerse: 3,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01RAp",
-        wordPartNumber: 1,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "created",
-        wordNumberInVerse: 5,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01cuO",
-        wordPartNumber: 1,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "God",
-        wordNumberInVerse: 4,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01vvO",
-        wordPartNumber: 1,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "the",
-        wordNumberInVerse: 6,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01vvO",
-        wordPartNumber: 2,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "heavens",
-        wordNumberInVerse: 7,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01Q4j",
-        wordPartNumber: 1,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "and",
-        wordNumberInVerse: 8,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01VFX",
-        wordPartNumber: 1,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "the",
-        wordNumberInVerse: 9,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01Q4j",
-        wordPartNumber: 2,
-      },
-    ],
-    translationWordsInfo: [],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01VFX",
-        wordPartNumber: 2,
-      },
-    ],
-    translationWordsInfo: [
-      {
-        word: "earth",
-        wordNumberInVerse: 10,
-      },
-    ],
-    alignmentType: "without-suggestion",
-  },
-  {
-    origWordsInfo: [
-      {
-        uhbWordId: "01XDl",
-        wordPartNumber: 1,
-      },
-    ],
-    translationWordsInfo: [],
-    alignmentType: "without-suggestion",
-  },
-]
+const { cloneObj } = require('../src/utils')
+const rawTagSubmissions = require('./gen.1.1.rawTagSubmissions')
 
 describe('Mutation: submitTagSet', async () => {
 
-  it('Genesis 1:1 ESV (resubmit)', async () => {
+  it('Genesis 1:1 ESV (resubmit bad tagging)', async () => {
 
-    const tagSubmissions = JSON.stringify(rawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
+    const badRawTagSubmissions = cloneObj(rawTagSubmissions)
+    badRawTagSubmissions[0].translationWordsInfo.push(badRawTagSubmissions[1].translationWordsInfo[0])
+    badRawTagSubmissions.splice(1,1)
+    const tagSubmissions = JSON.stringify(badRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "123", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
         id
         tags
         status
@@ -202,7 +45,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(rawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001003", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "123", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
+      submitTagSet(input: { loc: "01001003", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
         id
         tags
         status
