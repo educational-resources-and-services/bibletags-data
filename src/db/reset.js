@@ -22,6 +22,7 @@ const { setUpConnection } = require('./connect')
               'ugntUnitWord',
               'ugntUnitRange',
               'definition',
+              'partOfSpeech',
               'languageSpecificDefinition',
               'lemma',
             ].includes(model)
