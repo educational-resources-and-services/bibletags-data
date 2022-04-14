@@ -16,7 +16,7 @@ const calculateTagSets = async ({
   const autoMatchTagSetUpdatesByUniqueKey = {}
   const origLangVersionId = getOrigLangVersionIdFromLoc(loc)
 
-  const [ baseVersion, tagSetSubmissions ] = await Promise.all([
+  const [ baseVersion, tagSetSubmissions, tagSet ] = await Promise.all([
 
     models.version.findByPk(versionId, {transaction: t}),
 
@@ -48,6 +48,15 @@ const calculateTagSets = async ({
         },
       ],
       order: [[ 'createdAt', 'DESC' ]],
+      transaction: t,
+    }),
+
+    models.tagSet.findOne({
+      where: {
+        loc,
+        versionId,
+        wordsHash,
+      },
       transaction: t,
     }),
 
@@ -381,6 +390,8 @@ const calculateTagSets = async ({
 
   if(tagSetSubmissions.length > 0) {  // coming from submitTagSet: update tagSet based on all submissions
 
+    if(!tagSet) throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
+
     // each tag gets a rating
     const tagsByTagStr = {}
     const tagsByUserId = {}
@@ -438,17 +449,6 @@ const calculateTagSets = async ({
     })
     const newStatus = confirmed ? 'confirmed' : 'unconfirmed'
     deepSortTagSetTags(newTagSetTags)
-
-    const tagSet = await models.tagSet.findOne({
-      where: {
-        loc,
-        versionId,
-        wordsHash,
-      },
-      transaction: t,
-    })
-
-    if(!tagSet) throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
 
     if(tagSet.status !== newStatus && (tagSet.status === `confirmed` || newStatus === `confirmed`)) {
       // update user ratings if status is changing
@@ -569,8 +569,10 @@ const calculateTagSets = async ({
 
       }))
 
-      await updateAutoMatchTags()
-      await addDefinitionUpdateItems({ baseWordInfoByIdAndPart, alteredTags })
+      await Promise.all([
+        updateAutoMatchTags(),
+        addDefinitionUpdateItems({ baseWordInfoByIdAndPart, alteredTags }),
+      ])
 
     }
 
