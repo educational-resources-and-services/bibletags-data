@@ -1615,7 +1615,13 @@ const setUpConnection = ({
   // changes often
   const WordTranslationDefinition = connection.define(
     'wordTranslationDefinition',
-    {},
+    {
+      morphPart: {
+        type: Sequelize.STRING(10),
+        allowNull: false,
+        notEmpty: true,
+      },
+    },
     {
       indexes: [
         {
@@ -1624,6 +1630,7 @@ const setUpConnection = ({
           name: 'definitionId_wordTranslationId',
         },
         { fields: ['wordTranslationId'] },
+        { fields: ['definitionId', 'morphPart'] },
       ],
       timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
