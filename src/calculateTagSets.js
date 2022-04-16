@@ -126,20 +126,21 @@ const calculateTagSets = async ({
     baseTag,
     newTagSetRating=0,
     wordHashesSetSubmissions,
-    verseToUpdateInfo,
   }) => {
 
     const startFromTag = !!baseTag
 
     let fixedUniqueKey
     if(!startFromTag && !autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey]) {
-      fixedUniqueKey = `${verseToUpdateInfo.loc} ${verseToUpdateInfo.versionId} ${verseToUpdateInfo.wordsHash}`
+      fixedUniqueKey = `${loc} ${versionId} ${wordsHash}`
       autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey] = {
         tags: [],
         autoMatchScores: [],
         status: 'automatch',
         hasChange: true,
-        ...verseToUpdateInfo,
+        loc,
+        versionId,
+        wordsHash,
       }
     }
 
@@ -152,7 +153,6 @@ const calculateTagSets = async ({
         versionId,
         wordsHash,
         tagSetId,
-        tags=[],
 
         // following relevant for new tag submission call only
         wordHashesSubmissions=[],
@@ -167,6 +167,7 @@ const calculateTagSets = async ({
 
       } = wordHashesSetSubmission
 
+      const tags = JSON.parse(wordHashesSetSubmission.tags || `[]`)
       const tag = baseTag || tags.find(tag => tag.t.includes(wordNumberInVerse))
 
       if(tag.o.length === 0 || tag.t.length === 0) return
@@ -184,7 +185,7 @@ const calculateTagSets = async ({
         return
         // TODO: to be able to get multi-translation-word tags upon word hash submission, I need to 
         // add in code here to (1) get the hashes of the other words in the found tag, (2) look 
-        // in the verseToUpdateInfo spot to see if we have all those words, (3) form the array,
+        // in the versionId/loc/wordsHash spot to see if we have all those words, (3) form the array,
         // including wordNumberInVerse for forming newTag.t below.
       }
 
@@ -367,27 +368,6 @@ const calculateTagSets = async ({
 
   }
 
-  const addDefinitionUpdateItems = async ({ baseWordInfoByIdAndPart, alteredTags }) => {
-
-    // find the definitionIds of tags that changed and add to wordTranslation + languageSpecificDefinition update queue
-    await models.definitionUpdateItem.bulkCreate(
-      (
-        alteredTags
-          .map(tag => (
-            tag.o.map(wordIdAndPart => ({
-              definitionId: baseWordInfoByIdAndPart[wordIdAndPart].strongPart.replace(/^Sp.*$/, 'Sp'),
-            }))
-          ))
-          .flat()
-      ),
-      {
-        validate: true,
-        transaction: t,
-      },
-    )
-
-  }
-
   if(tagSetSubmissions.length > 0) {  // coming from submitTagSet: update tagSet based on all submissions
 
     if(!tagSet) throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
@@ -485,11 +465,6 @@ const calculateTagSets = async ({
 
     } else {
 
-      // record changed tags
-
-      const oldTagsStringified = tagSet.tags.map(tag => JSON.stringify(tag))
-      const alteredTags = newTagSetTags.filter(tag => !oldTagsStringified.includes(JSON.stringify(tag)))
-
       // create the new tagSet based on submissions
 
       if(tagSet) {
@@ -519,7 +494,7 @@ const calculateTagSets = async ({
               whss.loc,
               whss.versionId,
               whss.wordsHash,
-              (SELECT COUNT(*) FROM wordHashesSubmissions as whs WHERE whs.wordHashesSetSubmissionId = whss.id) AS numTranslationWords,
+              (SELECT COUNT(*) FROM wordHashesSubmissions AS whs WHERE whs.wordHashesSetSubmissionId = whss.id) AS numTranslationWords,
               ${baseTag.t.map((x, idx) => `
                 whs${idx}.wordNumberInVerse AS 'wordHashesSubmissions.${idx}.wordNumberInVerse',
                 ${/* whs${idx}.hash AS 'wordHashesSubmissions.${idx}.hash', */ ""}
@@ -531,10 +506,10 @@ const calculateTagSets = async ({
               ts.tags,
               ts.autoMatchScores
 
-            FROM wordHashesSetSubmissions as whss
-              LEFT JOIN tagSets as ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
+            FROM wordHashesSetSubmissions AS whss
+              LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
               ${baseTag.t.map((x, idx) => `
-                LEFT JOIN wordHashesSubmissions as whs${idx} ON (whs${idx}.wordHashesSetSubmissionId = whss.id)
+                LEFT JOIN wordHashesSubmissions AS whs${idx} ON (whs${idx}.wordHashesSetSubmissionId = whss.id)
               `).join("")}
 
             WHERE whss.versionId IN (:versionIds)
@@ -569,10 +544,7 @@ const calculateTagSets = async ({
 
       }))
 
-      await Promise.all([
-        updateAutoMatchTags(),
-        addDefinitionUpdateItems({ baseWordInfoByIdAndPart, alteredTags }),
-      ])
+      await updateAutoMatchTags()
 
     }
 
@@ -595,9 +567,9 @@ const calculateTagSets = async ({
             whs.withBeforeAndAfterHash,
             ts.tags
 
-          FROM wordHashesSetSubmissions as whss
-            LEFT JOIN wordHashesSubmissions as whs ON (whs.wordHashesSetSubmissionId = whss.id)
-            LEFT JOIN tagSets as ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
+          FROM wordHashesSetSubmissions AS whss
+            LEFT JOIN wordHashesSubmissions AS whs ON (whs.wordHashesSetSubmissionId = whss.id)
+            LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
 
           WHERE whss.versionId IN (:versionIds)
             AND whs.hash = :hash
@@ -623,30 +595,11 @@ const calculateTagSets = async ({
         baseWordHashesSubmissions,
         baseWordNumberInVerse: wordHashesSubmission.wordNumberInVerse,
         wordHashesSetSubmissions,
-        verseToUpdateInfo: {
-          loc,
-          versionId,
-          wordsHash,
-        },
       })
 
     }))
 
     await updateAutoMatchTags()
-
-    const updatedTagSet = await models.tagSet.findOne({
-      where: {
-        loc,
-        versionId,
-        wordsHash,
-      },
-      transaction: t,
-    })
-
-    await addDefinitionUpdateItems({
-      baseWordInfoByIdAndPart,
-      alteredTags: updatedTagSet.tags,
-    })
 
   }
 

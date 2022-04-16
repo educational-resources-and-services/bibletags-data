@@ -116,7 +116,7 @@ const specialDefinitions = {
     lexUnique: 1,
     vocal: ``,
     hits: 45589,
-    // gloss: `me, my, our, us, you, your, his...`,
+    // gloss: `me, my, you, your, him, his, etc.`,
     pos: [`P`],
     nakedLex: `suffix`,
   },

@@ -43,10 +43,10 @@ const setUpConnection = ({
       },
       host: connectionObj.host,
       port: connectionObj.port,
-      logging: (query, msEllapsed) => (
+      logging: (query, msEllapsed) => {
         // console.log(`Query: ${query}`)
         msEllapsed > 1000 ? console.log(`WARNING: Slow query (${msEllapsed/1000} seconds). ${query}`) : null
-      ),
+      },
       benchmark: true,
       pool: {
         // attempting to prevent the connection from becoming invalid due to mysql's wait_timeout
@@ -425,6 +425,11 @@ const setUpConnection = ({
           isDefinitionFormPreferences,
         },
       },
+      standardWordDivider: {
+        type: Sequelize.STRING(10),
+        allowNull: false,
+        defaultValue: " ",
+      },
       createdAt,
       updatedAt,
     },
@@ -510,25 +515,6 @@ const setUpConnection = ({
       timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
-
-  ////////////////////////////////////////////////////////////////////
-
-  // needed: none
-  // changes often
-  const DefinitionUpdateItem = connection.define(
-    'definitionUpdateItem',
-    {},
-    {
-      indexes: [
-        { fields: ['createdAt'] },
-        { fields: ['definitionId', 'createdAt'] },
-      ],
-      updatedAt: false,
-    },
-  )
-
-  DefinitionUpdateItem.belongsTo(Definition, required)
-  Definition.hasMany(DefinitionUpdateItem)
 
   //////////////////////////////////////////////////////////////////
 
@@ -832,8 +818,20 @@ const setUpConnection = ({
     {
       loc,
       tags: {
-        type: Sequelize.JSON,
+        // contains JSON; did not use JSON type column, however, since that type does not maintain key order
+        type: Sequelize.TEXT('medium'),
         allowNull: false,
+        notEmpty: true,
+        get() {
+          try {
+            return JSON.parse(this.getDataValue('tags'))
+          } catch(err) {
+            return []
+          }
+        },
+        set(value) {
+          this.setDataValue('tags', JSON.stringify(value))
+        },
       },
       autoMatchScores: {  // NOT included in offline version; this array matches tags item for item
         type: Sequelize.JSON,
@@ -858,6 +856,7 @@ const setUpConnection = ({
         },
         { fields: ['loc', 'status'] },
         { fields: ['versionId', 'status'] },
+        { fields: ['versionId', 'loc'] },
         { fields: ['wordsHash'] },
         { fields: ['status'] },
       ],
@@ -888,6 +887,7 @@ const setUpConnection = ({
         },
         { fields: ['userId'] },
         { fields: ['loc'] },
+        { fields: ['versionId', 'loc'] },
         { fields: ['embeddingAppId'] },
         { fields: ['createdAt'] },
       ],
@@ -1616,11 +1616,7 @@ const setUpConnection = ({
   const WordTranslationDefinition = connection.define(
     'wordTranslationDefinition',
     {
-      morphPart: {
-        type: Sequelize.STRING(10),
-        allowNull: false,
-        notEmpty: true,
-      },
+      form,
     },
     {
       indexes: [
@@ -1630,7 +1626,7 @@ const setUpConnection = ({
           name: 'definitionId_wordTranslationId',
         },
         { fields: ['wordTranslationId'] },
-        { fields: ['definitionId', 'morphPart'] },
+        { fields: ['definitionId', 'form'] },
       ],
       timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },

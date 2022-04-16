@@ -24,7 +24,7 @@ const submitTagSet = async (args, req, queryInfo) => {
     throw `No tags submitted.`
   }
 
-  let origLangVersion
+  let origLangVersionId
   tagSubmissions.forEach(tagSubmission => {
 
     if(tagSubmission.origWordsInfo.length === 0 && tagSubmission.translationWordsInfo.length === 0) {
@@ -37,13 +37,13 @@ const submitTagSet = async (args, req, queryInfo) => {
         throw `Each tag must contain either a uhbWordId or ugntWordId, but not both. uhbWordId: ${uhbWordId} / ugntWordId: ${ugntWordId}`
       }
 
-      const thisOrigLangVersion = uhbWordId ? 'uhb' : 'ugnt'
+      const thisOrigLangVersionId = uhbWordId ? 'uhb' : 'ugnt'
 
-      if(origLangVersion && origLangVersion !== thisOrigLangVersion) {
+      if(origLangVersionId && origLangVersionId !== thisOrigLangVersionId) {
         throw `All tags in a single tagSet submission must relate to a single original language text.`
       }
 
-      origLangVersion = thisOrigLangVersion
+      origLangVersionId = thisOrigLangVersionId
 
     })
   })
@@ -152,7 +152,7 @@ const submitTagSet = async (args, req, queryInfo) => {
             transaction: t,
           },
         ),
-        models[`${origLangVersion}TagSubmission`].bulkCreate(
+        models[`${origLangVersionId}TagSubmission`].bulkCreate(
           origWordsInfo.map(origWordInfo => ({
             ...origWordInfo,
             tagSetSubmissionItemId,
