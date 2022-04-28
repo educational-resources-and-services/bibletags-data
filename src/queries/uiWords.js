@@ -16,7 +16,7 @@ const uiWords = async (args, req, queryInfo) => {
     languageId,
   }
 
-  const uiWords = await models.uiWord.find({
+  const uiWords = await models.uiWord.findAll({
     where,
   })
 

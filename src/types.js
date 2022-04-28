@@ -9,12 +9,19 @@
 // Definition:pos = an array of parts of speech abbreviations (N, V, etc) that this lexeme is found in
 // Definition:syn and Definition:rel = arrays of synonym/related word objects (eg. [{"lex":"τέκνον","strongs":"G5043","hits":99,"gloss":"child"},...])
 // Definition:lxx = an object with info on the lxx translation of this word (eg. [{"w":"ἀρχῇ","lex":"ἀρχή","strongs":"G746","hits":236,"ugntHits":55}]); only relevant for Hebrew
-// Hits:id = [extended strongs number]-[context abbreviation] (eg. H323-t for this word in the Torah, G822-40 for this word in Matthew as the 40th book, G873-lxx for this word in the LXX, G3025-ληνῶν for this word inflected in this way, etc)
 // DO NOT DO hits query - instead, just do a search without any results
-// Translations:id = [extended strongs number]-[versionId] (eg. H8873-esv for the different translations of the word in the esv)
-// Translations:tr = an object mapping word translations to hits (eg. {"son":299,"sons":56,...})
+// TranslationBreakdown:id = [extended strongs number]-[versionId] (eg. H8873-esv for the different translations of the word in the esv)
+// TranslationBreakdown:breakdown = an array with info on translation hits (eg. [ [``, [ { tr: "well", hits: 12, forms: [ "באר" ] } ]], [`באר שבע`, [ ... ]] ])
 // LexEntry:id = [extended strongs number]-[languageId] (eg. H234a-eng, G8289-esp)
 // SearchResult:hitsPerBook (eg. {"43":22,"44":3} would indicate 22 hits in John and 3 in Acts)
+
+const languageSpecificDefinition = `
+  gloss: String
+  syn: JSON
+  rel: JSON
+  lexEntry: String
+  editorId: ID
+`
 
 const types = `
 
@@ -23,34 +30,61 @@ const types = `
     usfm: String
   }
 
+  type Language {
+    id: ID
+    name: String
+    englishName: String
+    definitionPreferencesForVerbs: JSON
+    standardWordDivider: String
+  }
+
   type TagSet {
     id: ID
     tags: JSON
     status: String
   }
 
+  type TranslationBreakdown {
+    id: ID
+    breakdown: JSON
+  }
+
   type Definition {
     id: ID
     lex: String
+    nakedLex: String
     lexUnique: Boolean
     vocal: String
+    simplifiedVocal: String
     hits: Int
-    gloss: String
-    pos: [String]
-    syn: JSON
-    rel: JSON
     lxx: JSON
-    lxxHits: Hits
+    lemmas: JSON
+    forms: JSON
+    pos: [String]
+    ${languageSpecificDefinition}
   }
 
-  type Hits {
+  type LanguageSpecificDefinition {
     id: ID
-    hits: Int
+    ${languageSpecificDefinition}
   }
 
-  type Translations {
-    id: ID
-    tr: JSON
+  type TagSetUpdate {
+    tagSets: [TagSet]
+    hasMore: Boolean
+    newUpdatedFrom: Milliseconds!
+  }
+
+  type TranslationBreakdownUpdate {
+    translationBreakdowns: [TranslationBreakdown]
+    hasMore: Boolean
+    newUpdatedFrom: Milliseconds!
+  }
+
+  type LanguageSpecificDefinitionUpdate {
+    languageSpecificDefinitions: [LanguageSpecificDefinition]
+    hasMore: Boolean
+    newUpdatedFrom: Milliseconds!
   }
 
   type LexEntry {
@@ -98,7 +132,7 @@ const types = `
   type Version {
     id: ID
     name: String
-    languageId: String
+    languageId: ID
     wordDividerRegex: String
     partialScope: String
     versificationModel: String

@@ -3,17 +3,18 @@ const fs = require('fs-extra')
 const { Op } = require('sequelize')
 require('dotenv').config()
 
-const mysql = require('mysql2/promise')
+const { setUpConnection } = require('../db/connect')
 
 ;(async() => {
 
-  const connection = await mysql.createConnection({
-    host: process.env.DB_NAME || "localhost",
-    database: process.env.HOST || 'bibletags',
-    user: process.env.USERNAME || "root",
-    password: process.env.PASSWORD || "",
-    multipleStatements: true,
-  })
+  if(!global.connection) {
+    console.log('Establishing DB connection...')
+    setUpConnection()
+    await global.connection.authenticate()
+    console.log('...DB connection established.')
+  }
+
+  const { models } = global.connection
 
   console.log(`\nSTARTING updateOriginalSearchTablesInAppsDefaultTenant...\n`)
 
@@ -76,7 +77,7 @@ const mysql = require('mysql2/promise')
 
     for(let type of typesByText[text]) {
 
-      const [ unitWords ] = await connection.query(`SELECT * FROM ${text}UnitWords WHERE id LIKE "verseNumber:${type}:%" ORDER BY id`)
+      const [ unitWords ] = await global.connection.query(`SELECT * FROM ${text}UnitWords WHERE id LIKE "verseNumber:${type}:%" ORDER BY id`)
 
       const db = new Database(`${searchDir}/${text}UnitWords-${type}.db`)
       const tableName = `${text}UnitWords`
@@ -102,7 +103,7 @@ const mysql = require('mysql2/promise')
 
     // create the unitRanges sqlite files
 
-    const [ unitRanges ] = await connection.query(`SELECT * FROM ${text}UnitRanges ORDER BY id`)
+    const [ unitRanges ] = await global.connection.query(`SELECT * FROM ${text}UnitRanges ORDER BY id`)
 
     const db = new Database(`${searchDir}/${text}UnitRanges.db`)
     const tableName = `${text}UnitRanges`
@@ -126,29 +127,80 @@ const mysql = require('mysql2/promise')
 
   }
 
-  // create the lemmas sqlite file
+  {  // create the lemmas sqlite file
+    const [ lemmas ] = await global.connection.query(`SELECT * FROM lemmas ORDER BY id`)
 
-  const [ lemmas ] = await connection.query(`SELECT * FROM lemmas ORDER BY id`)
+    const db = new Database(`${searchDir}/lemmas.db`)
+    const tableName = `lemmas`
 
-  const db = new Database(`${searchDir}/lemmas.db`)
-  const tableName = `lemmas`
+    const create = db.prepare(
+      `CREATE TABLE ${tableName} (
+        id TEXT PRIMARY KEY,
+        nakedLemma TEXT
+      );`
+    )
+    create.run()
+    numDbs++
 
-  const create = db.prepare(
-    `CREATE TABLE ${tableName} (
-      id TEXT PRIMARY KEY,
-      nakedLemma TEXT
-    );`
-  )
-  create.run()
-  numDbs++
+    const insert = db.prepare(`INSERT INTO ${tableName} (id, nakedLemma) VALUES (@id, @nakedLemma)`)
+    db.transaction(() => {
+      lemmas.forEach(({ id, nakedLemma }) => {
+        insert.run({ id, nakedLemma })
+        numRows++
+      })
+    })()
+  }
 
-  const insert = db.prepare(`INSERT INTO ${tableName} (id, nakedLemma) VALUES (@id, @nakedLemma)`)
-  db.transaction(() => {
-    lemmas.forEach(({ id, nakedLemma }) => {
-      insert.run({ id, nakedLemma })
-      numRows++
+  {  // create the definitions sqlite file
+    const definitions = await models.definition.findAll({
+      include: [
+        {
+          model: models.partOfSpeech,
+          attributes: [ 'pos' ],
+          required: false,
+        },
+      ],
+      order: [ 'id' ]
     })
-  })()
+
+    const db = new Database(`${searchDir}/definitions.db`)
+    const tableName = `definitions`
+
+    const create = db.prepare(
+      `CREATE TABLE ${tableName} (
+        id TEXT PRIMARY KEY,
+        lex TEXT,
+        nakedLex TEXT,
+        lexUnique INTEGER,
+        vocal TEXT,
+        simplifiedVocal TEXT,
+        hits INTEGER,
+        lxx TEXT,
+        lemmas TEXT,
+        forms TEXT,
+        pos TEXT
+      );`
+    )
+    create.run()
+    numDbs++
+
+    const insert = db.prepare(`INSERT INTO ${tableName} (id, lex, nakedLex, lexUnique, vocal, simplifiedVocal, hits, lxx, lemmas, forms, pos) VALUES (@id, @lex, @nakedLex, @lexUnique, @vocal, @simplifiedVocal, @hits, @lxx, @lemmas, @forms, @pos)`)
+    db.transaction(() => {
+      definitions.forEach(({ dataValues, partOfSpeeches }) => {
+        insert.run({
+          ...dataValues,
+          lexUnique: dataValues.lexUnique ? 1 : 0,
+          lxx: JSON.stringify(dataValues.lxx),
+          lemmas: JSON.stringify(dataValues.lemmas),
+          forms: JSON.stringify(dataValues.forms),
+          pos: JSON.stringify(partOfSpeeches.map(({ pos }) => pos)),
+        })
+        numRows++
+      })
+    })()
+  }
+
+  // report
 
   console.log(`  ...${numRows} rows inserted in ${numDbs} db's.\n`)
 

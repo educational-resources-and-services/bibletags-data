@@ -2,6 +2,8 @@ const Sequelize = require('sequelize')
 const retry = require('retry-as-promised')
 const { isValidBibleSearch } = require('@bibletags/bibletags-ui-helper')
 
+const { equalObjs } = require('../utils')
+
 const {
   wordIdRegEx,
   locRegEx,
@@ -99,6 +101,44 @@ const setUpConnection = ({
         }
       })
     })
+  }
+
+  const isTranslationBreadown = ary => {
+    // eg. [ [``, [ { tr: "well", hits: 12, forms: [ "באר" ] } ]], [`באר שבע`, [ ... ]] ]
+
+    if(!(ary instanceof Array)) {
+      throw new Error('Must be an array.')
+    }
+
+    ary.forEach(wordComboAry => {
+
+      if(!(wordComboAry instanceof Array) || wordComboAry.length !== 2) {
+        throw new Error('Each item must be an array of two items.')
+      }
+      if(typeof wordComboAry[0] !== "string") {
+        throw new Error('First item of every second level array must be a string.')
+      }
+      if(!(wordComboAry[1] instanceof Array)) {
+        throw new Error('Second item of every second level array must be an array.')
+      }
+
+      wordComboAry[1].forEach(translationObj => {
+        if(typeof translationObj !== "object") {
+          throw new Error('Each third level item must be an object.')
+        }
+        if(typeof translationObj.tr !== "string") {
+          throw new Error('tr key must be a string')
+        }
+        if(!Number.isInteger(translationObj.hits)) {
+          throw new Error('hits key must be an integer')
+        }
+        if(translationObj.forms && (!(translationObj.forms instanceof Array) || !translationObj.forms.every(item => typeof item === "string"))) {
+          throw new Error('forms key must be an array of strings')
+        }
+      })
+  
+    })
+
   }
 
   const isLexEntry = obj => {
@@ -385,7 +425,6 @@ const setUpConnection = ({
   const translation = {
     type: Sequelize.STRING(translationLength),
     allowNull: false,
-    notEmpty: true,
   }
 
   // const createdAtDesc = { attribute: 'createdAt', order: 'DESC' }
@@ -451,7 +490,7 @@ const setUpConnection = ({
 
   ////////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
+  // needed: app (in combo with PartOfSpeech and LanguageSpecificDefinition), biblearc
   // doesn't change
   const Definition = connection.define(
     'definition',
@@ -518,7 +557,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
+  // needed: app (in combo with Definition and LanguageSpecificDefinition), biblearc
   // doesn't change
   const PartOfSpeech = connection.define(
     'partOfSpeech',
@@ -542,7 +581,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app (partial), biblearc (partial)
+  // needed: app (in versions.json), biblearc (partial)
   // changes some
   const Version = connection.define(
     'version',
@@ -703,7 +742,7 @@ const setUpConnection = ({
 
   ////////////////////////////////////////////////////////////////////
 
-  // needed: app (partial), biblearc (partial)
+  // needed: app (partial: in combo with PartOfSpeech and Definition), biblearc (partial)
   // changes some
   const LanguageSpecificDefinition = connection.define(
     'languageSpecificDefinition',
@@ -733,6 +772,8 @@ const setUpConnection = ({
           isLexEntry,
         },
       },
+      createdAt,
+      updatedAt,
     },
     {
       indexes: [
@@ -743,9 +784,9 @@ const setUpConnection = ({
         },
         { fields: ['gloss'] },
         { fields: ['definitionId', 'editorId'] },
-        { fields: ['editorId'] },
+        { fields: ['editorId', 'updatedAt'] },
+        { fields: ['languageId', 'updatedAt'] },
       ],
-      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
     },
   )
 
@@ -811,7 +852,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
+  // needed: app (partial), biblearc (partial)
   // changes often
   const TagSet = connection.define(
     'tagSet',
@@ -846,6 +887,7 @@ const setUpConnection = ({
         allowNull: false,
       },
       wordsHash,
+      createdAt,
     },
     {
       indexes: [
@@ -859,8 +901,9 @@ const setUpConnection = ({
         { fields: ['versionId', 'loc'] },
         { fields: ['wordsHash'] },
         { fields: ['status'] },
+        { fields: ['versionId', 'createdAt'] },
       ],
-      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
+      updatedAt: false,  // since rows are never updated, but rather destroyed and re-created
     },
   )
 
@@ -1200,6 +1243,8 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app (as expo resource), biblearc
+  // doesn't change
   const uhbUnitWord = connection.define(
     `uhbUnitWord`,
     {
@@ -1239,6 +1284,8 @@ const setUpConnection = ({
 
   ////////////////////////////////////////////////////////////////////
 
+  // needed: app (as expo resource), biblearc
+  // doesn't change
   const uhbUnitRange = connection.define(
     `uhbUnitRange`,
     {
@@ -1260,7 +1307,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
+  // needed: app (as expo resource), biblearc
   // doesn't change
   const uhbVerse = connection.define(
     'uhbVerse',
@@ -1385,6 +1432,8 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
+  // needed: app (as expo resource), biblearc
+  // doesn't change
   const ugntUnitWord = connection.define(
     `ugntUnitWord`,
     {
@@ -1422,6 +1471,8 @@ const setUpConnection = ({
 
   ////////////////////////////////////////////////////////////////////
 
+  // needed: app (as expo resource), biblearc
+  // doesn't change
   const ugntUnitRange = connection.define(
     `ugntUnitRange`,
     {
@@ -1443,7 +1494,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
+  // needed: app (as expo resource), biblearc
   // doesn't change
   const ugntVerse = connection.define(
     'ugntVerse',
@@ -1538,7 +1589,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
+  // needed: app (as expo resource), biblearc
   // doesn't change
   const lxxVerse = connection.define(
     'lxxVerse',
@@ -1559,7 +1610,7 @@ const setUpConnection = ({
 
   // Covers UHB, UGNT, and LXX
 
-  // needed: app, biblearc
+  // needed: app (as expo resource), biblearc
   // doesn't change
   const Lemma = connection.define(
     'lemma',
@@ -1585,7 +1636,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
+  // needed: none
   // changes often
   const WordTranslation = connection.define(
     'wordTranslation',
@@ -1611,7 +1662,7 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
+  // needed: none
   // changes often
   const WordTranslationDefinition = connection.define(
     'wordTranslationDefinition',
@@ -1640,88 +1691,130 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
-  // doesn't change
-  const HitsByScope = connection.define(
-    'hitsByScope',
+  // needed: app (partial), biblearc (partial)
+  // changes often
+  const TranslationBreakdown = connection.define(
+    'translationBreakdown',
     {
-      scope,
-      hits,
-    },
-    {
-      indexes: [
-        {
-          fields: ['definitionId', 'scope'],
-          unique: true,
-          name: 'definitionId_scope',
-        },
-        { fields: ['scope'] },
-        { fields: ['hits'] },
-      ],
-      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
-    },
-  )
-
-  HitsByScope.belongsTo(Definition, required)
-  Definition.hasMany(HitsByScope)
-
-  //////////////////////////////////////////////////////////////////
-
-  // needed: app, biblearc
-  // doesn't change
-  // NOT SURE WE NEED THIS - shouldn't this rather be HitsByMorph so as to give a quick number to the "Search inflected" option?
-  const HitsByForm = connection.define(
-    'hitsByForm',
-    {
-      form: {
-        type: Sequelize.STRING(30),
+      breakdown: {
+        type: Sequelize.JSON,
         allowNull: false,
+        validate: {
+          isTranslationBreadown,
+        },
       },
-      hits,
+      createdAt,
     },
     {
       indexes: [
         {
-          fields: ['definitionId', 'form'],
+          fields: ['versionId', 'definitionId'],
           unique: true,
-          name: 'definitionId_form',
+          name: 'versionId_definitionId',
         },
-        { fields: ['form'] },
-        { fields: ['hits'] },
+        { fields: ['versionId', 'createdAt'] },
       ],
-      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
+      updatedAt: false,  // since rows are never updated, but rather destroyed and re-created
     },
   )
 
-  HitsByForm.belongsTo(Definition, required)
-  Definition.hasMany(HitsByForm)
+  TranslationBreakdown.belongsTo(Version, required)
+  Version.hasMany(TranslationBreakdown)
+
+  TranslationBreakdown.belongsTo(Definition, required)
+  Definition.hasMany(TranslationBreakdown)
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app, biblearc
-  // doesn't change
-  const HitsInLXXByScope = connection.define(
-    'hitsInLXXByScope',
-    {
-      scope,
-      hits,
-    },
-    {
-      indexes: [
-        {
-          fields: ['definitionId', 'scope'],
-          unique: true,
-          name: 'definitionId_scope',
-        },
-        { fields: ['scope'] },
-        { fields: ['hits'] },
-      ],
-      timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
-    },
-  )
+  // TODO: For =love type searches, I will need more data available offline. This should probably be another table
+  // derived from WordTranslation + WordTranslationDefinition. But wait to see how I actually make this work first.
 
-  HitsInLXXByScope.belongsTo(Definition, required)
-  Definition.hasMany(HitsInLXXByScope)
+  //////////////////////////////////////////////////////////////////
+
+  // WE DO NOT NEED THE HITS TABLES SO LONG AS THE SEARCH PROVES FAST ENOUGH
+
+  // // needed: app, biblearc
+  // // doesn't change
+  // const HitsByScope = connection.define(
+  //   'hitsByScope',
+  //   {
+  //     scope,
+  //     hits,
+  //   },
+  //   {
+  //     indexes: [
+  //       {
+  //         fields: ['definitionId', 'scope'],
+  //         unique: true,
+  //         name: 'definitionId_scope',
+  //       },
+  //       { fields: ['scope'] },
+  //       { fields: ['hits'] },
+  //     ],
+  //     timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
+  //   },
+  // )
+
+  // HitsByScope.belongsTo(Definition, required)
+  // Definition.hasMany(HitsByScope)
+
+  //////////////////////////////////////////////////////////////////
+
+  // // needed: app, biblearc
+  // // doesn't change
+  // // NOT SURE WE NEED THIS - shouldn't this rather be HitsByMorph so as to give a quick number to the "Search inflected" option?
+  // const HitsByForm = connection.define(
+  //   'hitsByForm',
+  //   {
+  //     form: {
+  //       type: Sequelize.STRING(30),
+  //       allowNull: false,
+  //     },
+  //     hits,
+  //   },
+  //   {
+  //     indexes: [
+  //       {
+  //         fields: ['definitionId', 'form'],
+  //         unique: true,
+  //         name: 'definitionId_form',
+  //       },
+  //       { fields: ['form'] },
+  //       { fields: ['hits'] },
+  //     ],
+  //     timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
+  //   },
+  // )
+
+  // HitsByForm.belongsTo(Definition, required)
+  // Definition.hasMany(HitsByForm)
+
+  //////////////////////////////////////////////////////////////////
+
+  // // needed: app, biblearc
+  // // doesn't change
+  // const HitsInLXXByScope = connection.define(
+  //   'hitsInLXXByScope',
+  //   {
+  //     scope,
+  //     hits,
+  //   },
+  //   {
+  //     indexes: [
+  //       {
+  //         fields: ['definitionId', 'scope'],
+  //         unique: true,
+  //         name: 'definitionId_scope',
+  //       },
+  //       { fields: ['scope'] },
+  //       { fields: ['hits'] },
+  //     ],
+  //     timestamps: false,  // Used in tables which can be completely derived from other tables and base import files.
+  //   },
+  // )
+
+  // HitsInLXXByScope.belongsTo(Definition, required)
+  // Definition.hasMany(HitsInLXXByScope)
 
   //////////////////////////////////////////////////////////////////
 

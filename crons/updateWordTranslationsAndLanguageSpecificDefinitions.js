@@ -2,6 +2,7 @@ const { Op } = require('sequelize')
 const { wordPartDividerRegex, getMainWordPartIndex } = require('@bibletags/bibletags-ui-helper')
 
 const { setUpConnection } = require('../src/db/connect')
+const updateTranslationBreakdowns = require('./updateTranslationBreakdowns')
 
 const prefixToDefinitionIdMap = {
   "ב": 'b',
@@ -34,7 +35,7 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
       include: [
         {
           model: models.version,
-          require: true,
+          required: true,
         },
       ],
     })
@@ -65,94 +66,142 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
 
           console.log(`updateWordTranslationsAndLanguageSpecificDefinitions cron now handling versionId:${version.id} (cron id:${cronId})`)
 
-          // find all tags with associated tagSetSubmissionItems
-          const tagJsonConcat = `
-            CONCAT(
-              '{"o":[',
-              (
-                SELECT GROUP_CONCAT( CONCAT('"', ts.${origLangVersionId}WordId, ${origLangVersionId === `uhb` ? ` '|', ts.wordPartNumber, ` : ``} '"') )
-                FROM ${origLangVersionId}TagSubmissions AS ts
-                WHERE ts.tagSetSubmissionItemId = tssi.id
-                ORDER BY ts.${origLangVersionId}WordId ${origLangVersionId === `uhb` ? `, ts.wordPartNumber` : ``}
-              ),
-              '],"t":[',
-              (
-                SELECT GROUP_CONCAT(tssitw.wordNumberInVerse)
-                FROM tagSetSubmissionItemTranslationWords AS tssitw
-                WHERE tssitw.tagSetSubmissionItemId = tssi.id
-                ORDER BY tssitw.wordNumberInVerse
-              ),
-              ']}'
-            )
-          `
-          const translationConcat = `
-            (
-              SELECT GROUP_CONCAT(tssitw.word SEPARATOR ' ') AS translation
-              FROM tagSetSubmissionItemTranslationWords AS tssitw
-              WHERE tssitw.tagSetSubmissionItemId = tssi.id
-              ORDER BY tssitw.wordNumberInVerse
-            )
-          `
-          const tagSetSubmissionItems = await global.connection.query(
-            `
-              SELECT DISTINCT
-                ${translationConcat} AS translation,
-                ${tagJsonConcat} AS tagJSON
+          const translationsByLocWordsHashAndWordNumbers = {}
+          const updatedHitsByUniqueKey = {}
 
-              FROM tagSets AS ts
-                LEFT JOIN tagSetSubmissions AS tss ON (ts.loc = tss.loc AND ts.wordsHash = tss.wordsHash AND ts.versionId = tss.versionId)
-                LEFT JOIN tagSetSubmissionItems AS tssi ON (tssi.tagSetSubmissionId = tss.id)
+          {  // blocked off to facilitate memory garbage collection
+            const tagSetSubmissionItems = await models.tagSetSubmissionItem.findAll({
+              attributes: [ 'id' ],
+              include: [
+                {
+                  model: models.tagSetSubmission,
+                  required: true,
+                  attributes: [ 'loc', 'wordsHash' ],
+                  where: {
+                    loc: {
+                      [Op.regexp]: origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]',
+                    },
+                    versionId: version.id,
+                  },
+                },
+                {
+                  model: models.tagSetSubmissionItemTranslationWord,
+                  required: false,
+                  attributes: [ 'wordNumberInVerse', 'word' ],
+                },
+              ],
+              order: [
+                [
+                  models.tagSetSubmissionItemTranslationWord,
+                  'wordNumberInVerse',
+                ]
+              ],
+            })
 
-              WHERE ts.versionId = :versionId
-                AND ts.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
-                AND tss.versionId = :versionId
-                AND tss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
-                AND ts.tags LIKE CONCAT( '%', ${tagJsonConcat}, '%' )
-            `,
-            {
-              nest: true,
-              replacements: {
+            tagSetSubmissionItems.forEach(({ tagSetSubmission: { loc, wordsHash }, tagSetSubmissionItemTranslationWords }) => {
+              const translation = tagSetSubmissionItemTranslationWords.map(({ word }) => word).join(language.standardWordDivider)
+              const wordNumbers = tagSetSubmissionItemTranslationWords.map(({ wordNumberInVerse }) => wordNumberInVerse).join(',')
+              translationsByLocWordsHashAndWordNumbers[`${loc} ${wordsHash}`] = translationsByLocWordsHashAndWordNumbers[`${loc} ${wordsHash}`] || {}
+              translationsByLocWordsHashAndWordNumbers[`${loc} ${wordsHash}`][wordNumbers] = translation
+            })
+          }
+
+          {  // blocked off to facilitate memory garbage collection
+            const wordHashesSubmissions = await models.wordHashesSubmission.findAll({
+              attributes: [ 'wordNumberInVerse', 'hash' ],
+              include: [
+                {
+                  model: models.wordHashesSetSubmission,
+                  required: true,
+                  attributes: [ 'loc', 'wordsHash' ],
+                  where: {
+                    loc: {
+                      [Op.regexp]: origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]',
+                    },
+                    versionId: version.id,
+                  },
+                },
+              ],
+            })
+
+            const translationsByHash = {}
+            const hashesWithoutTagSubmission = []
+            wordHashesSubmissions.forEach(({ wordNumberInVerse, hash, wordHashesSetSubmission: { loc, wordsHash } }) => {
+              const translationsByWordNumbers = translationsByLocWordsHashAndWordNumbers[`${loc} ${wordsHash}`]
+              if(translationsByWordNumbers) {
+                if(translationsByWordNumbers[wordNumberInVerse]) {
+                  translationsByHash[hash] = translationsByWordNumbers[wordNumberInVerse]
+                }
+              } else {
+                hashesWithoutTagSubmission.push({ loc, wordsHash, hash, wordNumberInVerse })
+              }
+            })
+            hashesWithoutTagSubmission.forEach(({ loc, wordsHash, hash, wordNumberInVerse }) => {
+              if(translationsByHash[hash]) {
+                translationsByLocWordsHashAndWordNumbers[`${loc} ${wordsHash}`] = translationsByLocWordsHashAndWordNumbers[`${loc} ${wordsHash}`] || {}
+                translationsByLocWordsHashAndWordNumbers[`${loc} ${wordsHash}`][wordNumberInVerse] = translationsByHash[hash]
+              }
+            })
+          }
+
+          {  // blocked off to facilitate memory garbage collection
+            const tagSets = await models.tagSet.findAll({
+              attributes: [ 'loc', 'tags', 'wordsHash' ],
+              where: {
+                loc: {
+                  [Op.regexp]: origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]',
+                },
                 versionId: version.id,
               },
-            },
-          )
-
-          const updatedWordTranslationsByUniqueKey = {}
-
-          tagSetSubmissionItems.forEach(({ translation, tagJSON }) => {
-            const wordIdAndParts = JSON.parse(tagJSON).o
-            const definitionIdAndFormSets = []
-            wordIdAndParts.map(wordIdAndPart => {
-              const [ wordId, wordPartNumber ] = wordIdAndPart.split('|')
-              const morphParts = origWordMap[wordId].fullParsing.slice(3).split(':')
-              const mainPartIdx = getMainWordPartIndex(morphParts)
-              const isMainWordPart = (
-                origLangVersionId === 'uhb'
-                  ? mainPartIdx === wordPartNumber-1
-                  : true
-              )
-              const form = origWordMap[wordId].form.split(wordPartDividerRegex)[wordPartNumber - 1]
-              if(isMainWordPart) {
-                definitionIdAndFormSets.push([ origWordMap[wordId].definitionId, form ])
-              } else {
-                const definitionId = (
-                  prefixToDefinitionIdMap[form]
-                  || (
-                    origWordMap[wordId].fullParsing.substring(3)
-                      .split(':')[wordPartNumber - 1]
-                      .replace(/^T/, '')
-                      .replace(/^(S.).*$/, '$1')
-                  )
-                )
-                definitionIdAndFormSets.push([ definitionId, form ])
-              }
-              updatedWordTranslationsByUniqueKey
-              origWordMap[wordId]
             })
-            const uniqueKey = JSON.stringify([ translation, definitionIdAndFormSets ]) 
-            updatedWordTranslationsByUniqueKey[uniqueKey] = updatedWordTranslationsByUniqueKey[uniqueKey] || 0
-            updatedWordTranslationsByUniqueKey[uniqueKey]++
-          })
+
+
+            tagSets.forEach(({ tags, loc, wordsHash }) => {
+              tags.forEach(tag => {
+
+                // get translation, definitionId, and form
+                const translation = (translationsByLocWordsHashAndWordNumbers[`${loc} ${wordsHash}`] || {})[tag.t.join(',')]
+                if(translation === undefined) return
+                
+                // get definitionId and form
+                if(tag.o.length === 0) return
+                const definitionIdAndFormSets = []
+                tag.o.map(wordIdAndPart => {
+                  const [ wordId, wordPartNumber ] = wordIdAndPart.split('|')
+                  const morphParts = origWordMap[wordId].fullParsing.slice(3).split(':')
+                  const mainPartIdx = getMainWordPartIndex(morphParts)
+                  const isMainWordPart = (
+                    origLangVersionId === 'uhb'
+                      ? mainPartIdx === wordPartNumber-1
+                      : true
+                  )
+                  const form = origWordMap[wordId].form.split(wordPartDividerRegex)[wordPartNumber - 1]
+                  if(isMainWordPart) {
+                    definitionIdAndFormSets.push([ origWordMap[wordId].definitionId, form ])
+                  } else {
+                    const definitionId = (
+                      prefixToDefinitionIdMap[form]
+                      || (
+                        origWordMap[wordId].fullParsing.substring(3)
+                          .split(':')[wordPartNumber - 1]
+                          .replace(/^T/, '')
+                          .replace(/^(S.).*$/, '$1')
+                      )
+                    )
+                    definitionIdAndFormSets.push([ definitionId, form ])
+                  }
+                  updatedHitsByUniqueKey
+                  origWordMap[wordId]
+                })
+
+                // add on hit
+                const uniqueKey = JSON.stringify([ translation, definitionIdAndFormSets ]) 
+                updatedHitsByUniqueKey[uniqueKey] = updatedHitsByUniqueKey[uniqueKey] || 0
+                updatedHitsByUniqueKey[uniqueKey]++
+
+              })
+            })
+          }
 
           const oldWordTranslations = await models.wordTranslation.findAll({
             where: {
@@ -161,7 +210,7 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
             include: [
               {
                 model: models.wordTranslationDefinition,
-                require: true,
+                required: true,
                 where: {
                   definitionId: {
                     [origLangVersionId === 'uhb' ? Op.notLike : Op.like]: `G%`
@@ -186,7 +235,7 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
                 // Greek prepositions by case of associated words
               // in combo with another word
 
-          console.log(`updateWordTranslationsAndLanguageSpecificDefinitions cron – versionId:${version.id} — ${oldWordTranslations.length} old wordTranslations, ${Object.values(updatedWordTranslationsByUniqueKey).length} new wordTranslations (cron id:${cronId})`)
+          console.log(`updateWordTranslationsAndLanguageSpecificDefinitions cron – versionId:${version.id} — ${oldWordTranslations.length} old wordTranslations, ${Object.values(updatedHitsByUniqueKey).length} new wordTranslations (cron id:${cronId})`)
 
           await global.connection.transaction(async t => {
 
@@ -198,8 +247,8 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
               const definitionIdAndFormSets = wordTranslationDefinitions.map(({ definitionId, form }) => ([ definitionId, form ]))
               const uniqueKey = JSON.stringify([ translation, definitionIdAndFormSets ])
 
-              if(updatedWordTranslationsByUniqueKey[uniqueKey]) {
-                if(updatedWordTranslationsByUniqueKey[uniqueKey] !== hits) {
+              if(updatedHitsByUniqueKey[uniqueKey]) {
+                if(updatedHitsByUniqueKey[uniqueKey] !== hits) {
                   wordTranslation.hits = hits
                   updates.push(wordTranslation.save({transaction: t}))
                 }
@@ -207,14 +256,14 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
                 updates.push(wordTranslation.destroy({transaction: t}))
               }
 
-              delete updatedWordTranslationsByUniqueKey[uniqueKey]
+              delete updatedHitsByUniqueKey[uniqueKey]
 
             })
 
             updates.push(
-              ...Object.keys(updatedWordTranslationsByUniqueKey).map(async uniqueKey => {
+              ...Object.keys(updatedHitsByUniqueKey).map(async uniqueKey => {
 
-                const hits = updatedWordTranslationsByUniqueKey[uniqueKey]
+                const hits = updatedHitsByUniqueKey[uniqueKey]
                 const [ translation, definitionIdAndFormSets ] = JSON.parse(uniqueKey)
 
                 const newWordTranslation = await models.wordTranslation.create(
@@ -232,7 +281,10 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
                     definitionId,
                     form,
                   })),
-                  {transaction: t},
+                  {
+                    validate: true,
+                    transaction: t,
+                  },
                 )
 
               })
@@ -256,6 +308,8 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
     await doTestament(`ugnt`)
 
     console.log(`...completed cron run for updateWordTranslationsAndLanguageSpecificDefinitions in ${(Date.now() - now)/1000} seconds (cron id:${cronId}).`)
+
+    await updateTranslationBreakdowns()
 
   } catch(err) {
     console.error(`cron updateWordTranslationsAndLanguageSpecificDefinitions failed (cron id:${cronId}).`, err)

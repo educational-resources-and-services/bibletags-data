@@ -1,20 +1,29 @@
 const queries = `
 
   version(id: ID!): Version
-  chapter(bookId: Int!, chapter: Int!, versionId: String!): [Verse]
+  chapter(bookId: Int!, chapter: Int!, versionId: ID!): [Verse]
   verse(id: ID!): Verse
-  hits(id: ID!): Hits
 
   embeddingApp(uri: String!): EmbeddingApp
-  uiWords(languageId: String!): [UIWord]
+  uiWords(languageId: ID!): [UIWord]
+  languages(languageIds: [ID]!): [Language]
 
-  tagSets(bookId: Int!, chapter: Int!, verse: Int, versionId: String!): [TagSet]
+  tagSets(bookId: Int!, chapter: Int!, verse: Int, versionId: ID!): [TagSet]
   tagSet(id: ID!): TagSet
-  translations(id: ID!): Translations
-  translationsByPosition(versionId: String!, loc: String!, wordNum: Int!, languageId: String!): [Translations]
+  translationBreakdown(id: ID!): TranslationBreakdown
   definition(id: ID!): Definition
-  definitionsByPosition(versionId: String!, loc: String!, wordNum: Int!, languageId: String!): [Definition]
 
+  ${/*
+    THESE TWO WERE DESIGNED SO THAT THE WIDGET WOULD ONLY REQUIRE A SINGLE REQUEST ROUNDTRIP. NOT YET SURE IF THEY ARE REALLY HELPFUL OR NOT.
+    translationBreakdownByPosition(versionId: String!, loc: String!, wordNum: Int!, languageId: String!): Translationsreakdown
+    definitionsByPosition(versionId: ID!, loc: String!, wordNum: Int!, languageId: ID!): [Definition]
+  */ ""}
+
+  updatedTagSets(versionId: ID!, updatedFrom: Milliseconds!): TagSetUpdate
+  updatedTranslationBreakdowns(versionId: ID!, updatedFrom: Milliseconds!): TranslationBreakdownUpdate
+  updatedLanguageSpecificDefinitions(languageId: ID!, updatedFrom: Milliseconds!): LanguageSpecificDefinitionUpdate
+
+  ${/* The following have offline equivelants in the apps. */ ""}
   autoCompleteSuggestions(incompleteQuery: String!, languageId: ID!): [AutoCompleteSuggestion]  ${/* note: isn't as exhaustive in offline version */ ""}
   bibleSearchResults(query: String!, hebrewOrdering: Boolean!, offset: Int!, limit: Int!): BibleSearchResultSet
 

@@ -102,7 +102,7 @@ const calculateTagSets = async ({
         include: [
           {
             model: models.wordHashesSubmission,
-            require: false,
+            required: false,
           },
         ],
         order: [[ models.wordHashesSubmission, 'wordNumberInVerse' ]],

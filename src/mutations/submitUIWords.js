@@ -32,11 +32,11 @@ const submitUIWords = async (args, req, queryInfo) => {
     languageId,
   }
 
-  const uiWord = await models.uiWord.find({
+  const uiWords = await models.uiWord.findAll({
     where,
   })
 
-  return uiWord
+  return uiWords
 
 }
 

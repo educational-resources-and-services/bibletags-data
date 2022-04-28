@@ -12,6 +12,7 @@ const definitionsByPosition = async (args, req, queryInfo) => {
   const { versionId, loc, wordNum, languageId } = args
 
   // THIS FILE HAS NOT BEEN TESTED YET AND PROBABLY DOESN'T WORK
+  return null
 
   // validate everything
 

@@ -36,7 +36,7 @@ const tagSets = async (args, req, queryInfo) => {
     versionId,
   }
 
-  const tagSets = await models.tagSet.find({
+  const tagSets = await models.tagSet.findAll({
     where,
   })
   

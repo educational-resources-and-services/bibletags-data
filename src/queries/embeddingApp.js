@@ -1,24 +1,28 @@
 const embeddingApp = async (args, req, queryInfo) => {
 
-  const { uri } = args
+  return null
 
-  const { models } = global.connection
+  // TODO: This should be changed to embeddingApps, and only be retrievable by an admin; it will also need pagation.
 
-  const where = {
-    uri,
-  }
+  // const { uri } = args
 
-  let embeddingApp = await models.embeddingApp.findOne({
-    where,
-  })
+  // const { models } = global.connection
 
-  if(!embeddingApp) {
-    embeddingApp = await models.embeddingApp.create({
-      uri,
-    })
-  }
+  // const where = {
+  //   uri,
+  // }
 
-  return embeddingApp
+  // let embeddingApp = await models.embeddingApp.findOne({
+  //   where,
+  // })
+
+  // if(!embeddingApp) {
+  //   embeddingApp = await models.embeddingApp.create({
+  //     uri,
+  //   })
+  // }
+
+  // return embeddingApp
 
 }
 

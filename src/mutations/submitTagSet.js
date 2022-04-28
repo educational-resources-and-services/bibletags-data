@@ -67,7 +67,7 @@ const submitTagSet = async (args, req, queryInfo) => {
       {
         model: models.wordHashesSubmission,
         attributes: [ 'id', 'wordNumberInVerse' ],
-        require: true,
+        required: true,
       },
     ],
   })
