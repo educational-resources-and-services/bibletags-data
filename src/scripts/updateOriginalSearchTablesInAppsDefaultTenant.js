@@ -67,8 +67,9 @@ const { setUpConnection } = require('../db/connect')
 
   let numRows = 0
   let numDbs = 0
-  const searchDir = `../bibletags-react-native-app/defaultTenant/assets/versions/original/search`
-  await fs.remove(`${searchDir}/lemmas.db`)
+  const baseDir = `../bibletags-react-native-app/defaultTenant/assets/versions/original`
+  const searchDir = `${baseDir}/search`
+  await fs.remove(searchDir)
   await fs.ensureDir(searchDir)
 
   for(let text in typesByText) {
@@ -163,7 +164,8 @@ const { setUpConnection } = require('../db/connect')
       order: [ 'id' ]
     })
 
-    const db = new Database(`${searchDir}/definitions.db`)
+    await fs.remove(`${baseDir}/definitions.db`)
+    const db = new Database(`${baseDir}/definitions.db`)
     const tableName = `definitions`
 
     const create = db.prepare(
