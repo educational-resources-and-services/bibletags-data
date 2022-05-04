@@ -67,7 +67,8 @@ const { setUpConnection } = require('../db/connect')
 
   let numRows = 0
   let numDbs = 0
-  const baseDir = `../bibletags-react-native-app/defaultTenant/assets/versions/original`
+  const baseDir = `../bibletags-react-native-app/defaultTenant/versions/original`
+  const bundledBaseDir = `../bibletags-react-native-app/defaultTenant/assets/bundledVersions/original`
   const searchDir = `${baseDir}/search`
   await fs.remove(searchDir)
   await fs.ensureDir(searchDir)
@@ -200,6 +201,8 @@ const { setUpConnection } = require('../db/connect')
         numRows++
       })
     })()
+
+    await fs.copy(`${baseDir}/definitions.db`, `${bundledBaseDir}/definitions.db`, { overwrite: true })
   }
 
   // report

@@ -1,3 +1,5 @@
+const { Op } = require('sequelize')
+
 const {
   languageIdRegEx,
 } = require('../constants')
@@ -25,7 +27,7 @@ const updatedLanguageSpecificDefinitions = async (args, req, queryInfo) => {
     limit,
   })
 
-  const newUpdatedFrom = languageSpecificDefinitions.slice(-1)[0].updatedAt
+  const newUpdatedFrom = (languageSpecificDefinitions.pop() || {}).updatedAt || Date.now()
 
   if(languageSpecificDefinitions.length === limit) {
     // prevent situation where multiple sets with the same timestamp are split between results
