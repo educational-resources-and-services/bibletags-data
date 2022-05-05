@@ -27,12 +27,12 @@ const updatedLanguageSpecificDefinitions = async (args, req, queryInfo) => {
     limit,
   })
 
-  const lastUpdatedAt = (languageSpecificDefinitions.slice(-1)[0] || {}).updatedAt || new Date()
+  const lastUpdatedAt = ((languageSpecificDefinitions.slice(-1)[0] || {}).updatedAt || new Date()).getTime()
 
   if(languageSpecificDefinitions.length === limit) {
     // prevent situation where multiple sets with the same timestamp are split between results
     languageSpecificDefinitions = [
-      ...languageSpecificDefinitions.filter(({ updatedAt }) => updatedAt !== lastUpdatedAt),
+      ...languageSpecificDefinitions.filter(({ updatedAt }) => updatedAt.getTime() !== lastUpdatedAt),
       ...(await models.languageSpecificDefinition.findAll({
         where: {
           updatedAt: lastUpdatedAt,
@@ -54,7 +54,7 @@ const updatedLanguageSpecificDefinitions = async (args, req, queryInfo) => {
   return {
     languageSpecificDefinitions,
     hasMore: languageSpecificDefinitions.length >= limit,
-    newUpdatedFrom: lastUpdatedAt.getTime() + 1,
+    newUpdatedFrom: lastUpdatedAt + 1,
   }
 
 }

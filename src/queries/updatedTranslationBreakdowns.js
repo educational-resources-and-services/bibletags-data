@@ -1,3 +1,5 @@
+const { Op } = require('sequelize')
+
 const {
   versionIdRegEx,
 } = require('../constants')
@@ -25,22 +27,22 @@ const updatedTranslationBreakdowns = async (args, req, queryInfo) => {
     limit,
   })
 
-  const newUpdatedFrom = translationBreakdowns.slice(-1)[0].createdAt
+  const lastCreatedAt = ((translationBreakdowns.slice(-1)[0] || {}).createdAt || new Date()).getTime()
 
   if(translationBreakdowns.length === limit) {
     // prevent situation where multiple sets with the same timestamp are split between results
     translationBreakdowns = [
-      ...translationBreakdowns.filter(({ createdAt }) => createdAt !== newUpdatedFrom),
-      ...(await models.tagSet.findAll({
+      ...translationBreakdowns.filter(({ createdAt }) => createdAt.getTime() !== lastCreatedAt),
+      ...(await models.translationBreakdown.findAll({
         where: {
-          createdAt: newUpdatedFrom,
+          createdAt: lastCreatedAt,
           versionId,
         },
       })),
     ]
   }
 
-  translationBreakdowns = translationBreakdowns.map(({ definitionId, versionId }) => ({
+  translationBreakdowns = translationBreakdowns.map(({ definitionId, breakdown }) => ({
     id: `${definitionId}-${versionId}`,
     breakdown,
   }))
@@ -48,7 +50,7 @@ const updatedTranslationBreakdowns = async (args, req, queryInfo) => {
   return {
     translationBreakdowns,
     hasMore: translationBreakdowns.length >= limit,
-    newUpdatedFrom,
+    newUpdatedFrom: lastCreatedAt + 1,
   }
 
 }
