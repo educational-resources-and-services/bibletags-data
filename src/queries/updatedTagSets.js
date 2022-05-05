@@ -1,3 +1,5 @@
+const { Op } = require('sequelize')
+
 const {
   versionIdRegEx,
 } = require('../constants')
@@ -25,22 +27,22 @@ const updatedTagSets = async (args, req, queryInfo) => {
     limit,
   })
 
-  const newUpdatedFrom = tagSets.slice(-1)[0].createdAt
+  const lastCreatedAt = ((tagSets.slice(-1)[0] || {}).createdAt || new Date()).getTime()
 
   if(tagSets.length === limit) {
     // prevent situation where multiple sets with the same timestamp are split between results
     tagSets = [
-      ...tagSets.filter(({ createdAt }) => createdAt !== newUpdatedFrom),
+      ...tagSets.filter(({ createdAt }) => createdAt.getTime() !== lastCreatedAt),
       ...(await models.tagSet.findAll({
         where: {
-          createdAt: newUpdatedFrom,
+          createdAt: lastCreatedAt,
           versionId,
         },
       })),
     ]
   }
 
-  tagSets = tagSets.map(({ loc, versionId, wordsHash, tags }) => ({
+  tagSets = tagSets.map(({ loc, wordsHash, tags }) => ({
     id: `${loc}-${versionId}-${wordsHash}`,
     tags,
   }))
@@ -48,7 +50,7 @@ const updatedTagSets = async (args, req, queryInfo) => {
   return {
     tagSets,
     hasMore: tagSets.length >= limit,
-    newUpdatedFrom,
+    newUpdatedFrom: lastCreatedAt + 1,
   }
 
 }
