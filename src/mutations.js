@@ -4,7 +4,7 @@ const mutations = `
   logIn(input: LogInInput!): Boolean
   logOut: Boolean
   submitWordHashesSet(input: WordHashesSetInput!): TagSet
-  submitTagSet(input: TagSetInput!): TagSet
+  submitTagSet(input: TagSetInput!, updatedFrom: Milliseconds!): TagSetUpdate
   submitUIWords(input: UIWordsInput!): [UIWord]
 
 `

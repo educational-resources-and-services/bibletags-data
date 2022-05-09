@@ -1,11 +1,11 @@
 const calculateTagSets = require('../calculateTagSets')
-const tagSet = require('../queries/tagSet')
+const updatedTagSets = require('../queries/updatedTagSets')
 const getWordInfoByIdAndPart = require('../getWordInfoByIdAndPart')
 const { equalObjs , getTagsJson} = require('../utils')
 
 const submitTagSet = async (args, req, queryInfo) => {
 
-  const { input } = args
+  const { input, updatedFrom } = args
   const { loc, versionId, wordsHash, deviceId, embeddingAppId, tagSubmissions } = input
 
   const { models } = global.connection
@@ -177,7 +177,7 @@ const submitTagSet = async (args, req, queryInfo) => {
 
   })
 
-  return await tagSet({ id: `${loc}-${versionId}-${wordsHash}` }, req, queryInfo)
+  return await updatedTagSets({ versionId, updatedFrom }, req, queryInfo)
 
 }
 
