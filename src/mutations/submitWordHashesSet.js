@@ -15,7 +15,15 @@ const submitWordHashesSet = async (args, req, queryInfo) => {
     throw `Invalid embeddingAppId. Please register via bibletags.org.`
   }
 
-  try {
+  const existingWordHashesSetSubmission = await models.wordHashesSetSubmission.findOne({
+    where: {
+      versionId,
+      wordsHash,
+      loc,
+    },
+  })
+
+  if(!existingWordHashesSetSubmission) {
 
     await connection.transaction(async t => {
 
@@ -43,11 +51,6 @@ const submitWordHashesSet = async (args, req, queryInfo) => {
 
     })
 
-  } catch(err) {
-    // gracefully handle duplicate by simply not creating
-    if(err.name !== 'SequelizeUniqueConstraintError') {
-      throw err
-    }
   }
 
   return tagSet({ id: `${loc}-${versionId}-${wordsHash}` }, req, queryInfo)
