@@ -42,9 +42,10 @@ const updatedTagSets = async (args, req, queryInfo) => {
     ]
   }
 
-  tagSets = tagSets.map(({ loc, wordsHash, tags }) => ({
+  tagSets = tagSets.map(({ loc, wordsHash, tags, status }) => ({
     id: `${loc}-${versionId}-${wordsHash}`,
     tags,
+    status,
   }))
 
   return {

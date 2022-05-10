@@ -2,8 +2,6 @@ const Sequelize = require('sequelize')
 const retry = require('retry-as-promised')
 const { isValidBibleSearch } = require('@bibletags/bibletags-ui-helper')
 
-const { equalObjs } = require('../utils')
-
 const {
   wordIdRegEx,
   locRegEx,

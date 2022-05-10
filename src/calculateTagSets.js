@@ -460,7 +460,8 @@ const calculateTagSets = async ({
 
       if(tagSet.status !== newStatus) {
         tagSet.status = newStatus
-        await tagSet.save({transaction: t})
+        tagSet.set('createdAt', new Date(), { raw: true })
+        await tagSet.save({ transaction: t, fields: [ 'status', 'createdAt' ] })
       }
 
     } else {

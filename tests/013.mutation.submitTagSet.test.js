@@ -1,5 +1,5 @@
 const { doMutation } = require('./testUtils')
-const { cloneObj } = require('../src/utils')
+const { cloneObj, equalObjs } = require('../src/utils')
 const rawTagSubmissions = require('./gen.1.1.rawTagSubmissions')
 
 describe('Mutation: submitTagSet', async () => {
@@ -12,14 +12,18 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(badRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
-        id
-        tags
-        status
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+        tagSets {
+          id
+          tags
+          status
+        }
+        hasMore
+        newUpdatedFrom
       }
     `)
 
-    submitTagSet.should.eql({
+    const oneNewTagSet = {
       id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
       tags: [
         {o:["01h7N|1"],t:[1,2]},
@@ -35,7 +39,10 @@ describe('Mutation: submitTagSet', async () => {
         {o:["01XDl|1"],t:[]},
       ],
       status: "unconfirmed",
-    })
+    }
+
+    ;(submitTagSet.tagSets.some(tagSet => equalObjs(tagSet, oneNewTagSet))).should.eql(true)
+
   })
 
   it('Genesis 1:3 ESV (prior to word hashes submit)', async () => {
@@ -45,10 +52,14 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(rawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001003", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
-        id
-        tags
-        status
+      submitTagSet(input: { loc: "01001003", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+        tagSets {
+          id
+          tags
+          status
+        }
+        hasMore
+        newUpdatedFrom
       }
     `)
 

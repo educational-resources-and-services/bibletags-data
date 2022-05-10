@@ -1,4 +1,4 @@
-const { cloneObj } = require('../src/utils')
+const { cloneObj, equalObjs } = require('../src/utils')
 const { doMutation } = require('./testUtils')
 
 const rawTagSubmissions = [
@@ -570,14 +570,18 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(rawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01021014", versionId: "esv", wordsHash: "4uya/NKzE7j8x8vlpQ26vlDMN8i/lGvlD1DRAbaABtDR7SpDegZsI6j8G3vleJpD77wznruwvlk5E7j8BKi/Jb", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}) {
-        id
-        tags
-        status
+      submitTagSet(input: { loc: "01021014", versionId: "esv", wordsHash: "4uya/NKzE7j8x8vlpQ26vlDMN8i/lGvlD1DRAbaABtDR7SpDegZsI6j8G3vleJpD77wznruwvlk5E7j8BKi/Jb", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+        tagSets {
+          id
+          tags
+          status
+        }
+        hasMore
+        newUpdatedFrom
       }
     `)
 
-    submitTagSet.should.eql({
+    const oneNewTagSet = {
       id: "01021014-esv-4uya/NKzE7j8x8vlpQ26vlDMN8i/lGvlD1DRAbaABtDR7SpDegZsI6j8G3vleJpD77wznruwvlk5E7j8BKi/Jb",
       tags: [
         {"o":["01wMy|1"],"t":[1]},
@@ -619,7 +623,10 @@ describe('Mutation: submitTagSet', async () => {
         {"o":["01fFu|1"],"t":[43]},
       ],
       status: "unconfirmed",
-    })
+    }
+
+    ;(submitTagSet.tagSets.some(tagSet => equalObjs(tagSet, oneNewTagSet))).should.eql(true)
+
   })
 
 })
