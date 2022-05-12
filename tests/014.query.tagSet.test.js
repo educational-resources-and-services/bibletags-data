@@ -4,14 +4,14 @@ describe('Query: tagSet', async () => {
 
   it('Genesis 21:14 (after resubmit of Genesis 1:1)', async () => {
     const tagSet = await doQuery(`
-      tagSet(id: "01021014-esv-4uya/NKzE7j8x8vlpQ26vlDMN8i/lGvlD1DRAbaABtDR7SpDegZsI6j8G3vleJpD77wznruwvlk5E7j8BKi/Jb") {
+      tagSet(id: "01021014-esv-8r//") {
         id
         tags
         status
       }
     `)
     tagSet.should.eql({
-      id: `01021014-esv-4uya/NKzE7j8x8vlpQ26vlDMN8i/lGvlD1DRAbaABtDR7SpDegZsI6j8G3vleJpD77wznruwvlk5E7j8BKi/Jb`,
+      id: `01021014-esv-8r//`,
       tags: [
         // {o:['01dPb|1'],t:[5,6]},  // בַּ⁠בֹּ֡קֶר - because the ב here does not match the parsing while the ב in בְּ⁠מִדְבַּ֖ר does, this gets a lower score and is not chosen
         {o:["01biP|1"],t:[8]},  // וַ⁠יִּֽקַּֽח

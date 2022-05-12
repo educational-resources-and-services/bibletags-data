@@ -19,6 +19,5 @@ module.exports = {
   languageNameLength: 100,
   glossLength: 100,
   versionNameLength: 150,
-  wordsHashLength: 255,
 
 }

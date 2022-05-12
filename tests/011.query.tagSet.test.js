@@ -4,14 +4,14 @@ describe('Query: tagSet', async () => {
 
   it('Genesis 1:1', async () => {
     const tagSet = await doQuery(`
-      tagSet(id: "01001001-esv-7+j841rr4vj8eOvlj8hS") {
+      tagSet(id: "01001001-esv-Sfgh") {
         id
         tags
         status
       }
     `)
     tagSet.should.eql({
-      id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
+      id: "01001001-esv-Sfgh",
       tags: [
         {o:["01h7N|1"],t:[1]},
         {o:[],t:[2]},
@@ -32,14 +32,14 @@ describe('Query: tagSet', async () => {
 
   it('Genesis 1:2', async () => {
     const tagSet = await doQuery(`
-      tagSet(id: "01001002-esv-pHhSp3/AP8vlyrvlm3p3O3j81ci/j8Ziwzj8rki/rrp3mfO3j81ci/j8dS") {
+      tagSet(id: "01001002-esv-vmGG") {
         id
         tags
         status
       }
     `)
     tagSet.should.eql({
-      id: "01001002-esv-pHhSp3/AP8vlyrvlm3p3O3j81ci/j8Ziwzj8rki/rrp3mfO3j81ci/j8dS",
+      id: "01001002-esv-vmGG",
       tags: [
         {o:["01SU2|2"],t:[1]},  // וְ⁠הָ⁠אָ֗רֶץ
         {o:["01SU2|3"],t:[2]},  // וְ⁠הָ⁠אָ֗רֶץ

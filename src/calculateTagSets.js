@@ -516,7 +516,7 @@ const calculateTagSets = async ({
             WHERE whss.versionId IN (:versionIds)
               AND (ts.id IS NULL OR (ts.status = "automatch" AND ts.autoMatchScores IS NOT NULL))
               ${baseTag.t.map((wordNumberInVerse, idx) => `
-                AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase())}"
+                AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase()).slice(0,6)}"
                 ${idx === 0 ? `` : `
                   AND whs${idx}.wordNumberInVerse > whs${idx-1}.wordNumberInVerse
                 `}

@@ -14,7 +14,6 @@ const {
   languageNameLength,
   glossLength,
   versionNameLength,
-  wordsHashLength,
   wordsHashRegEx,
 } = require('../constants')
 
@@ -276,10 +275,9 @@ const setUpConnection = ({
   }
 
   const wordsHash = {
-    // eg. "i8eeWqiuDiufAA" for a seven-word verse (2 letters per word)
     // Effectively works to distiguish verses which differ due to being
     // from two different editions of a single Bible version.
-    type: Sequelize.STRING(wordsHashLength),
+    type: Sequelize.STRING(4),
     allowNull: false,
     validate: {
       is: wordsHashRegEx,
@@ -291,8 +289,14 @@ const setUpConnection = ({
     allowNull: false,
   }
 
+  const hash = {
+    type: Sequelize.STRING(6),
+    allowNull: false,
+    notEmpty: true,
+  }
+
   const wordComboHash = {
-    type: Sequelize.STRING(24),
+    type: Sequelize.STRING(3),
     allowNull: false,
     notEmpty: true,
   }
@@ -1038,7 +1042,7 @@ const setUpConnection = ({
     'wordHashesSubmission',
     {
       wordNumberInVerse,
-      hash: { ...wordComboHash },
+      hash,
       withBeforeHash: { ...wordComboHash },
       withAfterHash: { ...wordComboHash },
       withBeforeAndAfterHash: { ...wordComboHash },

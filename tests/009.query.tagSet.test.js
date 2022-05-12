@@ -4,14 +4,14 @@ describe('Query: tagSet', async () => {
 
   it('Genesis 1:1', async () => {
     const tagSet = await doQuery(`
-      tagSet(id: "01001001-esv-7+j841rr4vj8eOvlj8hS") {
+      tagSet(id: "01001001-esv-Sfgh") {
         id
         tags
         status
       }
     `)
     tagSet.should.eql({
-      id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
+      id: "01001001-esv-Sfgh",
       tags: [],
       status: "automatch",
     })

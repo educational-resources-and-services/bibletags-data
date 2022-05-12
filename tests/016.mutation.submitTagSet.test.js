@@ -30,7 +30,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(badRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "222", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "Sfgh", deviceId: "222", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
         tagSets {
           id
           tags
@@ -50,7 +50,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(rawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "Sfgh", deviceId: "111", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
         tagSets {
           id
           tags
@@ -62,7 +62,7 @@ describe('Mutation: submitTagSet', async () => {
     `)
 
     const oneNewTagSet = {
-      id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
+      id: "01001001-esv-Sfgh",
       tags: correctTags,
       status: "unconfirmed",
     }
@@ -80,7 +80,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(adjustedRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "222", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "Sfgh", deviceId: "222", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
         tagSets {
           id
           tags
@@ -92,7 +92,7 @@ describe('Mutation: submitTagSet', async () => {
     `)
 
     const oneNewTagSet = {
-      id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
+      id: "01001001-esv-Sfgh",
       tags: correctTags,
       status: "confirmed",
     }
@@ -114,7 +114,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(badRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "333", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "Sfgh", deviceId: "333", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
         tagSets {
           id
           tags
@@ -127,7 +127,7 @@ describe('Mutation: submitTagSet', async () => {
 
 
     const oneNewTagSet = {
-      id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
+      id: "01001001-esv-Sfgh",
       tags: correctTags,
       status: "unconfirmed",
     }
@@ -147,7 +147,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(badRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "444", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "Sfgh", deviceId: "444", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
         tagSets {
           id
           tags
@@ -173,7 +173,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(badRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "555", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "Sfgh", deviceId: "555", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
         tagSets {
           id
           tags
@@ -185,7 +185,7 @@ describe('Mutation: submitTagSet', async () => {
     `)
 
     const oneNewTagSet = {
-      id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
+      id: "01001001-esv-Sfgh",
       tags: [
         {o:["01h7N|1"],t:[1,2]},
         {o:["01h7N|2"],t:[3]},
@@ -215,7 +215,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(adjustedRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "555", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "Sfgh", deviceId: "555", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
         tagSets {
           id
           tags
@@ -227,7 +227,7 @@ describe('Mutation: submitTagSet', async () => {
     `)
 
     const oneNewTagSet = {
-      id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
+      id: "01001001-esv-Sfgh",
       tags: correctTags,
       status: "unconfirmed",
     }
@@ -247,7 +247,7 @@ describe('Mutation: submitTagSet', async () => {
     const tagSubmissions = JSON.stringify(badRawTagSubmissions).replace(/([{,])"([^"]+)"/g, '$1$2')
 
     const submitTagSet = await doMutation(`
-      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "7+j841rr4vj8eOvlj8hS", deviceId: "666", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
+      submitTagSet(input: { loc: "01001001", versionId: "esv", wordsHash: "Sfgh", deviceId: "666", embeddingAppId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", tagSubmissions: ${tagSubmissions}}, updatedFrom: ${Date.now()}) {
         tagSets {
           id
           tags
@@ -259,7 +259,7 @@ describe('Mutation: submitTagSet', async () => {
     `)
 
     const oneNewTagSet = {
-      id: "01001001-esv-7+j841rr4vj8eOvlj8hS",
+      id: "01001001-esv-Sfgh",
       tags: correctTags,
       status: "confirmed",
     }
