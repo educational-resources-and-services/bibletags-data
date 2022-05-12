@@ -22,6 +22,8 @@ const getWordInfoByIdAndPart = async ({
     },
   })
 
+  if(!originalRefs) return {}
+
   const wordRangesByLoc = {}
   originalRefs.forEach(ref => {
     const [ loc, wordRangesStr ] = getLocFromRef(ref).split(':')
