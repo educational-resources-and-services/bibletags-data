@@ -40,7 +40,7 @@ const getWordInfoByIdAndPart = async ({
   const wordInfoByIdAndPart = {}
   verses.forEach(verse => {
     let wordPartNumberInVerse = 1
-    const usfmWords = verse.usfm.match(/\\w [^|]*\|lemma="[^"]+" strong="[^"]+" x-morph="[^"]+" x-id="[^"]+"\\w\*/g)
+    const usfmWords = verse.usfm.match(/\\w [^|]*\|lemma="[^"]*" strong="[^"]+" x-morph="[^"]+" x-id="[^"]+"\\w\*/g)
     usfmWords.forEach((usfmWord, idx) => {
 
       if(
@@ -48,7 +48,7 @@ const getWordInfoByIdAndPart = async ({
         && !wordRangesByLoc[verse.loc].some(([ start, end ]) => (idx+1 >= start && idx+1 <= end))
       ) return
 
-      const [ x, strong, morph, id ] = usfmWord.match(/\\w [^|]*\|lemma="[^"]+" strong="([^"]+)" x-morph="([^"]+)" x-id="([^"]+)"\\w\*/)
+      const [ x, strong, morph, id ] = usfmWord.match(/\\w [^|]*\|lemma="[^"]*" strong="([^"]+)" x-morph="([^"]+)" x-id="([^"]+)"\\w\*/)
       const strongParts = `${strong}${(morph.match(/:S.*$/) || [``])[0]}`.split(':')
 
       morph.slice(3).split(':').forEach((morphPart, idx2) => {
