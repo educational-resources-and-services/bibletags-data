@@ -3,7 +3,7 @@ const tagSet = require('../queries/tagSet')
 
 const submitWordHashesSet = async (args, req, queryInfo) => {
 
-  const { input } = args
+  const { input, skipGetTagSet } = args
   const { loc, versionId, wordsHash, wordHashes, embeddingAppId } = input
   delete input.wordHashes
 
@@ -52,6 +52,8 @@ const submitWordHashesSet = async (args, req, queryInfo) => {
     })
 
   }
+
+  if(skipGetTagSet) return
 
   return tagSet({ id: `${loc}-${versionId}-${wordsHash}` }, req, queryInfo)
 
