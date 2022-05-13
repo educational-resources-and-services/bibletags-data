@@ -72,7 +72,7 @@ const submitTagSet = async (args, req, queryInfo) => {
     ],
   })
   if(!wordHashesSetSubmission) {
-    throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
+    throw `Call to submitTagSet cannot proceed call to submitWordHashesSet: ${loc} / ${wordsHash}`
   }
 
   // validate that every part of every orig word is covered, without repeats

@@ -370,7 +370,7 @@ const calculateTagSets = async ({
 
   if(tagSetSubmissions.length > 0) {  // coming from submitTagSet: update tagSet based on all submissions
 
-    if(!tagSet) throw `Call to submitTagSet cannot proceed a call to submitWordHashesSet for the same verse`
+    if(!tagSet) throw `Call to submitTagSet cannot proceed call to submitWordHashesSet: ${loc} / ${wordsHash}`
 
     // each tag gets a rating
     const tagsByTagStr = {}
