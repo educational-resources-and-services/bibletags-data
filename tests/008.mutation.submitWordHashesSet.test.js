@@ -32,7 +32,7 @@ const submitInitialESVVerse = async ({ verseText, loc }) => {
   submitWordHashesSet.should.eql({
     id: `${loc}-esv-${wordsHash}`,
     tags: [],
-    status: "automatch",
+    status: "none",
   })
 
 }

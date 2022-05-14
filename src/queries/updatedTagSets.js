@@ -21,7 +21,10 @@ const updatedTagSets = async (args, req, queryInfo) => {
       createdAt: {
         [Op.gte]: updatedFrom,
       },
-      versionId,  
+      versionId,
+      status: {
+        [Op.ne]: `none`,
+      },
     },
     order: [ 'createdAt' ],
     limit,
@@ -37,6 +40,9 @@ const updatedTagSets = async (args, req, queryInfo) => {
         where: {
           createdAt: lastCreatedAt,
           versionId,
+          status: {
+            [Op.ne]: `none`,
+          },
         },
       })),
     ]

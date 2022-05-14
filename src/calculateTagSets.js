@@ -136,7 +136,7 @@ const calculateTagSets = async ({
       autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey] = {
         tags: [],
         autoMatchScores: [],
-        status: 'automatch',
+        status: 'none',
         hasChange: true,
         loc,
         versionId,
@@ -306,7 +306,7 @@ const calculateTagSets = async ({
           id: tagSetId,  // will be null if !startFromTag
           tags,
           autoMatchScores,
-          status: 'automatch',
+          status: tags.length > 0 ? 'automatch' : 'none',
           hasChange: false,
           loc,
           wordsHash,
@@ -336,6 +336,7 @@ const calculateTagSets = async ({
         autoMatchTagSetUpdates.tags.push(newTag)
         deepSortTagSetTags(autoMatchTagSetUpdates.tags)
         autoMatchTagSetUpdates.autoMatchScores.splice(autoMatchTagSetUpdates.tags.indexOf(newTag), 0, newAutoMatchScore)
+        autoMatchTagSetUpdates.status = 'automatch'
         autoMatchTagSetUpdates.hasChange = true
       }
 
@@ -514,7 +515,7 @@ const calculateTagSets = async ({
               `).join("")}
 
             WHERE whss.versionId IN (:versionIds)
-              AND (ts.id IS NULL OR (ts.status = "automatch" AND ts.autoMatchScores IS NOT NULL))
+              AND (ts.id IS NULL OR (ts.status IN ("automatch", "none") AND ts.autoMatchScores IS NOT NULL))
               ${baseTag.t.map((wordNumberInVerse, idx) => `
                 AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase()).slice(0,6)}"
                 ${idx === 0 ? `` : `

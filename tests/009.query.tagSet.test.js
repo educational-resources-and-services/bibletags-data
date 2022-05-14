@@ -13,7 +13,7 @@ describe('Query: tagSet', async () => {
     tagSet.should.eql({
       id: "01001001-esv-Sfgh",
       tags: [],
-      status: "automatch",
+      status: "none",
     })
   })
 

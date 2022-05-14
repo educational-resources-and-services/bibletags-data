@@ -882,6 +882,7 @@ const setUpConnection = ({
       },
       status: {
         type: Sequelize.ENUM(
+          'none',  // no human submission yet, and nothing tagged
           'automatch',  // no human submission yet
           'unconfirmed',  // contains human submission, but contains at least some tags which are not confirmed strongly enough
           'confirmed'  // contains human submission and is strongly confirmed
