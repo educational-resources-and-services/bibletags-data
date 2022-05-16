@@ -489,51 +489,88 @@ const calculateTagSets = async ({
 
         const newTagSetRating = newTagSetRatings[newTagSetIdx]
 
-        const wordHashesSetSubmissions = await global.connection.query(
-          `
-            SELECT
-              whss.id,
-              whss.loc,
-              whss.versionId,
-              whss.wordsHash,
-              (SELECT COUNT(*) FROM wordHashesSubmissions AS whs WHERE whs.wordHashesSetSubmissionId = whss.id) AS numTranslationWords,
-              ${baseTag.t.map((x, idx) => `
-                whs${idx}.wordNumberInVerse AS 'wordHashesSubmissions.${idx}.wordNumberInVerse',
-                ${/* whs${idx}.hash AS 'wordHashesSubmissions.${idx}.hash', */ ""}
-                whs${idx}.withBeforeHash AS 'wordHashesSubmissions.${idx}.withBeforeHash',
-                whs${idx}.withAfterHash AS 'wordHashesSubmissions.${idx}.withAfterHash',
-                whs${idx}.withBeforeAndAfterHash AS 'wordHashesSubmissions.${idx}.withBeforeAndAfterHash',
-              `).join("")}
-              ts.id AS tagSetId,
-              ts.tags,
-              ts.autoMatchScores
+        const getQueryWithSpecificTagStatus = status => `
+          SELECT
+            whss.id,
+            whss.loc,
+            whss.versionId,
+            whss.wordsHash,
+            ${baseTag.t.map((x, idx) => `
+              whs${idx}.wordNumberInVerse AS 'wordHashesSubmissions.${idx}.wordNumberInVerse',
+              ${/* whs${idx}.hash AS 'wordHashesSubmissions.${idx}.hash', */ ""}
+              whs${idx}.withBeforeHash AS 'wordHashesSubmissions.${idx}.withBeforeHash',
+              whs${idx}.withAfterHash AS 'wordHashesSubmissions.${idx}.withAfterHash',
+              whs${idx}.withBeforeAndAfterHash AS 'wordHashesSubmissions.${idx}.withBeforeAndAfterHash',
+            `).join("")}
+            ts.id AS tagSetId,
+            ts.tags,
+            ts.autoMatchScores
 
-            FROM wordHashesSetSubmissions AS whss
-              LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
-              ${baseTag.t.map((x, idx) => `
-                LEFT JOIN wordHashesSubmissions AS whs${idx} ON (whs${idx}.wordHashesSetSubmissionId = whss.id)
-              `).join("")}
+          FROM wordHashesSetSubmissions AS whss
+            LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
+            ${baseTag.t.map((x, idx) => `
+              LEFT JOIN wordHashesSubmissions AS whs${idx} ON (whs${idx}.wordHashesSetSubmissionId = whss.id)
+            `).join("")}
 
-            WHERE whss.versionId IN (:versionIds)
-              AND (ts.id IS NULL OR (ts.status IN ("automatch", "none") AND ts.autoMatchScores IS NOT NULL))
-              ${baseTag.t.map((wordNumberInVerse, idx) => `
-                AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase()).slice(0,6)}"
-                ${idx === 0 ? `` : `
-                  AND whs${idx}.wordNumberInVerse > whs${idx-1}.wordNumberInVerse
-                `}
-              `).join("")}
+          WHERE whss.versionId IN (:versionIds)
+            AND ts.status = "${status}"
+            ${baseTag.t.map((wordNumberInVerse, idx) => `
+              AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase()).slice(0,6)}"
+              ${idx === 0 ? `` : `
+                AND whs${idx}.wordNumberInVerse > whs${idx-1}.wordNumberInVerse
+              `}
+            `).join("")}
 
-            ORDER BY ts.id  ${/* Will bring the NULL values to the top so as to preference completed untagged items. */ ""}
-            LIMIT 100
+          LIMIT :limit
+        `
+
+        // doing a UNION is way faster than doing an ORDER BY since it doesn't have to first find all the results
+        const wordHashesSetSubmissions = await global.connection.query(`
+            SELECT * FROM ((
+              ${getQueryWithSpecificTagStatus("none")}
+            ) UNION (
+              ${getQueryWithSpecificTagStatus("automatch")}
+            )) AS tbl
+            LIMIT :limit              
           `,
           {
             nest: true,
             replacements: {
               versionIds: Object.keys(versionsById),
+              limit: 100,
             },
             transaction: t,
           },
         )
+
+        if(wordHashesSetSubmissions.length > 0) {
+          // doing the following as a separate query was a lot faster than using a subquery in the SELECT of the query above
+          const wordHashesSetSubmissionIds = [ ...new Set(wordHashesSetSubmissions.map(({ id }) => id)) ]
+          const wordHashesSubmissionCounts = await global.connection.query(
+            `
+              SELECT
+                whs.wordHashesSetSubmissionId,
+                COUNT(*) AS cnt
+              FROM wordHashesSubmissions AS whs
+              WHERE whs.wordHashesSetSubmissionId IN (:wordHashesSetSubmissionIds)
+              GROUP BY whs.wordHashesSetSubmissionId
+            `,
+            {
+              nest: true,
+              replacements: {
+                wordHashesSetSubmissionIds,
+              },
+              transaction: t,
+            },
+          )
+          const numTranslationWordsById = {}
+          wordHashesSubmissionCounts.forEach(({ wordHashesSetSubmissionId, cnt }) => {
+            numTranslationWordsById[wordHashesSetSubmissionId] = cnt
+          })
+          wordHashesSetSubmissions.forEach(wordHashesSetSubmission => {
+            wordHashesSetSubmission.numTranslationWords = numTranslationWordsById[wordHashesSetSubmission.id]
+          })
+        }
 
         await getAutoMatchTags({
           versionsById,
