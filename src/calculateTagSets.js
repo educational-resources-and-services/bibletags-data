@@ -144,8 +144,18 @@ const calculateTagSets = async ({
       }
     }
 
+    const wordInfoSetByKey = await getWordInfoByIdAndPart({
+      locAndVersionCombos: (
+        wordHashesSetSubmissions.map(({ versionId, loc }) => ({
+          version: versionsById[versionId],
+          loc,
+        }))
+      ),
+      t,
+    })
+
     // for each wordHashesSetSubmissions
-    await Promise.all(wordHashesSetSubmissions.map(async wordHashesSetSubmission => {
+    wordHashesSetSubmissions.forEach(wordHashesSetSubmission => {
 
       const {
 
@@ -189,12 +199,7 @@ const calculateTagSets = async ({
         // including wordNumberInVerse for forming newTag.t below.
       }
 
-      const thisRowWordInfoByIdAndPart = await getWordInfoByIdAndPart({
-        version: versionsById[versionId],
-        loc,
-        t,
-      })
-
+      const thisRowWordInfoByIdAndPart = wordInfoSetByKey[`${loc}-${versionId}`]
       const tagWordInfoByIdAndPart = startFromTag ? baseWordInfoByIdAndPart : thisRowWordInfoByIdAndPart
       const searchWordInfoByIdAndPart = startFromTag ? thisRowWordInfoByIdAndPart : baseWordInfoByIdAndPart
       const searchRowWordInfos = Object.values(searchWordInfoByIdAndPart)
@@ -340,7 +345,7 @@ const calculateTagSets = async ({
         autoMatchTagSetUpdates.hasChange = true
       }
 
-    }))
+    })
 
   }
 
@@ -513,6 +518,7 @@ const calculateTagSets = async ({
             `).join("")}
 
           WHERE whss.versionId IN (:versionIds)
+            AND whss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
             AND ts.status = "${status}"
             ${baseTag.t.map((wordNumberInVerse, idx) => `
               AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase()).slice(0,6)}"
@@ -531,7 +537,7 @@ const calculateTagSets = async ({
             ) UNION (
               ${getQueryWithSpecificTagStatus("automatch")}
             )) AS tbl
-            LIMIT :limit              
+            LIMIT :limit
           `,
           {
             nest: true,
@@ -611,6 +617,7 @@ const calculateTagSets = async ({
             LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
 
           WHERE whss.versionId IN (:versionIds)
+            AND whss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
             AND whs.hash = :hash
             AND ts.status IN ("unconfirmed", "confirmed")
             AND ts.autoMatchScores IS NULL
