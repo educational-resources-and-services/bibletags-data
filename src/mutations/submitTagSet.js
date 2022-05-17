@@ -177,7 +177,7 @@ const submitTagSet = async (args, req, queryInfo) => {
 
   })
 
-  return await updatedTagSets({ versionId, updatedFrom }, req, queryInfo)
+  return await updatedTagSets({ versionId, updatedFrom, forceAll: true }, req, queryInfo)
 
 }
 

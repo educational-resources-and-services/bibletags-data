@@ -6,7 +6,7 @@ const {
 
 const updatedTagSets = async (args, req, queryInfo) => {
 
-  const { versionId, updatedFrom } = args
+  const { versionId, updatedFrom, forceAll } = args
 
   if(!versionId.match(versionIdRegEx)) {
     throw `Invalid versionId (${versionId}).`
@@ -14,7 +14,7 @@ const updatedTagSets = async (args, req, queryInfo) => {
 
   const { models } = global.connection
 
-  const limit = 100
+  const limit = forceAll ? 10000 : 100
 
   let tagSets = await models.tagSet.findAll({
     where: {
