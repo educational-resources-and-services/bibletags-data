@@ -123,7 +123,7 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
 
         let lemmas = await getDefDetailArrayFromProceedingStrongs({ queryStrProceedingDetail, detailType: "lemmas", partialDetail, limit, models })
 
-        if(!lemmas && partialDetail) {  // i.e. there wasn't a proceeeding strongs
+        if(!lemmas && partialDetail) {  // i.e. there wasn't a proceeding strongs
           lemmas = await models.lemma.findAll({
             where: {
               nakedLemma: {
@@ -160,7 +160,7 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
 
         let forms = await getDefDetailArrayFromProceedingStrongs({ queryStrProceedingDetail, detailType: "forms", partialDetail, limit, models })
 
-        if(!forms && partialDetail) {  // i.e. there wasn't a proceeeding strongs
+        if(!forms && partialDetail) {  // i.e. there wasn't a proceeding strongs
           const versionId = containsHebrewChars(partialDetail) ? `uhb` : `ugnt`
           forms = await models[`${versionId}UnitWord`].findAll({
             where: {
