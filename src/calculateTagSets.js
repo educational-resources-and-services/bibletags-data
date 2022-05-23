@@ -524,6 +524,7 @@ const calculateTagSets = async ({
               AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase()).slice(0,6)}"
               ${idx === 0 ? `` : `
                 AND whs${idx}.wordNumberInVerse > whs${idx-1}.wordNumberInVerse
+                AND whs${idx}.wordNumberInVerse - whs${idx-1}.wordNumberInVerse <= 3
               `}
             `).join("")}
 
