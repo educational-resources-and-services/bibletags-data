@@ -268,7 +268,7 @@ const calculateTagSets = async ({
         if(equalObjs(extraWordPartsBetweenEachOriginalWord, extraWordPartsBetween)) {
           totalScoreAddition += 300000
         }
-        const origWordsPlacementPercentage = origMatchOption.reduce((total, { wordPartNumberInVerse }) => total + wordPartNumberInVerse/totalOrigWordsInVerse, 0) / newTag.t.length
+        const origWordsPlacementPercentage = origMatchOption.reduce((total, { wordPartNumberInVerse }) => total + wordPartNumberInVerse/totalOrigWordsInVerse, 0) / origMatchOption.length
         const differenceInWordPlacementPercentage = Math.abs(origWordsPlacementPercentage - translationWordsPlacementPercentage)
         totalScoreAddition += parseInt(2500 / Math.max(.01, differenceInWordPlacementPercentage) - 2500, 10)  // will yield between 0-247500
         if(totalScoreAddition > bestMatchOptionInfo.totalScoreAddition) {
