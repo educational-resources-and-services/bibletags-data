@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const mysql = require('mysql2')
 const fs = require('fs')
-const { stripGreekAccents } = require('@bibletags/bibletags-ui-helper')
+const { getPartialWordRowFromUsfmWord } = require('@bibletags/bibletags-ui-helper')
 
 const utils = require('./utils')
 
@@ -13,23 +13,6 @@ const connection = mysql.createConnection({
   password: process.env.PASSWORD || "",
   multipleStatements: true,
 })
-
-const posMapping = {
-  N: "N",
-  A: "A",
-  NS: "A",  // better categorized as an adjective
-  NP: "A",  // better categorized as an adjective
-  E: "E",
-  R: "P",  // flipped to match UHB
-  V: "V",
-  I: "I",
-  P: "R",  // flipped to match UHB
-  D: "D",
-  PI: "D",  // better categorized as an adverb
-  C: "C",
-  T: "T",
-  TF: "F",  // better in its own category
-}
 
 connection.connect(async (err) => {
   if(err) throw err
@@ -110,66 +93,25 @@ connection.connect(async (err) => {
               paragraphNumber++
             }
 
-            const handleWord = ({ w, id, lemma, strong, morph, isVariant }) => {
+            const handleWord = usfmWord => {
 
-              const definitionId = (strong.match(/G[0-9]{5}/) || [])[0]
-              const form = stripGreekAccents(w).toLowerCase()
-
-              if(!id || !lemma || !definitionId || !morph || !form) {
-                console.log('word with missing info', wordUsfm)
-                process.exit()
-              }
-
-              const pos = posMapping[morph.slice(3,5)] || posMapping[morph.slice(3,4)]
-
-              if(!pos) {
-                console.log('invalid morph - pos not in mapping', wordUsfm)
-                process.exit()
-              }
-
-              const wordInsert = {
-                id,
+              const wordRow = {
                 bookId,
                 chapter,
                 verse,
                 verseNumber,
                 phraseNumber,
                 sentenceNumber,
-                paragraphNumber,
-                form,
-                lemma,
-                fullParsing: morph,
-                pos,
-                morphPos: morph.slice(3,4),
-                definitionId,
+                paragraphNumber,            
+                ...getPartialWordRowFromUsfmWord(usfmWord),
               }
 
-              if(!isVariant) {
-                wordInsert.wordNumber = wordNumber++
+              if(!usfmWord.isVariant) {
+                wordRow.wordNumber = wordNumber++
               }
-
-              if(morph.slice(4,5) !== ',') {
-                wordInsert.type = `${pos}${morph.slice(4,5)}`
-              }
-
-              [
-                "mood",
-                "aspect",
-                "voice",
-                "person",
-                "case",
-                "gender",
-                "number",
-                "attribute",
-              ].forEach((col, idx) => {
-                const morphDetail = morph.slice(idx+5,idx+6)
-                if(morphDetail !== ',') {
-                  wordInsert[col] = morphDetail
-                }
-              })
 
               const definitionInsert = {
-                id: definitionId,
+                id: wordRow.definitionId,
                 lex: "",
                 nakedLex: "",
                 lexUnique: 0,
@@ -181,8 +123,8 @@ connection.connect(async (err) => {
                 forms: JSON.stringify([]),
               }
 
-              if(!definitionUpdates[definitionId]) {
-                definitionUpdates[definitionId] = true
+              if(!definitionUpdates[wordRow.definitionId]) {
+                definitionUpdates[wordRow.definitionId] = true
                 updates.push(`
                   INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
                   VALUES ('${Object.values(definitionInsert).join("', '")}')
@@ -190,8 +132,8 @@ connection.connect(async (err) => {
               }
 
               updates.push(`
-                INSERT INTO ugntWords (\`${Object.keys(wordInsert).join("\`, \`")}\`)
-                VALUES ('${Object.values(wordInsert).join("', '")}')
+                INSERT INTO ugntWords (\`${Object.keys(wordRow).join("\`, \`")}\`)
+                VALUES ('${Object.values(wordRow).join("', '")}')
               `)
 
             }

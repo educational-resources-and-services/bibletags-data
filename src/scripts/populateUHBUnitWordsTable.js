@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const { getLocFromRef } = require('@bibletags/bibletags-versification');
+const { getWordInfoFromWordRow } = require('@bibletags/bibletags-ui-helper');
 const mysql = require('mysql2/promise')
 
 const wordColumnsToUse = [
@@ -70,35 +71,7 @@ const wordColumnsToUse = [
         const key = `${word.bookId}:${word.verseNumber}`
         scopeMap[key] = scopeMap[key] || []
 
-        const info = [
-          word.wordNumber,
-          word.form,
-          word.definitionId ? parseInt(word.definitionId.slice(1), 10) : 0,
-          word.lemma || 0,
-          `H${word.type || `${word.pos}_`}${word.stem || '__'}${word.aspect || '_'}${word.person || '_'}${word.gender || '_'}${word.number || '_'}${word.state || '_'}`,
-        ]
-
-        const booleanColInfo = (
-          ['isAramaic','b','l','k','m','sh','v','h1','h2','h3','h4','h5','n']
-            .map(col => (
-              word[col]
-                ? col.slice(-1)
-                : ''
-            ))
-            .join('')
-        )
-        const suffixInfo = (
-          word.suffixPerson
-            ? `${word.suffixPerson}${word.suffixGender}${word.suffixNumber}`
-            : ''
-        )
-
-        if(booleanColInfo || suffixInfo) {
-          info.push(booleanColInfo)
-          if(suffixInfo) {
-            info.push(suffixInfo)
-          }
-        }
+        const info = getWordInfoFromWordRow(word)
 
         scopeMap[key].push(info)
 

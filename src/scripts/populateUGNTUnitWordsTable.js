@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const { getLocFromRef } = require('@bibletags/bibletags-versification');
+const { getWordInfoFromWordRow } = require('@bibletags/bibletags-ui-helper');
 const mysql = require('mysql2/promise')
 
 const wordColumnsToUse = [
@@ -56,13 +57,7 @@ const wordColumnsToUse = [
         const key = `${word.bookId}:${word.verseNumber}`
         scopeMap[key] = scopeMap[key] || []
 
-        const info = [
-          word.wordNumber,
-          word.form,
-          word.definitionId ? parseInt(word.definitionId.slice(1), 10) : 0,
-          word.lemma,
-          `G${word.type || `${word.pos}_`}${word.mood || '_'}${word.voice || '_'}${word.aspect || '_'}${word.person || '_'}${word.gender || '_'}${word.number || '_'}${word.case || '_'}${word.attribute || '_'}`,
-        ]
+        const info = getWordInfoFromWordRow(word)
 
         scopeMap[key].push(info)
 

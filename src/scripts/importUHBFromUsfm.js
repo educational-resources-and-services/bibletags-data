@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const mysql = require('mysql2')
 const fs = require('fs')
-const { getMainWordPartIndex, stripHebrewVowelsEtc } = require('@bibletags/bibletags-ui-helper')
+const { getPartialWordRowFromUsfmWord } = require('@bibletags/bibletags-ui-helper')
 
 const utils = require('./utils')
 const specialDefinitions = require('./specialDefinitions')
@@ -135,128 +135,28 @@ connection.connect(async (err) => {
               paragraphNumber++
             }
 
-            const handleWord = ({ w, id, lemma, strong, morph, isVariant }) => {
+            const handleWord = usfmWord => {
 
-              const definitionId = (strong.match(/H[0-9]{5}/) || [])[0]
-              const prefixParts = (strong.match(/[^"H]*/) || [])[0].split(':').filter(Boolean)
-              const form = stripHebrewVowelsEtc(w)
-              const isAramaic = /^Ar,/.test(morph) ? 1 : 0
-
-              if(!id || !morph || !form || (!!definitionId !== !!lemma)) {
-                console.log('word with missing info', wordUsfm)
-                process.exit()
-              }
-
-              morphParts = morph.slice(3).split(':')
-              mainPartIdx = getMainWordPartIndex(morphParts)
-              const mainPartMorph = morphParts[mainPartIdx]
-              const pos = mainPartMorph[0]
-              const [ suffixMorph ] = morph.match(/:Sp([^:]*)/g) || []
-
-              const wordInsert = {
-                id,
+              const wordRow = {
                 bookId,
                 chapter,
                 verse,
                 verseNumber,
                 sectionNumber,
-                paragraphNumber,
-                form,
-                lemma,
-                fullParsing: morph,
-                isAramaic,
-                b: prefixParts.includes("b") ? 1 : 0,
-                l: prefixParts.includes("l") ? 1 : 0,
-                k: prefixParts.includes("k") ? 1 : 0,
-                m: prefixParts.includes("m") ? 1 : 0,
-                sh: prefixParts.includes("s") ? 1 : 0,
-                v: prefixParts.includes("c") ? 1 : 0,
-                h1: /^(?:He,|Ar,)(?:[^:]*:)*Td/.test(morph) ? 1 : 0,
-                h2: /^(?:He,|Ar,)(?:[^:]*:)*Rd/.test(morph) ? 1 : 0,
-                h3: /^(?:He,|Ar,)(?:[^:]*:)*Ti/.test(morph) ? 1 : 0,
-                pos,
-                h4: /^(?:He,|Ar,)(?:[^:]*:)*Sd/.test(morph) ? 1 : 0,
-                h5: /^(?:He,|Ar,)(?:[^:]*:)*Sh/.test(morph) ? 1 : 0,
-                n: /^(?:He,|Ar,)(?:[^:]*:)*Sn/.test(morph) ? 1 : 0,
+                paragraphNumber,            
+                ...getPartialWordRowFromUsfmWord(usfmWord),
               }
 
-              if(!isVariant) {
-                wordInsert.wordNumber = wordNumber++
+              if(!usfmWord.isVariant) {
+                wordRow.wordNumber = wordNumber++
               }
 
-              switch(pos) {
-                case 'A':
-                case 'N':
-                  if(mainPartMorph.length > 2) {
-                    if(mainPartMorph.slice(1,4) !== 'xxx') {
-                      wordInsert.gender = mainPartMorph[2]
-                      wordInsert.number = mainPartMorph[3]
-                    }
-                    wordInsert.state = mainPartMorph[4]
-                  }
-                  
-                case 'R':
-                case 'T':
-                  const type = pos + mainPartMorph[1]
-                  if(
-                    mainPartMorph[1]
-                    && mainPartMorph.slice(1,4) !== 'xxx'
-                    && !['Aa','Nc'].includes(type)
-                  ) {
-                    wordInsert.type = type
-                  }
-                  break
+              if(wordRow.definitionId) {
 
-                case 'P':
-                  wordInsert.type = pos + mainPartMorph[1]
-                  if(mainPartMorph[1] === 'f' && mainPartMorph.length > 2) {
-                    const person = mainPartMorph[2]
-                    if(!['x'].includes(person)) {
-                      wordInsert.person = person
-                    }
-                    wordInsert.gender = mainPartMorph[3]
-                    wordInsert.number = mainPartMorph[4]
-                  }
-                  break
+                const definitionInsert = getDefinitionInsert(wordRow.definitionId)
 
-                case 'V':
-                  wordInsert.stem = (isAramaic ? 'A' : 'H') + mainPartMorph[1]
-                  wordInsert.aspect = mainPartMorph[2]
-                  if(['r','s'].includes(mainPartMorph[2])) {
-                    wordInsert.gender = mainPartMorph[3]
-                    wordInsert.number = mainPartMorph[4]
-                    wordInsert.state = mainPartMorph[5]
-                  } else if(['a','c'].includes(mainPartMorph[2])) {
-                    // nothing more to do
-                  } else {
-                    wordInsert.person = mainPartMorph[3]
-                    wordInsert.gender = mainPartMorph[4]
-                    wordInsert.number = mainPartMorph[5]
-                  }
-                  break
-              }
-
-              if(wordInsert.number === 'x') {
-                wordInsert.number = 's'  // see 1 Kings 12:12
-              }
-
-              // if(![ undefined, 'p', 'q', 'i', 'w', 'h', 'j', 'v', 'r', 's', 'a', 'c' ].includes(wordInsert.aspect)) console.log('>>>', morph)
-              // if(![ undefined, 's', 'p', 'd' ].includes(wordInsert.number)) console.log('>>>', morph)
-              // if(![ undefined, 'Ac', 'Ao', 'Ng', 'Np', 'Pd', 'Pf', 'Pi', 'Pp', 'Pr', 'Rd', 'Ta', 'Td', 'Te', 'Ti', 'Tj', 'Tm', 'Tn', 'To', 'Tr' ].includes(wordInsert.type)) console.log('>>>', morph)
-
-              if(suffixMorph) {
-                wordInsert.suffixPerson = suffixMorph.slice(3,4)
-                wordInsert.suffixGender = suffixMorph.slice(4,5)
-                wordInsert.suffixNumber = suffixMorph.slice(5,6)
-              }
-
-              if(definitionId) {
-                wordInsert.definitionId = definitionId
-
-                const definitionInsert = getDefinitionInsert(definitionId)
-
-                if(!definitionUpdates[definitionId]) {
-                  definitionUpdates[definitionId] = true
+                if(!definitionUpdates[wordRow.definitionId]) {
+                  definitionUpdates[wordRow.definitionId] = true
                   updates.push(`
                     INSERT INTO definitions (\`${Object.keys(definitionInsert).join("\`, \`")}\`)
                     VALUES ('${Object.values(definitionInsert).join("', '")}')
@@ -265,8 +165,8 @@ connection.connect(async (err) => {
               }
 
               updates.push(`
-                INSERT INTO uhbWords (\`${Object.keys(wordInsert).join("\`, \`")}\`)
-                VALUES ('${Object.values(wordInsert).join("', '")}')
+                INSERT INTO uhbWords (\`${Object.keys(wordRow).join("\`, \`")}\`)
+                VALUES ('${Object.values(wordRow).join("', '")}')
               `)
 
             }
