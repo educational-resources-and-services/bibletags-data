@@ -1,6 +1,7 @@
+// TODO: UPDATE THESE
 // Verse:id = [2-digit book][3-digit chapter][3-digit verse]-[original language or lxx versionId] (eg. 01001001-uhb for Gen 1:1)
 // Verse:usfm - every word MUST be in a /w enclosure
-// TagSet:id = [2-digit book][3-digit chapter][3-digit verse]-[versionId]-[wordsHash] (eg. 01001001-esv-PiUuem78i3msdf)
+// TagSet:id = [2-digit book][3-digit chapter][3-digit verse]-[versionId]-[wordsHash] (eg. 01001001-esv-Sfgh)
 // TagSet:tags = an array of the original language word ids (followed by |[word part number], if multi-part) and translation word numbers
   // eg. Gen 1:1's for the esv would be [{o:["01xeN|1"],t:[1]},{o:["01xeN|2"],t:[3]},{o:["01Nvk"],t:[5]},...]
   //     wherein "בראשית" is tagged to "In" and "beginning", and "ברא" is tagged to "created"
@@ -110,8 +111,8 @@ const types = `
 
   type BibleSearchResultSet {
     results: [BibleSearchResult]
-    countByBookId: JSON
-    totalHits: Int
+    rowCountByBookId: JSON
+    hitsByBookId: JSON
     otherSuggestedQueries: [SuggestedQuery]
   }
 

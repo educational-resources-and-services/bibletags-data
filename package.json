@@ -59,7 +59,7 @@
     "publish-to-npm": "npm publish --access public && echo '\nSUCCESS!\n'"
   },
   "dependencies": {
-    "@bibletags/bibletags-ui-helper": "^0.7.8",
+    "@bibletags/bibletags-ui-helper": "^0.7.9",
     "@bibletags/bibletags-versification": "^0.2.8",
     "better-sqlite3": "^7.5.1",
     "body-parser": "^1.19.1",

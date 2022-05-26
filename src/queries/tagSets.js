@@ -39,10 +39,11 @@ const tagSets = async (args, req, queryInfo) => {
   const tagSets = await models.tagSet.findAll({
     where,
   })
-  
-  return tagSets.map(({ loc, versionId, wordsHash, tags }) => ({
+
+  return tagSets.map(({ loc, versionId, wordsHash, tags, status }) => ({
     id: `${loc}-${versionId}-${wordsHash}`,
     tags,
+    status,
   }))
 
 }

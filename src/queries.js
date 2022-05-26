@@ -9,6 +9,7 @@ const queries = `
   languages(languageIds: [ID]!): [Language]
 
   tagSets(bookId: Int!, chapter: Int!, verse: Int, versionId: ID!): [TagSet]
+  tagSetsByIds(ids: [ID]!): [TagSet]
   tagSet(id: ID!): TagSet
   translationBreakdown(id: ID!): TranslationBreakdown
   definition(id: ID!): Definition
