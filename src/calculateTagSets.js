@@ -598,50 +598,57 @@ const calculateTagSets = async ({
 
     const { versionsById, baseWordInfoByIdAndPart, baseWordHashesSubmissions } = await getBaseAutoMatchTagInfo()
 
-    await Promise.all(baseWordHashesSubmissions.map(async wordHashesSubmission => {
+    const wordHashesSetSubmissions = await global.connection.query(
+      `
+        SELECT
+          whss.id,
+          whss.loc,
+          whss.versionId,
+          whss.wordsHash,
+          whs.hash,
+          whs.wordNumberInVerse,
+          whs.withBeforeHash,
+          whs.withAfterHash,
+          whs.withBeforeAndAfterHash,
+          ts.tags
 
-      const wordHashesSetSubmissions = await global.connection.query(
-        `
-          SELECT
-            whss.id,
-            whss.loc,
-            whss.versionId,
-            whss.wordsHash,
-            whs.wordNumberInVerse,
-            whs.withBeforeHash,
-            whs.withAfterHash,
-            whs.withBeforeAndAfterHash,
-            ts.tags
+        FROM wordHashesSetSubmissions AS whss
+          LEFT JOIN wordHashesSubmissions AS whs ON (whs.wordHashesSetSubmissionId = whss.id)
+          LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
 
-          FROM wordHashesSetSubmissions AS whss
-            LEFT JOIN wordHashesSubmissions AS whs ON (whs.wordHashesSetSubmissionId = whss.id)
-            LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
+        WHERE whss.versionId IN (:versionIds)
+          AND whss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
+          AND whs.hash IN (:hash)
+          AND ts.status IN ("unconfirmed", "confirmed")
+          AND ts.autoMatchScores IS NULL
 
-          WHERE whss.versionId IN (:versionIds)
-            AND whss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
-            AND whs.hash = :hash
-            AND ts.status IN ("unconfirmed", "confirmed")
-            AND ts.autoMatchScores IS NULL
-
-          ORDER BY FIELD(ts.status, "confirmed", "unconfirmed")
-          LIMIT 100
-        `,
-        {
-          nest: true,
-          replacements: {
-            versionIds: Object.keys(versionsById),
-            hash: wordHashesSubmission.hash,
-          },
-          transaction: t,
+        ORDER BY FIELD(ts.status, "confirmed", "unconfirmed")
+        LIMIT 100
+      `,
+      {
+        nest: true,
+        replacements: {
+          versionIds: Object.keys(versionsById),
+          hash: baseWordHashesSubmissions.map(({ hash }) => hash),
         },
-      )
+        transaction: t,
+      },
+    )
+
+    const wordHashesSetSubmissionsByHash = {}
+    wordHashesSetSubmissions.forEach(({ hash, ...wordHashesSetSubmission }) => {
+      wordHashesSetSubmissionsByHash[hash] = wordHashesSetSubmissionsByHash[hash] || []
+      wordHashesSetSubmissionsByHash[hash].push(wordHashesSetSubmission)
+    })
+
+    await Promise.all(baseWordHashesSubmissions.map(async wordHashesSubmission => {
 
       await getAutoMatchTags({
         versionsById,
         baseWordInfoByIdAndPart,
         baseWordHashesSubmissions,
         baseWordNumberInVerse: wordHashesSubmission.wordNumberInVerse,
-        wordHashesSetSubmissions,
+        wordHashesSetSubmissions: wordHashesSetSubmissionsByHash[wordHashesSubmission.hash] || [],
       })
 
     }))
