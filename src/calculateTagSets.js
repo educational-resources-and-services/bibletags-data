@@ -15,6 +15,7 @@ const calculateTagSets = async ({
 
   const autoMatchTagSetUpdatesByUniqueKey = {}
   const origLangVersionId = getOrigLangVersionIdFromLoc(loc)
+  const wordInfoByIdAndPartByVersionAndLoc = {}
 
   const [ baseVersion, tagSetSubmissions, tagSet ] = await Promise.all([
 
@@ -144,15 +145,22 @@ const calculateTagSets = async ({
       }
     }
 
-    const wordInfoSetByKey = await getWordInfoByIdAndPart({
-      locAndVersionCombos: (
-        wordHashesSetSubmissions.map(({ versionId, loc }) => ({
-          version: versionsById[versionId],
-          loc,
-        }))
-      ),
-      t,
-    })
+    const wordInfoSetByKey = (
+      // speed up by not redoing this query when redundant versionId/loc
+      wordInfoByIdAndPartByVersionAndLoc[`${versionId} ${loc}`]
+      || (
+        await getWordInfoByIdAndPart({
+          locAndVersionCombos: (
+            wordHashesSetSubmissions.map(({ versionId, loc }) => ({
+              version: versionsById[versionId],
+              loc,
+            }))
+          ),
+          t,
+        })
+      )
+    )
+    wordInfoByIdAndPartByVersionAndLoc[`${versionId} ${loc}`] = wordInfoSetByKey
 
     // for each wordHashesSetSubmissions
     wordHashesSetSubmissions.forEach(wordHashesSetSubmission => {
@@ -490,12 +498,19 @@ const calculateTagSets = async ({
 
       const { versionsById, baseWordInfoByIdAndPart, baseWordHashesSubmissions } = await getBaseAutoMatchTagInfo()
 
-      await Promise.all(newTagSetTags.map(async (baseTag, newTagSetIdx) => {
+      // combining as many of these queries together in a UNION slighly improves performance
+      const wordHashesSetSubmissionsByNewTagSetIdx = {}
+      const wordHashesSetSubmissionsQueriesByNumTranslationWords = {}
+      newTagSetTags.forEach((baseTag, newTagSetIdx) => {
 
-        const newTagSetRating = newTagSetRatings[newTagSetIdx]
+        if(baseTag.t.length === 0 || baseTag.o.length === 0) return
+
+        wordHashesSetSubmissionsByNewTagSetIdx[newTagSetIdx] = []
+        wordHashesSetSubmissionsQueriesByNumTranslationWords[baseTag.t.length] = wordHashesSetSubmissionsQueriesByNumTranslationWords[baseTag.t.length] || []
 
         const getQueryWithSpecificTagStatus = status => `
           SELECT
+            ${newTagSetIdx} AS newTagSetIdx,
             whss.id,
             whss.loc,
             whss.versionId,
@@ -532,14 +547,23 @@ const calculateTagSets = async ({
         `
 
         // doing a UNION is way faster than doing an ORDER BY since it doesn't have to first find all the results
-        const wordHashesSetSubmissions = await global.connection.query(`
-            SELECT * FROM ((
-              ${getQueryWithSpecificTagStatus("none")}
-            ) UNION (
-              ${getQueryWithSpecificTagStatus("automatch")}
-            )) AS tbl
-            LIMIT :limit
-          `,
+        const wordHashesSetSubmissionsQuery = `
+          SELECT * FROM ((
+            ${getQueryWithSpecificTagStatus("none")}
+          ) UNION (
+            ${getQueryWithSpecificTagStatus("automatch")}
+          )) AS tbl
+          LIMIT :limit
+        `
+
+        wordHashesSetSubmissionsQueriesByNumTranslationWords[baseTag.t.length].push(wordHashesSetSubmissionsQuery)
+
+      })
+
+      await Promise.all(Object.values(wordHashesSetSubmissionsQueriesByNumTranslationWords).map(async queries => {
+
+        const wordHashesSetSubmissionsGroup = await global.connection.query(
+          `SELECT * FROM (( ${queries.join(' ) UNION ( ')} )) AS tbl2`,
           {
             nest: true,
             replacements: {
@@ -550,34 +574,47 @@ const calculateTagSets = async ({
           },
         )
 
-        if(wordHashesSetSubmissions.length > 0) {
-          // doing the following as a separate query was a lot faster than using a subquery in the SELECT of the query above
-          const wordHashesSetSubmissionIds = [ ...new Set(wordHashesSetSubmissions.map(({ id }) => id)) ]
-          const wordHashesSubmissionCounts = await global.connection.query(
-            `
-              SELECT
-                whs.wordHashesSetSubmissionId,
-                COUNT(*) AS cnt
-              FROM wordHashesSubmissions AS whs
-              WHERE whs.wordHashesSetSubmissionId IN (:wordHashesSetSubmissionIds)
-              GROUP BY whs.wordHashesSetSubmissionId
-            `,
-            {
-              nest: true,
-              replacements: {
-                wordHashesSetSubmissionIds,
-              },
-              transaction: t,
+        wordHashesSetSubmissionsGroup.forEach(({ newTagSetIdx, ...wordHashesSetSubmission }) => {
+          wordHashesSetSubmissionsByNewTagSetIdx[newTagSetIdx].push(wordHashesSetSubmission)
+        })
+
+      }))
+
+      const allWordHashesSetSubmissions = Object.values(wordHashesSetSubmissionsByNewTagSetIdx).flat()
+
+      if(allWordHashesSetSubmissions.length > 0) {
+        // doing the following as a separate query was a lot faster than using a subquery in the SELECT of the query above
+        const wordHashesSetSubmissionIds = [ ...new Set(allWordHashesSetSubmissions.map(({ id }) => id)) ]
+        const wordHashesSubmissionCounts = await global.connection.query(
+          `
+            SELECT
+              whs.wordHashesSetSubmissionId,
+              COUNT(*) AS cnt
+            FROM wordHashesSubmissions AS whs
+            WHERE whs.wordHashesSetSubmissionId IN (:wordHashesSetSubmissionIds)
+            GROUP BY whs.wordHashesSetSubmissionId
+          `,
+          {
+            nest: true,
+            replacements: {
+              wordHashesSetSubmissionIds,
             },
-          )
-          const numTranslationWordsById = {}
-          wordHashesSubmissionCounts.forEach(({ wordHashesSetSubmissionId, cnt }) => {
-            numTranslationWordsById[wordHashesSetSubmissionId] = cnt
-          })
-          wordHashesSetSubmissions.forEach(wordHashesSetSubmission => {
-            wordHashesSetSubmission.numTranslationWords = numTranslationWordsById[wordHashesSetSubmission.id]
-          })
-        }
+            transaction: t,
+          },
+        )
+        const numTranslationWordsById = {}
+        wordHashesSubmissionCounts.forEach(({ wordHashesSetSubmissionId, cnt }) => {
+          numTranslationWordsById[wordHashesSetSubmissionId] = cnt
+        })
+        allWordHashesSetSubmissions.forEach(wordHashesSetSubmission => {
+          wordHashesSetSubmission.numTranslationWords = numTranslationWordsById[wordHashesSetSubmission.id]
+        })
+      }
+
+      await Promise.all(newTagSetTags.map(async (baseTag, newTagSetIdx) => {
+        if(baseTag.t.length === 0 || baseTag.o.length === 0) return
+
+        const newTagSetRating = newTagSetRatings[newTagSetIdx]
 
         await getAutoMatchTags({
           versionsById,
@@ -585,7 +622,7 @@ const calculateTagSets = async ({
           baseWordHashesSubmissions,
           baseTag,
           newTagSetRating,
-          wordHashesSetSubmissions,
+          wordHashesSetSubmissions: wordHashesSetSubmissionsByNewTagSetIdx[newTagSetIdx],
         })
 
       }))
