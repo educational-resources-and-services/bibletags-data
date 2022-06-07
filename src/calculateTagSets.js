@@ -120,20 +120,19 @@ const calculateTagSets = async ({
   }
 
   const getAutoMatchTags = async ({
-    versionsById,
     baseWordInfoByIdAndPart,
     baseWordHashesSubmissions,
     baseWordNumberInVerse,
     baseTag,
     newTagSetRating=0,
     wordHashesSetSubmissions,
+    wordInfoSetByKey,
   }) => {
 
     const startFromTag = !!baseTag
 
-    let fixedUniqueKey
+    const fixedUniqueKey = startFromTag ? `` : `${loc} ${versionId} ${wordsHash}`
     if(!startFromTag && !autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey]) {
-      fixedUniqueKey = `${loc} ${versionId} ${wordsHash}`
       autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey] = {
         tags: [],
         autoMatchScores: [],
@@ -144,23 +143,6 @@ const calculateTagSets = async ({
         wordsHash,
       }
     }
-
-    const wordInfoSetByKey = (
-      // speed up by not redoing this query when redundant versionId/loc
-      wordInfoByIdAndPartByVersionAndLoc[`${versionId} ${loc}`]
-      || (
-        await getWordInfoByIdAndPart({
-          locAndVersionCombos: (
-            wordHashesSetSubmissions.map(({ versionId, loc }) => ({
-              version: versionsById[versionId],
-              loc,
-            }))
-          ),
-          t,
-        })
-      )
-    )
-    wordInfoByIdAndPartByVersionAndLoc[`${versionId} ${loc}`] = wordInfoSetByKey
 
     // for each wordHashesSetSubmissions
     wordHashesSetSubmissions.forEach(wordHashesSetSubmission => {
@@ -611,21 +593,31 @@ const calculateTagSets = async ({
         })
       }
 
-      await Promise.all(newTagSetTags.map(async (baseTag, newTagSetIdx) => {
+      const wordInfoSetByKey = await getWordInfoByIdAndPart({
+        locAndVersionCombos: (
+          allWordHashesSetSubmissions.map(({ versionId, loc }) => ({
+            version: versionsById[versionId],
+            loc,
+          }))
+        ),
+        t,
+      })
+
+      newTagSetTags.forEach((baseTag, newTagSetIdx) => {
         if(baseTag.t.length === 0 || baseTag.o.length === 0) return
 
         const newTagSetRating = newTagSetRatings[newTagSetIdx]
 
-        await getAutoMatchTags({
-          versionsById,
+        getAutoMatchTags({
           baseWordInfoByIdAndPart,
           baseWordHashesSubmissions,
           baseTag,
           newTagSetRating,
           wordHashesSetSubmissions: wordHashesSetSubmissionsByNewTagSetIdx[newTagSetIdx],
+          wordInfoSetByKey,
         })
 
-      }))
+      })
 
       await updateAutoMatchTags()
 
@@ -678,17 +670,27 @@ const calculateTagSets = async ({
       wordHashesSetSubmissionsByHash[hash].push(wordHashesSetSubmission)
     })
 
-    await Promise.all(baseWordHashesSubmissions.map(async wordHashesSubmission => {
+    const wordInfoSetByKey = await getWordInfoByIdAndPart({
+      locAndVersionCombos: (
+        wordHashesSetSubmissions.map(({ versionId, loc }) => ({
+          version: versionsById[versionId],
+          loc,
+        }))
+      ),
+      t,
+    })
 
-      await getAutoMatchTags({
-        versionsById,
+    baseWordHashesSubmissions.forEach(wordHashesSubmission => {
+
+      getAutoMatchTags({
         baseWordInfoByIdAndPart,
         baseWordHashesSubmissions,
         baseWordNumberInVerse: wordHashesSubmission.wordNumberInVerse,
         wordHashesSetSubmissions: wordHashesSetSubmissionsByHash[wordHashesSubmission.hash] || [],
+        wordInfoSetByKey,
       })
 
-    }))
+    })
 
     await updateAutoMatchTags()
 
