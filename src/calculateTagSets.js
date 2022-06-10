@@ -3,6 +3,9 @@ const { hash64 } = require('@bibletags/bibletags-ui-helper')
 const { getOrigLangVersionIdFromLoc, equalObjs, getObjFromArrayOfObjs, deepSortTagSetTags, cloneObj } = require('./utils')
 const getWordInfoByIdAndPart = require('./getWordInfoByIdAndPart')
 
+const SUBMIT_TAG_SETS_CALC_ROW_LIMIT_PER_STATUS = 100
+const WORD_HASHES_SUBMISSIONS_CALC_ROW_LIMIT = 100
+
 const calculateTagSets = async ({
   loc,
   versionId,
@@ -535,7 +538,6 @@ const calculateTagSets = async ({
           ) UNION (
             ${getQueryWithSpecificTagStatus("automatch")}
           )) AS tbl
-          LIMIT :limit
         `
 
         wordHashesSetSubmissionsQueriesByNumTranslationWords[baseTag.t.length].push(wordHashesSetSubmissionsQuery)
@@ -550,7 +552,7 @@ const calculateTagSets = async ({
             nest: true,
             replacements: {
               versionIds: Object.keys(versionsById),
-              limit: 100,
+              limit: SUBMIT_TAG_SETS_CALC_ROW_LIMIT_PER_STATUS,
             },
             transaction: t,
           },
@@ -652,13 +654,14 @@ const calculateTagSets = async ({
           AND ts.autoMatchScores IS NULL
 
         ORDER BY FIELD(ts.status, "confirmed", "unconfirmed")
-        LIMIT 100
+        LIMIT :limit
       `,
       {
         nest: true,
         replacements: {
           versionIds: Object.keys(versionsById),
           hash: baseWordHashesSubmissions.map(({ hash }) => hash),
+          limit: WORD_HASHES_SUBMISSIONS_CALC_ROW_LIMIT,
         },
         transaction: t,
       },
