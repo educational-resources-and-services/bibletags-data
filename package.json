@@ -56,7 +56,8 @@
     "go-update-patch": "echo '-------------------------------------------\nUpdate version (PATCH) and deploy to npm...\n-------------------------------------------\n' && npm run confirm && npm i && npm version patch && npm run publish-to-npm",
     "go-update-minor": "echo '-------------------------------------------\nUpdate version (MINOR) and deploy to npm...\n-------------------------------------------\n' && npm run confirm && npm i && npm version minor && npm run publish-to-npm",
     "go-update-major": "echo '-------------------------------------------\nUpdate version (MAJOR) and deploy to npm...\n-------------------------------------------\n' && npm run confirm && npm i && npm version major && npm run publish-to-npm",
-    "publish-to-npm": "npm publish --access public && echo '\nSUCCESS!\n'"
+    "publish-to-npm": "npm publish --access public && echo '\nSUCCESS!\n'",
+    "sync-original-data-to-production": "node ./src/scripts/syncOriginalDataToProduction.js"
   },
   "dependencies": {
     "@bibletags/bibletags-ui-helper": "^0.7.17",
@@ -70,6 +71,7 @@
     "fs-extra": "^10.1.0",
     "graphql": "^15.4.0",
     "graphql-type-json": "^0.3.2",
+    "inquirer": "^8.2.4",
     "mysql2": "^2.3.3",
     "retry-as-promised": "^5.0.0",
     "sequelize": "^6.15.1",
