@@ -7,10 +7,10 @@ const { stripGreekAccents, stripHebrewVowelsEtc, stripVocalOfAccents } = require
 const utils = require('./utils')
 
 const connection = mysql.createConnection({
-  host: process.env.DB_NAME || "localhost",
-  database: process.env.HOST || 'bibletags',
-  user: process.env.USERNAME || "root",
-  password: process.env.PASSWORD || "",
+  host: process.env.RDS_HOST || "localhost",
+  database: process.env.RDS_DATABASE || 'BibleTags',
+  user: process.env.RDS_USERNAME || "root",
+  password: process.env.RDS_PASSWORD || "",
   multipleStatements: true,
 })
 
