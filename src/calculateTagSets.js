@@ -11,8 +11,13 @@ const calculateTagSets = async ({
   versionId,
   wordsHash,
   justSubmittedUserId,
+  currentTagSet,
   t,
 }) => {
+
+  loc = loc || (currentTagSet || {}).loc
+  versionId = versionId || (currentTagSet || {}).versionId
+  wordsHash = wordsHash || (currentTagSet || {}).wordsHash
 
   const { models } = global.connection
 
@@ -20,7 +25,7 @@ const calculateTagSets = async ({
   const origLangVersionId = getOrigLangVersionIdFromLoc(loc)
   const wordInfoByIdAndPartByVersionAndLoc = {}
 
-  const [ baseVersion, tagSetSubmissions, tagSet ] = await Promise.all([
+  const [ baseVersion, tagSetSubmissions, tagSet=currentTagSet ] = await Promise.all([
 
     models.version.findByPk(versionId, {transaction: t}),
 
@@ -55,14 +60,16 @@ const calculateTagSets = async ({
       transaction: t,
     }),
 
-    models.tagSet.findOne({
-      where: {
-        loc,
-        versionId,
-        wordsHash,
-      },
-      transaction: t,
-    }),
+    ...(currentTagSet ? [] : [
+      models.tagSet.findOne({
+        where: {
+          loc,
+          versionId,
+          wordsHash,
+        },
+        transaction: t,
+      }),
+    ]),
 
   ])
 
@@ -136,15 +143,20 @@ const calculateTagSets = async ({
 
     const fixedUniqueKey = startFromTag ? `` : `${loc} ${versionId} ${wordsHash}`
     if(!startFromTag && !autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey]) {
-      autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey] = {
-        tags: [],
-        autoMatchScores: [],
-        status: 'none',
-        hasChange: true,
-        loc,
-        versionId,
-        wordsHash,
-      }
+      autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey] = (
+        currentTagSet
+          ? cloneObj(currentTagSet)
+          : {
+            tags: [],
+            autoMatchScores: [],
+            status: 'none',
+            hasChange: true,
+            loc,
+            versionId,
+            wordsHash,
+          }
+      )
+      delete autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey].createdAt
     }
 
     // for each wordHashesSetSubmissions

@@ -177,7 +177,10 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
                   )
                   const form = origWordMap[wordId].form.split(wordPartDividerRegex)[wordPartNumber - 1]
                   if(isMainWordPart) {
-                    definitionIdAndFormSets.push([ origWordMap[wordId].definitionId, form ])
+                    definitionIdAndFormSets.push([
+                      origWordMap[wordId].definitionId || prefixToDefinitionIdMap[form],
+                      form,
+                    ])
                   } else {
                     const definitionId = (
                       prefixToDefinitionIdMap[form]

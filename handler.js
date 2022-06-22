@@ -1,4 +1,5 @@
 const updateWordTranslationsAndLanguageSpecificDefinitions = require('./crons/updateWordTranslationsAndLanguageSpecificDefinitions')
+const rerunCalcTagSetsForUntaggedVerses = require('./crons/rerunCalcTagSetsForUntaggedVerses')
 
 const handler = async ({ forceRunAll }={}) => {
 
@@ -7,12 +8,15 @@ const handler = async ({ forceRunAll }={}) => {
   const minutes = new Date().getMinutes()  // 0-59
 
   if((minutes === 0) || forceRunAll) {  // once per hour
-    await updateWordTranslationsAndLanguageSpecificDefinitions()
-  }
-
-  if((hours === 0 && minutes === 0) || forceRunAll) {  // once per day
     // await updateWordTranslationsAndLanguageSpecificDefinitions()
   }
+
+  if((minutes === 15) || forceRunAll) {  // once per hour
+    await rerunCalcTagSetsForUntaggedVerses({ day, hours })
+  }
+
+  // if((hours === 0 && minutes === 0) || forceRunAll) {  // once per day
+  // }
 
 }
 
