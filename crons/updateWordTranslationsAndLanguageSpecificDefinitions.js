@@ -166,8 +166,12 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
                 // get definitionId and form
                 if(tag.o.length === 0) return
                 const definitionIdAndFormSets = []
-                tag.o.map(wordIdAndPart => {
+                tag.o.forEach(wordIdAndPart => {
                   const [ wordId, wordPartNumber ] = wordIdAndPart.split('|')
+                  if(!origWordMap[wordId]) {
+                    console.log(`Missing wordId: ${wordId} (likely due to change to USFM or original)`)
+                    return
+                  }
                   const morphParts = origWordMap[wordId].fullParsing.slice(3).split(':')
                   const mainPartIdx = getMainWordPartIndex(morphParts)
                   const isMainWordPart = (
@@ -240,34 +244,40 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
 
           console.log(`updateWordTranslationsAndLanguageSpecificDefinitions cron – versionId:${version.id} — ${oldWordTranslations.length} old wordTranslations, ${Object.values(updatedHitsByUniqueKey).length} new wordTranslations (cron id:${cronId})`)
 
-          await global.connection.transaction(async t => {
 
-            const updates = []
+          const updates = []
 
-            oldWordTranslations.forEach(wordTranslation => {
+          oldWordTranslations.forEach(wordTranslation => {
 
-              const { translation, hits, wordTranslationDefinitions } = wordTranslation
-              const definitionIdAndFormSets = wordTranslationDefinitions.map(({ definitionId, form }) => ([ definitionId, form ]))
-              const uniqueKey = JSON.stringify([ translation, definitionIdAndFormSets ])
+            const { translation, hits, wordTranslationDefinitions } = wordTranslation
+            const definitionIdAndFormSets = wordTranslationDefinitions.map(({ definitionId, form }) => ([ definitionId, form ]))
+            const uniqueKey = JSON.stringify([ translation, definitionIdAndFormSets ])
 
-              if(updatedHitsByUniqueKey[uniqueKey]) {
-                if(updatedHitsByUniqueKey[uniqueKey] !== hits) {
-                  wordTranslation.hits = hits
-                  updates.push(wordTranslation.save({transaction: t}))
-                }
-              } else {
-                updates.push(wordTranslation.destroy({transaction: t}))
+            if(updatedHitsByUniqueKey[uniqueKey]) {
+              if(updatedHitsByUniqueKey[uniqueKey] !== hits) {
+                wordTranslation.hits = hits
+                updates.push(wordTranslation.save())
               }
+            } else {
+              updates.push(wordTranslation.destroy())
+            }
 
-              delete updatedHitsByUniqueKey[uniqueKey]
+            delete updatedHitsByUniqueKey[uniqueKey]
 
-            })
+          })
 
-            updates.push(
-              ...Object.keys(updatedHitsByUniqueKey).map(async uniqueKey => {
+          updates.push(
+            ...Object.keys(updatedHitsByUniqueKey).map(async uniqueKey => {
 
-                const hits = updatedHitsByUniqueKey[uniqueKey]
-                const [ translation, definitionIdAndFormSets ] = JSON.parse(uniqueKey)
+              const hits = updatedHitsByUniqueKey[uniqueKey]
+              const [ translation, definitionIdAndFormSets ] = JSON.parse(uniqueKey)
+
+              await global.connection.transaction(async t => {
+
+// if(definitionIdAndFormSets.some(([ definitionId ]) => !definitionId)) {
+//   console.log('>>>>', definitionIdAndFormSets, translation)
+//   return
+// }
 
                 const newWordTranslation = await models.wordTranslation.create(
                   {
@@ -291,16 +301,17 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
                 )
 
               })
-            )
 
-            console.log(`updateWordTranslationsAndLanguageSpecificDefinitions cron – versionId:${version.id} — ${updates.length} updates or creates (cron id:${cronId})...`)
+            })
+          )
 
-            // wait for updates to finish
-            await Promise.all(updates)
+          console.log(`updateWordTranslationsAndLanguageSpecificDefinitions cron – versionId:${version.id} — ${updates.length} updates or creates (cron id:${cronId})...`)
 
-            console.log(`...updateWordTranslationsAndLanguageSpecificDefinitions cron – versionId:${version.id} — updates and creates complete (cron id:${cronId})`)
+          // wait for updates to finish
+          await Promise.all(updates)
 
-          })
+          console.log(`...updateWordTranslationsAndLanguageSpecificDefinitions cron – versionId:${version.id} — updates and creates complete (cron id:${cronId})`)
+
 
         }
       }

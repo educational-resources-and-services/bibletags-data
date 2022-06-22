@@ -9,10 +9,18 @@ const handler = async ({ forceRunAll }={}) => {
 
   if((minutes === 0) || forceRunAll) {  // once per hour
     // await updateWordTranslationsAndLanguageSpecificDefinitions()
+    // A couple things here need fixing:
+      // 1) currently there is a unique index on wordTranslationDefinitions for definitionId and wordTranslationId.
+      //    BUT, multi orig-word tags break this
+      // 2) For some unknown reason, it is trying to insert a wordTranslationDefinition with definitionId === NULL
   }
 
-  if((minutes === 15) || forceRunAll) {  // once per hour
-    await rerunCalcTagSetsForUntaggedVerses({ day, hours })
+  if((minutes === 10) || forceRunAll) {  // once per hour
+    await rerunCalcTagSetsForUntaggedVerses({ day, halfHourIdx: hours })
+  }
+
+  if((minutes === 40) || forceRunAll) {  // once per hour
+    await rerunCalcTagSetsForUntaggedVerses({ day, halfHourIdx: hours + 24 })
   }
 
   // if((hours === 0 && minutes === 0) || forceRunAll) {  // once per day

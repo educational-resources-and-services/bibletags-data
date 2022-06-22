@@ -3,13 +3,13 @@ const { Op, fn } = require('sequelize')
 const { setUpConnection } = require('../src/db/connect')
 const calculateTagSets = require('../src/calculateTagSets')
 
-const rerunCalcTagSetsForUntaggedVerses = async ({ day, hours }) => {  // day: 0-6, hours: 0-23
+const rerunCalcTagSetsForUntaggedVerses = async ({ day, halfHourIdx }) => {  // day: 0-6, halfHourIdx: 0-47
   const cronId = parseInt(Math.random() * 999999)
   console.log(`Beginning cron run for rerunCalcTagSetsForUntaggedVerses (cron id:${cronId})...`)
 
   const now = Date.now()
   const bookIds = Array(66).fill().map((x, idx) => idx+1)
-  const bookIdsToDo = bookIds.filter(bookId => bookId % 24 === hours).join('|')
+  const bookIdsToDo = bookIds.filter(bookId => bookId % 48 === halfHourIdx).join('|')
 
   try {
 
