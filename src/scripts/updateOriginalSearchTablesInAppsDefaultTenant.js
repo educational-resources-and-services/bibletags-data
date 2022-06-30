@@ -96,7 +96,7 @@ const { setUpConnection } = require('../db/connect')
       const insert = db.prepare(`INSERT INTO ${tableName} (id, scopeMap) VALUES (@id, @scopeMap)`)
       db.transaction(() => {
         unitWords.forEach(({ id, scopeMap }) => {
-          insert.run({ id, scopeMap: JSON.stringify(scopeMap) })
+          insert.run({ id, scopeMap })
           numRows++
         })
       })()
