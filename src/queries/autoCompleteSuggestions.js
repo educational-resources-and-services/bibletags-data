@@ -1,7 +1,7 @@
 const { Op } = require('sequelize')
 const { containsHebrewChars, stripGreekAccents, stripHebrewVowelsEtc, stripVocalOfAccents } = require('@bibletags/bibletags-ui-helper')
 
-const SUGGESTIONS_LIMIT = 4
+const SUGGESTIONS_LIMIT = 6
 
 const safeifyForLike = str => str.replace(/_/g, ' ').replace(/%/g, '')
 
