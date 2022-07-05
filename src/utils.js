@@ -49,7 +49,7 @@ module.exports = {
     // first sort o and t keys
     tags.forEach(tag => {
       tag.o.sort()
-      tag.t.sort()
+      tag.t.sort((a,b) => a-b)
     })
     // then sort tags
     tags.sort((a,b) => {

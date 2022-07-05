@@ -87,8 +87,8 @@ const submitTagSet = async (args, req, queryInfo) => {
   }
 
   // validate that every translation word is covered, without repeats
-  const submittedTranslationWordNumbers = wordHashesSetSubmission.wordHashesSubmissions.map(({ wordNumberInVerse }) => wordNumberInVerse).sort()
-  const dataTranslationWordNumbers = submissionTranslationWordNumberSets.flat().sort()
+  const submittedTranslationWordNumbers = wordHashesSetSubmission.wordHashesSubmissions.map(({ wordNumberInVerse }) => wordNumberInVerse).sort((a,b) => a-b)
+  const dataTranslationWordNumbers = submissionTranslationWordNumberSets.flat().sort((a,b) => a-b)
   if(!equalObjs(submittedTranslationWordNumbers, dataTranslationWordNumbers)) {
     if(!global.skipConsoleLogError) {
       console.log('Bad submitTagSet translation word numbers comparison:', submittedTranslationWordNumbers, dataTranslationWordNumbers)
