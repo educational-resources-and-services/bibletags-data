@@ -84,6 +84,7 @@ const calculateTagSets = async ({
       t: (
         tagSetSubmissionItem.tagSetSubmissionItemTranslationWords
           .map(({ wordNumberInVerse }) => wordNumberInVerse)
+          .sort()
       ),
     }))
   )
@@ -260,7 +261,7 @@ const calculateTagSets = async ({
       let newAutoMatchScore = newTagSetRating
 
       // form newTag.t
-      newTag.t = startFromTag ? wordHashesSubmissionsArray.map(({ wordNumberInVerse }) => wordNumberInVerse) : [ baseWordNumberInVerse ]
+      newTag.t = startFromTag ? wordHashesSubmissionsArray.map(({ wordNumberInVerse }) => wordNumberInVerse).sort() : [ baseWordNumberInVerse ]
       
       // add to auto-match score and select best match
       const totalTranslationWordsInVerse = startFromTag ? numTranslationWords : baseWordHashesSubmissions.length
