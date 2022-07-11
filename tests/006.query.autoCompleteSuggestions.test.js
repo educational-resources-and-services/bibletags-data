@@ -61,6 +61,28 @@ describe('Query: autoCompleteSuggestions', async () => {
         resultCount: 6,
         suggestedQuery: "#H43020",
       },
+      {
+        from: "look-up",
+        originalWords: {
+          H43030: {
+            gloss: "tasty, savoury food, dainties",
+            lex: "מַטְעַם",
+          },
+        },
+        resultCount: 8,
+        suggestedQuery: "#H43030",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          H43040: {
+            gloss: "cloak",
+            lex: "מִטְפַּחַת",
+          }
+        },
+        resultCount: 2,
+        suggestedQuery: "#H43040",
+      }
     ])
   })
 
@@ -132,6 +154,36 @@ describe('Query: autoCompleteSuggestions', async () => {
         resultCount: null,
         suggestedQuery: "#H01200 #b#H43020",
       },
+      {
+        from: "look-up",
+        originalWords: {
+          H01200: {
+            gloss: "man, mankind",
+            lex: "אָדָם",
+          },
+          H43030: {
+            gloss: "tasty, savoury food, dainties",
+            lex: "מַטְעַם",
+          }
+        },
+        resultCount: null,
+        suggestedQuery: "#H01200 #b#H43030",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          H01200: {
+            gloss: "man, mankind",
+            lex: "אָדָם",
+          },
+          H43040: {
+            gloss: "cloak",
+            lex: "מִטְפַּחַת",
+          },
+        },
+        resultCount: null,
+        suggestedQuery: "#H01200 #b#H43040",
+      },
     ])
   })
 
@@ -186,6 +238,28 @@ describe('Query: autoCompleteSuggestions', async () => {
         },
         resultCount: null,
         suggestedQuery: "#not:H43020",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          H43030: {
+            gloss: "tasty, savoury food, dainties",
+            lex: "מַטְעַם",
+          },
+        },
+        resultCount: null,
+        suggestedQuery: "#not:H43030",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          H43040: {
+            gloss: "cloak",
+            lex: "מִטְפַּחַת",
+          },
+        },
+        resultCount: null,
+        suggestedQuery: "#not:H43040",
       },
     ])
   })
@@ -242,6 +316,17 @@ describe('Query: autoCompleteSuggestions', async () => {
         resultCount: 9,
         suggestedQuery: "#H04360",
       },
+      {
+        from: "look-up",
+        originalWords: {
+          H04400: {
+            gloss: "an Elonite",
+            lex: "אֵלוֹנִי",
+          },
+        },
+        resultCount: 1,
+        suggestedQuery: "#H04400",
+      },
     ])
   })
 
@@ -296,6 +381,28 @@ describe('Query: autoCompleteSuggestions', async () => {
         },
         resultCount: 4,
         suggestedQuery: "#G30510",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          G30520: {
+            gloss: "eloquent",
+            lex: "λόγιος",
+          },
+        },
+        resultCount: 1,
+        suggestedQuery: "#G30520",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          G30530: {
+            gloss: "reasoning, thinking",
+            lex: "λογισμός",
+          },
+        },
+        resultCount: 2,
+        suggestedQuery: "#G30530",
       },
     ])
   })
@@ -352,6 +459,28 @@ describe('Query: autoCompleteSuggestions', async () => {
         resultCount: 4,
         suggestedQuery: "#G30510",
       },
+      {
+        from: "look-up",
+        originalWords: {
+          G30520: {
+            gloss: "eloquent",
+            lex: "λόγιος",
+          },
+        },
+        resultCount: 1,
+        suggestedQuery: "#G30520",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          G30530: {
+            gloss: "reasoning, thinking",
+            lex: "λογισμός",
+          },
+        },
+        resultCount: 2,
+        suggestedQuery: "#G30530",
+      },
     ])
   })
 
@@ -397,6 +526,18 @@ describe('Query: autoCompleteSuggestions', async () => {
         originalWords: {},
         resultCount: null,
         suggestedQuery: "#lemma:βάρβαρος",
+      },
+      {
+        from: "look-up",
+        originalWords: {},
+        resultCount: null,
+        suggestedQuery: "#lemma:βαρέω",
+      },
+      {
+        from: "look-up",
+        originalWords: {},
+        resultCount: null,
+        suggestedQuery: "#lemma:βαρέως",
       },
     ])
   })
@@ -510,6 +651,18 @@ describe('Query: autoCompleteSuggestions', async () => {
         resultCount: null,
         suggestedQuery: "#form:βαραχιου",
       },
+      {
+        from: "look-up",
+        originalWords: {},
+        resultCount: null,
+        suggestedQuery: "#form:βαρβαροι",
+      },
+      {
+        from: "look-up",
+        originalWords: {},
+        resultCount: null,
+        suggestedQuery: "#form:βαρβαροις",
+      },
     ])
   })
 
@@ -564,6 +717,28 @@ describe('Query: autoCompleteSuggestions', async () => {
         },
         resultCount: null,
         suggestedQuery: "#G00320#form:αγγελος",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          G00320: {
+            gloss: "an angel, messenger",
+            lex: "ἄγγελος",
+          },
+        },
+        resultCount: null,
+        suggestedQuery: "#G00320#form:αγγελου",
+      },
+      {
+        from: "look-up",
+        originalWords: {
+          G00320: {
+            gloss: "an angel, messenger",
+            lex: "ἄγγελος",
+          },
+        },
+        resultCount: null,
+        suggestedQuery: "#G00320#form:αγγελους",
       },
     ])
   })

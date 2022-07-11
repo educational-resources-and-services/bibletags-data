@@ -40,6 +40,8 @@ const setUpConnection = ({
       dialectOptions: {
         multipleStatements: true,
       },
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_bin',
       host: connectionObj.host,
       port: connectionObj.port,
       logging: (query, msEllapsed) => {
