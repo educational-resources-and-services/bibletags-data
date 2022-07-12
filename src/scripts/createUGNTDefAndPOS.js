@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const mysql = require('mysql2')
 const fs = require('fs').promises
-const { stripGreekAccents, stripHebrewVowelsEtc, stripVocalOfAccents } = require('@bibletags/bibletags-ui-helper')
+const { normalizeSearchStr, stripVocalOfAccents } = require('@bibletags/bibletags-ui-helper')
 
 const utils = require('./utils')
 
@@ -69,7 +69,7 @@ connection.connect(async (err) => {
 
       const defUpdate = {
         lex,
-        nakedLex: stripGreekAccents(stripHebrewVowelsEtc(lex)).toLowerCase(),
+        nakedLex: normalizeSearchStr({ str: lex }),
         lexUnique: uniqueStateOfLexemes[lex],
         vocal,
         simplifiedVocal,

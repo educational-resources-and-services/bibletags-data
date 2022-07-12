@@ -1,5 +1,5 @@
 const { Op } = require('sequelize')
-const { containsHebrewChars, stripGreekAccents, stripHebrewVowelsEtc, stripVocalOfAccents } = require('@bibletags/bibletags-ui-helper')
+const { containsHebrewChars, normalizeSearchStr, stripVocalOfAccents } = require('@bibletags/bibletags-ui-helper')
 
 const SUGGESTIONS_LIMIT = 6
 
@@ -51,7 +51,7 @@ const getDefDetailArrayFromProceedingStrongs = async ({ queryStrProceedingDetail
     if(definition) {
       detailArray = (
         definition[detailType]
-          .filter(detail => stripGreekAccents(stripHebrewVowelsEtc(detail)).toLowerCase().indexOf(partialDetail) === 0)
+          .filter(detail => normalizeSearchStr({ str: detail }).indexOf(partialDetail) === 0)
           .slice(0, limit)
           .map(id => ({ id }))
       )
@@ -116,7 +116,7 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
     // table: lemmas
 
     let [ x, queryStrProceedingDetail, negator='', partialDetail ] = incompleteQuery.match(/^(.*)#(not:)?lemma:([^#+~*=[\]\/(). ]*)$/i)
-    partialDetail = stripGreekAccents(stripHebrewVowelsEtc(partialDetail)).toLowerCase()
+    partialDetail = normalizeSearchStr({ str: partialDetail })
 
     const [ lemmas, originalWords ] = await Promise.all([
       (async () => {
@@ -153,7 +153,7 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
     // table: unitWords
 
     let [ x, queryStrProceedingDetail, negator='', partialDetail ] = incompleteQuery.match(/^(.*)#(not:)?form:([^#+~*=[\]\/(). ]*)$/i)
-    partialDetail = stripGreekAccents(stripHebrewVowelsEtc(partialDetail)).toLowerCase()
+    partialDetail = normalizeSearchStr({ str: partialDetail })
 
     const [ forms, originalWords ] = await Promise.all([
       (async () => {
@@ -224,7 +224,7 @@ const autoCompleteSuggestions = async (args, req, queryInfo) => {
     } else if(/[\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF]/.test(partialDetail)) {  // Greek or Hebrew
       where = {
         nakedLex: {
-          [Op.like]: `${safeifyForLike(stripGreekAccents(stripHebrewVowelsEtc(partialDetail)).toLowerCase())}%`,
+          [Op.like]: `${safeifyForLike(normalizeSearchStr({ str: partialDetail }))}%`,
         },
       }
 
