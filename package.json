@@ -60,10 +60,11 @@
     "sync-original-data-to-production": "node ./src/scripts/syncOriginalDataToProduction.js"
   },
   "dependencies": {
-    "@bibletags/bibletags-ui-helper": "^0.9.2",
+    "@bibletags/bibletags-ui-helper": "^0.9.6",
     "@bibletags/bibletags-versification": "^0.2.12",
     "better-sqlite3": "^7.5.1",
     "body-parser": "^1.19.1",
+    "colors": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
@@ -72,6 +73,8 @@
     "graphql": "^15.4.0",
     "graphql-type-json": "^0.3.2",
     "inquirer": "^8.2.4",
+    "inquirer-file-tree-selection-prompt": "^1.0.19",
+    "inquirer-fuzzy-path": "^2.3.0",
     "mysql2": "^2.3.3",
     "retry-as-promised": "^5.0.0",
     "sequelize": "^6.15.1",
