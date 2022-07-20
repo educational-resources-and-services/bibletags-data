@@ -1,5 +1,6 @@
 const fs = require('fs').promises
 const { getLanguageInfo } = require('@bibletags/bibletags-ui-helper')
+const { Parser } = require('json2csv')
 
 const pagesDir = `./pages`
 
@@ -9,6 +10,7 @@ const buildPages = async ({
 
   const { models } = global.connection
   const now = Date.now()
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
   const versions = await models.version.findAll({
     attributes: {
@@ -56,20 +58,19 @@ const buildPages = async ({
 
   await fs.mkdir(`${pagesDir}/versions`, { recursive: true })
   await fs.mkdir(`${pagesDir}/languages`, { recursive: true })
-  await fs.mkdir(`${pagesDir}/downloads/definitions`, { recursive: true })
-  await fs.mkdir(`${pagesDir}/downloads/tagsets`, { recursive: true })
-  await fs.mkdir(`${pagesDir}/downloads/translationbreakdowns`, { recursive: true })
+  await fs.mkdir(`${pagesDir}/downloads`, { recursive: true })
 
   // CSS
   await fs.writeFile(`${pagesDir}/index.css`, cssIndex)
 
-  // PAGE: /versions
+  // BUILD PAGE: /versions
   await fs.writeFile(`${pagesDir}/versions/index.html`,
     versionsTemplate
 
       // general
       .replace(/{{header}}/g, headerTemplate)
       .replace(/{{footer}}/g, footerTemplate)
+      .replace(/{{date}}/g, date)
 
       // global stats
       .replace(/{{numLanguages}}/g, Object.values(versionsByLanguageId).length)
@@ -107,7 +108,7 @@ const buildPages = async ({
 
   )
 
-  // PAGE: /versions/{{id}}.html
+  // Go through relevant versions
   await Promise.all(
     versions
       .filter(({ id }) => (!changedVersionIds || changedVersionIds.includes(id)))
@@ -133,6 +134,40 @@ const buildPages = async ({
         const { englishName, nativeName } = getLanguageInfo(languageId)
         const languageName = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
 
+        // BUILD DOWNLOAD: /downloads/tagsets-{{id}}.json + /downloads/tagsets-{{id}}.csv
+        const tagSets = await models.tagSet.findAll({
+          attributes: {
+            exclude: [
+              'id',
+              'autoMatchScores',
+            ],
+          },
+          where: {
+            versionId: id,
+          },
+        })
+
+        const tagSetsData = tagSets.map(({ dataValues }) => dataValues)
+        await fs.writeFile(`${pagesDir}/downloads/tagsets-${id}.json`, JSON.stringify(tagSetsData))
+        await fs.writeFile(`${pagesDir}/downloads/tagsets-${id}.csv`, (new Parser({ fields: [ 'loc', 'tags', 'status', 'wordsHash', 'createdAt' ] })).parse(tagSetsData))
+
+        // BUILD DOWNLOAD: /downloads/translationbreakdowns/{{id}}.json + /downloads/translationbreakdowns/{{id}}.csv
+        const translationBreakdowns = await models.translationBreakdown.findAll({
+          attributes: {
+            exclude: [
+              'id',
+            ],
+          },
+          where: {
+            versionId: id,
+          },
+        })
+
+        const translationBreakdownsData = translationBreakdowns.map(({ dataValues }) => dataValues)
+        await fs.writeFile(`${pagesDir}/downloads/translationbreakdowns-${id}.json`, JSON.stringify(translationBreakdownsData))
+        await fs.writeFile(`${pagesDir}/downloads/translationbreakdowns-${id}.csv`, (new Parser({ fields: [ 'breakdown', 'createdAt', 'definitionId' ] })).parse(translationBreakdownsData))
+
+        // BUILD PAGE: /versions/{{id}}.html
         await fs.writeFile(`${pagesDir}/versions/${id}.html`,
           versionTemplate
 
@@ -145,6 +180,7 @@ const buildPages = async ({
             .replace(/{{languageId}}/g, languageId)
             .replace(/{{partialScope}}/g, partialScope === `ot` ? `Old Testament only.` : (partialScope === `nt` ? `New Testament only.` : ``))
             .replace(/{{now}}/g, now)
+            .replace(/{{date}}/g, date)
 
             // stats
             .replace(/{{percentageOfWordsTagged}}/g, numVerses === numVersesWithTagging ? `100%` : `${Math.round(percentageOfWordsTagged * 100)}%`)
@@ -167,7 +203,7 @@ const buildPages = async ({
       })
   )
 
-  // PAGE: /languages/{{id}}.html
+  // Go through relevant languages
   await Promise.all(
     Object.keys(versionsByLanguageId)
       .filter(id => (!changedVersionIds || versionsByLanguageId[id].some(({ id }) => changedVersionIds.includes(id))))
@@ -188,6 +224,34 @@ const buildPages = async ({
 
         const name = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
 
+        // BUILD DOWNLOAD: /downloads/definitions-{{id}}.json + /downloads/definitions-{{id}}.csv
+        const definitions = await models.definition.findAll({
+          include: [
+            {
+              model: models.languageSpecificDefinition,
+              required: false,
+              attributes: {
+                exclude: [
+                  'id',
+                  'editorId',
+                  'definitionId',
+                ],
+              },
+              where: {
+                languageId: id,
+              },
+            },
+          ],
+        })
+
+        const definitionsData = definitions.map(({ dataValues: { languageSpecificDefinitions, ...otherDataValues } }) => ({
+          ...otherDataValues,
+          ...((languageSpecificDefinitions[0] || {}).dataValues || {}),
+        }))
+        await fs.writeFile(`${pagesDir}/downloads/definitions-${id}.json`, JSON.stringify(definitionsData))
+        await fs.writeFile(`${pagesDir}/downloads/definitions-${id}.csv`, (new Parser()).parse(definitionsData))
+
+        // BUILD PAGE: /languages/{{id}}.html
         await fs.writeFile(`${pagesDir}/languages/${id}.html`,
           languageTemplate
 
@@ -200,6 +264,7 @@ const buildPages = async ({
             .replace(/{{iso6392b}}/g, iso6392b || '<span class="special_value">[none]</span>')
             .replace(/{{iso6392t}}/g, iso6392t || '<span class="special_value">[none]</span>')
             .replace(/{{now}}/g, now)
+            .replace(/{{date}}/g, date)
 
             // stats
             .replace(/{{numVersions}}/g, versionsByLanguageId[id].length)

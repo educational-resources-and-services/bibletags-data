@@ -75,6 +75,7 @@
     "inquirer": "^8.2.4",
     "inquirer-file-tree-selection-prompt": "^1.0.19",
     "inquirer-fuzzy-path": "^2.3.0",
+    "json2csv": "^5.0.7",
     "mysql2": "^2.3.3",
     "retry-as-promised": "^5.0.0",
     "sequelize": "^6.15.1",
