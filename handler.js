@@ -1,5 +1,8 @@
+require('dotenv').config()
+
 const updateWordTranslationsAndLanguageSpecificDefinitions = require('./crons/updateWordTranslationsAndLanguageSpecificDefinitions')
 const rerunCalcTagSetsForUntaggedVerses = require('./crons/rerunCalcTagSetsForUntaggedVerses')
+const rebuildAllPages = require('./crons/rebuildAllPages')
 
 const handler = async ({ forceRunAll }={}) => {
 
@@ -23,8 +26,9 @@ const handler = async ({ forceRunAll }={}) => {
     await rerunCalcTagSetsForUntaggedVerses({ day, halfHourIdx: hours + 24 })
   }
 
-  // if((hours === 0 && minutes === 0) || forceRunAll) {  // once per day
-  // }
+  if((hours === 0 && minutes === 0) || forceRunAll) {  // once per day
+    await rebuildAllPages()
+  }
 
 }
 

@@ -1,12 +1,42 @@
 const fs = require('fs').promises
 const { getLanguageInfo } = require('@bibletags/bibletags-ui-helper')
 const { Parser } = require('json2csv')
+const AWS = require('aws-sdk')
 
-const pagesDir = `./pages`
+let s3
+const writeToS3 = (key, body) => new Promise((resolve, reject) => {
+  s3 = s3 || new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID_S3_OVERRIDE || process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_S3_OVERRIDE || process.env.AWS_SECRET_ACCESS_KEY,
+  })
+  s3.putObject(
+    {
+      Bucket: process.env.AWS_DOWNLOADS_BUCKET,
+      Key: key,
+      Body: body,
+      ContentType: {
+        html: `text/html`,
+        csv: `text/csv`,
+        json: `application/json`,
+        css: `text/css`,
+      }[key.split('.').pop()]
+    },
+    err => {
+      if(err) return reject(err)
+      resolve()
+    }
+  )
+})
 
 const buildPages = async ({
   changedVersionIds,
 }={}) => {
+
+  if(!process.env.AWS_DOWNLOADS_BUCKET && !process.env.LOCAL) return
+
+  const mkdir = process.env.LOCAL ? fs.mkdir : ()=>{}
+  const write = process.env.LOCAL ? fs.writeFile : writeToS3
+  const pagesDir = process.env.LOCAL ? `./pages/` : ``
 
   const { models } = global.connection
   const now = Date.now()
@@ -56,15 +86,15 @@ const buildPages = async ({
   const footerTemplate = (await fs.readFile(`./src/templates/footer.html`)).toString()
   const cssIndex = (await fs.readFile(`./src/templates/index.css`)).toString()
 
-  await fs.mkdir(`${pagesDir}/versions`, { recursive: true })
-  await fs.mkdir(`${pagesDir}/languages`, { recursive: true })
-  await fs.mkdir(`${pagesDir}/downloads`, { recursive: true })
+  await mkdir(`${pagesDir}versions`, { recursive: true })
+  await mkdir(`${pagesDir}languages`, { recursive: true })
+  await mkdir(`${pagesDir}downloads`, { recursive: true })
 
   // CSS
-  await fs.writeFile(`${pagesDir}/index.css`, cssIndex)
+  await write(`${pagesDir}index.css`, cssIndex)
 
   // BUILD PAGE: /versions
-  await fs.writeFile(`${pagesDir}/versions/index.html`,
+  await write(`${pagesDir}index.html`,
     versionsTemplate
 
       // general
@@ -109,192 +139,186 @@ const buildPages = async ({
   )
 
   // Go through relevant versions
-  await Promise.all(
-    versions
-      .filter(({ id }) => (!changedVersionIds || changedVersionIds.includes(id)))
-      .map(async version => {
+  const relevantVersions = versions.filter(({ id }) => (!changedVersionIds || changedVersionIds.includes(id)))
+  for(let version of relevantVersions) {
 
-        const {
-          id,
-          name,
-          languageId,
-          partialScope,
-          percentageOfWordsTagged,
-          numVerses,
-          numVersesWithTagging,
-          numVersesWithConfirmedTagging,
-          numTaggers,
-          numTagSubmissions,
-          wordDivisionRegex,
-          versificationModel,
-          skipsUnlikelyOriginals,
-          extraVerseMappings,
-        } = version.dataValues
+    const {
+      id,
+      name,
+      languageId,
+      partialScope,
+      percentageOfWordsTagged,
+      numVerses,
+      numVersesWithTagging,
+      numVersesWithConfirmedTagging,
+      numTaggers,
+      numTagSubmissions,
+      wordDivisionRegex,
+      versificationModel,
+      skipsUnlikelyOriginals,
+      extraVerseMappings,
+    } = version.dataValues
 
-        const { englishName, nativeName } = getLanguageInfo(languageId)
-        const languageName = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
+    const { englishName, nativeName } = getLanguageInfo(languageId)
+    const languageName = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
 
-        // BUILD DOWNLOAD: /downloads/tagsets-{{id}}.json + /downloads/tagsets-{{id}}.csv
-        const tagSets = await models.tagSet.findAll({
-          attributes: {
-            exclude: [
-              'id',
-              'autoMatchScores',
-            ],
-          },
-          where: {
-            versionId: id,
-          },
-        })
+    // BUILD DOWNLOAD: /downloads/tagsets-{{id}}.json + /downloads/tagsets-{{id}}.csv
+    const tagSets = await models.tagSet.findAll({
+      attributes: {
+        exclude: [
+          'id',
+          'autoMatchScores',
+        ],
+      },
+      where: {
+        versionId: id,
+      },
+    })
 
-        const tagSetsData = tagSets.map(({ dataValues }) => dataValues)
-        await fs.writeFile(`${pagesDir}/downloads/tagsets-${id}.json`, JSON.stringify(tagSetsData))
-        await fs.writeFile(`${pagesDir}/downloads/tagsets-${id}.csv`, (new Parser({ fields: [ 'loc', 'tags', 'status', 'wordsHash', 'createdAt' ] })).parse(tagSetsData))
+    const tagSetsData = tagSets.map(({ dataValues }) => dataValues)
+    await write(`${pagesDir}downloads/tagsets-${id}.json`, JSON.stringify(tagSetsData))
+    await write(`${pagesDir}downloads/tagsets-${id}.csv`, (new Parser({ fields: [ 'loc', 'tags', 'status', 'wordsHash', 'createdAt' ] })).parse(tagSetsData))
 
-        // BUILD DOWNLOAD: /downloads/translationbreakdowns/{{id}}.json + /downloads/translationbreakdowns/{{id}}.csv
-        const translationBreakdowns = await models.translationBreakdown.findAll({
-          attributes: {
-            exclude: [
-              'id',
-            ],
-          },
-          where: {
-            versionId: id,
-          },
-        })
+    // BUILD DOWNLOAD: /downloads/translationbreakdowns/{{id}}.json + /downloads/translationbreakdowns/{{id}}.csv
+    const translationBreakdowns = await models.translationBreakdown.findAll({
+      attributes: {
+        exclude: [
+          'id',
+        ],
+      },
+      where: {
+        versionId: id,
+      },
+    })
 
-        const translationBreakdownsData = translationBreakdowns.map(({ dataValues }) => dataValues)
-        await fs.writeFile(`${pagesDir}/downloads/translationbreakdowns-${id}.json`, JSON.stringify(translationBreakdownsData))
-        await fs.writeFile(`${pagesDir}/downloads/translationbreakdowns-${id}.csv`, (new Parser({ fields: [ 'breakdown', 'createdAt', 'definitionId' ] })).parse(translationBreakdownsData))
+    const translationBreakdownsData = translationBreakdowns.map(({ dataValues }) => dataValues)
+    await write(`${pagesDir}downloads/translationbreakdowns-${id}.json`, JSON.stringify(translationBreakdownsData))
+    await write(`${pagesDir}downloads/translationbreakdowns-${id}.csv`, (new Parser({ fields: [ 'breakdown', 'createdAt', 'definitionId' ] })).parse(translationBreakdownsData))
 
-        // BUILD PAGE: /versions/{{id}}.html
-        await fs.writeFile(`${pagesDir}/versions/${id}.html`,
-          versionTemplate
+    // BUILD PAGE: /versions/{{id}}.html
+    await write(`${pagesDir}versions/${id}.html`,
+      versionTemplate
 
-            // general
-            .replace(/{{header}}/g, headerTemplate)
-            .replace(/{{footer}}/g, footerTemplate)
-            .replace(/{{id}}/g, id)
-            .replace(/{{name}}/g, name)
-            .replace(/{{language}}/g, languageName)
-            .replace(/{{languageId}}/g, languageId)
-            .replace(/{{partialScope}}/g, partialScope === `ot` ? `Old Testament only.` : (partialScope === `nt` ? `New Testament only.` : ``))
-            .replace(/{{now}}/g, now)
-            .replace(/{{date}}/g, date)
+        // general
+        .replace(/{{header}}/g, headerTemplate)
+        .replace(/{{footer}}/g, footerTemplate)
+        .replace(/{{id}}/g, id)
+        .replace(/{{name}}/g, name)
+        .replace(/{{language}}/g, languageName)
+        .replace(/{{languageId}}/g, languageId)
+        .replace(/{{partialScope}}/g, partialScope === `ot` ? `Old Testament only.` : (partialScope === `nt` ? `New Testament only.` : ``))
+        .replace(/{{now}}/g, now)
+        .replace(/{{date}}/g, date)
 
-            // stats
-            .replace(/{{percentageOfWordsTagged}}/g, numVerses === numVersesWithTagging ? `100%` : `${Math.round(percentageOfWordsTagged * 100)}%`)
-            .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
-            .replace(/{{percentageOfVersesWithTagging}}/g, `${Math.round((numVersesWithTagging * 100) / numVerses)}%`)
-            .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
-            .replace(/{{percentageOfVersesWithConfirmedTagging}}/g, `${Math.round((numVersesWithConfirmedTagging * 100) / numVerses)}%`)
-            .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
-            .replace(/{{numTaggers}}/g, numTaggers)
-            .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
+        // stats
+        .replace(/{{percentageOfWordsTagged}}/g, numVerses === numVersesWithTagging ? `100%` : `${Math.round(percentageOfWordsTagged * 100)}%`)
+        .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
+        .replace(/{{percentageOfVersesWithTagging}}/g, `${Math.round((numVersesWithTagging * 100) / numVerses)}%`)
+        .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
+        .replace(/{{percentageOfVersesWithConfirmedTagging}}/g, `${Math.round((numVersesWithConfirmedTagging * 100) / numVerses)}%`)
+        .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
+        .replace(/{{numTaggers}}/g, numTaggers)
+        .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
 
-            // technical
-            .replace(/{{wordDivisionRegex}}/g, !wordDivisionRegex ? '<span class="special_value">[default]</span>' : wordDivisionRegex)
-            .replace(/{{versificationModel}}/g, versificationModel)
-            .replace(/{{skipsUnlikelyOriginals}}/g, skipsUnlikelyOriginals)
-            .replace(/{{extraVerseMappings}}/g, JSON.stringify(extraVerseMappings))
+        // technical
+        .replace(/{{wordDivisionRegex}}/g, !wordDivisionRegex ? '<span class="special_value">[default]</span>' : wordDivisionRegex)
+        .replace(/{{versificationModel}}/g, versificationModel)
+        .replace(/{{skipsUnlikelyOriginals}}/g, skipsUnlikelyOriginals)
+        .replace(/{{extraVerseMappings}}/g, JSON.stringify(extraVerseMappings))
 
-        )
+    )
 
-      })
-  )
+  }
 
   // Go through relevant languages
-  await Promise.all(
-    Object.keys(versionsByLanguageId)
-      .filter(id => (!changedVersionIds || versionsByLanguageId[id].some(({ id }) => changedVersionIds.includes(id))))
-      .map(async id => {
+  const relevantLanguageIds = Object.keys(versionsByLanguageId).filter(id => (!changedVersionIds || versionsByLanguageId[id].some(({ id }) => changedVersionIds.includes(id))))
+  for(let id of relevantLanguageIds) {
 
-        const {
-          englishName,
-          iso6392b,
-          iso6392t,
-          iso6391,
-          nativeName,
-          definitionPreferencesForVerbs,
-          standardWordDivider,
-          phraseDividerRegex,
-          sentenceDividerRegex,
+    const {
+      englishName,
+      iso6392b,
+      iso6392t,
+      iso6391,
+      nativeName,
+      definitionPreferencesForVerbs,
+      standardWordDivider,
+      phraseDividerRegex,
+      sentenceDividerRegex,
 
-        } = getLanguageInfo(id)
+    } = getLanguageInfo(id)
 
-        const name = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
+    const name = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
 
-        // BUILD DOWNLOAD: /downloads/definitions-{{id}}.json + /downloads/definitions-{{id}}.csv
-        const definitions = await models.definition.findAll({
-          include: [
-            {
-              model: models.languageSpecificDefinition,
-              required: false,
-              attributes: {
-                exclude: [
-                  'id',
-                  'editorId',
-                  'definitionId',
-                ],
-              },
-              where: {
-                languageId: id,
-              },
-            },
-          ],
-        })
+    // BUILD DOWNLOAD: /downloads/definitions-{{id}}.json + /downloads/definitions-{{id}}.csv
+    const definitions = await models.definition.findAll({
+      include: [
+        {
+          model: models.languageSpecificDefinition,
+          required: false,
+          attributes: {
+            exclude: [
+              'id',
+              'editorId',
+              'definitionId',
+            ],
+          },
+          where: {
+            languageId: id,
+          },
+        },
+      ],
+    })
 
-        const definitionsData = definitions.map(({ dataValues: { languageSpecificDefinitions, ...otherDataValues } }) => ({
-          ...otherDataValues,
-          ...((languageSpecificDefinitions[0] || {}).dataValues || {}),
-        }))
-        await fs.writeFile(`${pagesDir}/downloads/definitions-${id}.json`, JSON.stringify(definitionsData))
-        await fs.writeFile(`${pagesDir}/downloads/definitions-${id}.csv`, (new Parser()).parse(definitionsData))
+    const definitionsData = definitions.map(({ dataValues: { languageSpecificDefinitions, ...otherDataValues } }) => ({
+      ...otherDataValues,
+      ...((languageSpecificDefinitions[0] || {}).dataValues || {}),
+    }))
+    await write(`${pagesDir}downloads/definitions-${id}.json`, JSON.stringify(definitionsData))
+    await write(`${pagesDir}downloads/definitions-${id}.csv`, (new Parser()).parse(definitionsData))
 
-        // BUILD PAGE: /languages/{{id}}.html
-        await fs.writeFile(`${pagesDir}/languages/${id}.html`,
-          languageTemplate
+    // BUILD PAGE: /languages/{{id}}.html
+    await write(`${pagesDir}languages/${id}.html`,
+      languageTemplate
 
-            // general
-            .replace(/{{header}}/g, headerTemplate)
-            .replace(/{{footer}}/g, footerTemplate)
-            .replace(/{{id}}/g, id)
-            .replace(/{{name}}/g, name)
-            .replace(/{{iso6391}}/g, iso6391 || '<span class="special_value">[none]</span>')
-            .replace(/{{iso6392b}}/g, iso6392b || '<span class="special_value">[none]</span>')
-            .replace(/{{iso6392t}}/g, iso6392t || '<span class="special_value">[none]</span>')
-            .replace(/{{now}}/g, now)
-            .replace(/{{date}}/g, date)
+        // general
+        .replace(/{{header}}/g, headerTemplate)
+        .replace(/{{footer}}/g, footerTemplate)
+        .replace(/{{id}}/g, id)
+        .replace(/{{name}}/g, name)
+        .replace(/{{iso6391}}/g, iso6391 || '<span class="special_value">[none]</span>')
+        .replace(/{{iso6392b}}/g, iso6392b || '<span class="special_value">[none]</span>')
+        .replace(/{{iso6392t}}/g, iso6392t || '<span class="special_value">[none]</span>')
+        .replace(/{{now}}/g, now)
+        .replace(/{{date}}/g, date)
 
-            // stats
-            .replace(/{{numVersions}}/g, versionsByLanguageId[id].length)
-            .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
-            .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
-            .replace(/{{numTaggers}}/g, numTaggers)
-            .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
+        // stats
+        .replace(/{{numVersions}}/g, versionsByLanguageId[id].length)
+        .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
+        .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
+        .replace(/{{numTaggers}}/g, numTaggers)
+        .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
 
-            // versions list
-            .replace(
-              /{{versionsList}}/g,
-              versionsByLanguageId[id]
-                .map(version => (
-                  languageVersionTemplate
-                    .replace(/{{id}}/g, version.id)
-                    .replace(/{{name}}/g, version.name)
-                ))
-                .join('\n')
-            )
-
-            // technical
-            .replace(/{{definitionPreferencesForVerbs}}/g, definitionPreferencesForVerbs.join('<br>'))
-            .replace(/{{standardWordDivider}}/g, standardWordDivider === ' ' ? '<span class="special_value">[space]</span>' : standardWordDivider)
-            .replace(/{{phraseDividerRegex}}/g, phraseDividerRegex)
-            .replace(/{{sentenceDividerRegex}}/g, sentenceDividerRegex)
-
+        // versions list
+        .replace(
+          /{{versionsList}}/g,
+          versionsByLanguageId[id]
+            .map(version => (
+              languageVersionTemplate
+                .replace(/{{id}}/g, version.id)
+                .replace(/{{name}}/g, version.name)
+            ))
+            .join('\n')
         )
 
-      })
-  )
+        // technical
+        .replace(/{{definitionPreferencesForVerbs}}/g, definitionPreferencesForVerbs.join('<br>'))
+        .replace(/{{standardWordDivider}}/g, standardWordDivider === ' ' ? '<span class="special_value">[space]</span>' : standardWordDivider)
+        .replace(/{{phraseDividerRegex}}/g, phraseDividerRegex)
+        .replace(/{{sentenceDividerRegex}}/g, sentenceDividerRegex)
+
+    )
+
+  }
 
 }
 
