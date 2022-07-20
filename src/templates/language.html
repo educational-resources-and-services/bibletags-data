@@ -1,0 +1,136 @@
+<html>
+
+  <head>
+
+    <title>{{name}} Tagging Information | Bible Tags</title>
+
+    <link rel="shortcut icon" href="https://s3.amazonaws.com/cdn.gospelpaths.com/tenants/144/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=0, initial-scale=1, minimum-scale=1, width=device-width, height=device-height, shrink-to-fit=no">
+
+    <link rel="stylesheet" type="text/css" href="../index.css">
+
+  </head>
+
+  <body dir="ltr">
+    <div class="container">
+
+      {{header}}
+
+      <div class="content">
+
+        <div class="back">
+          <a class="back_a" href="../versions/index.html">
+            ← Back to Versions List
+          </a>
+        </div>
+
+        <h1 class="title">{{name}}</h1>
+
+        <div class="language_ids">
+          <div class="language_id">ID: <span class="language_id_id">{{id}}</span> <span class="language_id_credit">(<a href="https://iso639-3.sil.org/" target="_blank">ISO-639-3</a>)</span></div>
+          <div class="language_1">ISO-639-1: {{iso6391}}</div>
+          <div class="language_2b">ISO-639-2B: {{iso6392b}}</div>
+          <div class="language_2t">ISO-639-2T: {{iso6392t}}</div>
+        </div>
+
+        <div class="language_stats">
+
+          <h2 class="stats_heading">
+            Language Stats
+          </h2>
+
+          <div class="stat">
+            Bible Versions: <span class="stat_number">{{numVersions}}</span>
+          </div>
+          <div class="stat">
+            Verses with Tagging: <span class="stat_number">{{numVersesWithTagging}}</span>
+          </div>
+          <div class="stat">
+            Verses with Confirmed Tagging: <span class="stat_number">{{numVersesWithConfirmedTagging}}</span>
+          </div>
+          <div class="stat">
+            Taggers: <span class="stat_number">{{numTaggers}}</span>
+          </div>
+          <div class="stat">
+            Tagged-Verse Submissions: <span class="stat_number">{{numTagSubmissions}}</span>
+          </div>
+
+          <!-- TODO: add graph of tag submissions over time -->
+
+        </div>
+
+        <div class="downloads">
+
+          <h2 class="sub_heading">
+            Downloads
+          </h2>
+
+          <div class="download">
+            <a class="download_a" href="/downloads/definitions/{{id}}.json?{{now}}" download>
+              Definitions (JSON format)
+            </a>
+          </div>
+          <div class="download">
+            <a class="download_a" href="/downloads/definitions/{{id}}.csv?{{now}}" download>
+              Definitions (CSV format)
+            </a>
+          </div>
+
+        </div>
+
+        <div class="versions">
+
+          <h2 class="sub_heading">
+            Versions
+          </h2>
+
+          {{versionsList}}
+
+        </div>
+
+        <div class="contact_tagger_lead">
+          <a class="contact_tagger_lead_a" href="https://bibletags.org/contact?defaultMessage=Could%20you%20please%20put%20me%20in%20contact%20with%20tagger%20lead%20for%20{{name}}%3F%0A%0A%5B%20Please%20include%201-2%20sentences%20explaining%20your%20interest%20in%20connecting.%20%5D">
+            Contact the tagger lead for this language
+          </a>
+        </div>
+
+        <div class="technical">
+
+          <h3 class="technical_heading">
+            Technical Information
+          </h3>
+
+          <table>
+            <tbody>
+              <tr>
+                <td>Verbs <a href="https://preview.biblearc.com/grammar-search-key" target="_blank">search strings</a><div class="technical_detail">(used for creating gloss)</div></td>
+                <td>{{definitionPreferencesForVerbs}}</td>
+              </tr>
+              <tr>
+                <td>Standard word divider</td>
+                <td>{{standardWordDivider}}</td>
+              </tr>
+              <tr>
+                <td>Phrase divider regular expression</td>
+                <td>{{phraseDividerRegex}}</td>
+              </tr>
+              <tr>
+                <td>Sentence divider regular expression</td>
+                <td>{{sentenceDividerRegex}}</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+      {{footer}}
+
+    </div>
+  </body>
+
+</html>

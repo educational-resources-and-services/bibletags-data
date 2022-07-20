@@ -1,0 +1,72 @@
+<html>
+
+  <head>
+
+    <title>Bible Translations with Tagging Data | Bible Tags</title>
+
+    <link rel="shortcut icon" href="https://s3.amazonaws.com/cdn.gospelpaths.com/tenants/144/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=0, initial-scale=1, minimum-scale=1, width=device-width, height=device-height, shrink-to-fit=no">
+
+    <link rel="stylesheet" type="text/css" href="../index.css">
+
+    </style>
+
+  </head>
+
+  <body dir="ltr">
+    <div class="container">
+
+      {{header}}
+      
+      <div class="content">
+
+        <h1 class="title">
+          Bible Translations with Tagging Data
+        </h1>
+
+        <div class="global_stats">
+
+          <h2 class="stats_heading">
+            Global Stats
+          </h2>
+
+          <div class="stat">
+            Languages: <span class="stat_number">{{numLanguages}}</span>
+          </div>
+          <div class="stat">
+            Bible Versions: <span class="stat_number">{{numVersions}}</span>
+          </div>
+          <div class="stat">
+            Verses with Tagging: <span class="stat_number">{{numVersesWithTagging}}</span>
+          </div>
+          <div class="stat">
+            Verses with Confirmed Tagging: <span class="stat_number">{{numVersesWithConfirmedTagging}}</span>
+          </div>
+          <div class="stat">
+            Taggers: <span class="stat_number">{{numTaggers}}</span>
+          </div>
+          <div class="stat">
+            Tagged-Verse Submissions: <span class="stat_number">{{numTagSubmissions}}</span>
+          </div>
+
+          <!-- TODO: add graph of tag submissions over time -->
+
+        </div>
+
+        <div class="languages_with_versions_list">
+
+          {{languagesWithVersionsList}}
+
+        </div>
+
+      </div>
+
+      {{footer}}
+
+    </div>
+  </body>
+
+</html>

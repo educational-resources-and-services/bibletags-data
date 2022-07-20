@@ -1,0 +1,159 @@
+<html>
+
+  <head>
+
+    <title>{{name}} Tagging Information | Bible Tags</title>
+
+    <link rel="shortcut icon" href="https://s3.amazonaws.com/cdn.gospelpaths.com/tenants/144/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=0, initial-scale=1, minimum-scale=1, width=device-width, height=device-height, shrink-to-fit=no">
+
+    <link rel="stylesheet" type="text/css" href="../index.css">
+
+    <script>
+
+      window.openTabWithExtraVerseMappings = () => {
+        var x = window.open()
+        x.document.open()
+        x.document.write(`<html><body><pre>${JSON.stringify({{extraVerseMappings}}, null, 2)}</pre></body></html>`)
+        x.document.close()
+      }
+
+    </script>
+
+  </head>
+
+  <body dir="ltr">
+    <div class="container">
+
+      {{header}}
+
+      <div class="content">
+
+        <div class="back">
+          <a class="back_a" href="./index.html">
+            ← Back to Versions List
+          </a>
+        </div>
+
+        <h1 class="title">{{name}}</h1>
+
+        <div class="version_basic_info">
+          <div class="version_id">ID: <span class="version_id_id">{{id}}</span></div>
+          <div class="version_language">
+            Language:
+            <a class="back_a" href="../languages/{{languageId}}.html">
+              {{language}}
+            </a>
+          </div>
+          <div class="version_partial_scope">{{partialScope}}</div>
+        </div>
+
+        <div class="version_stats">
+
+          <h2 class="stats_heading">
+            Version Stats
+          </h2>
+
+          <div class="stat">
+            Percentage of Words Tagged: <span class="stat_number">{{percentageOfWordsTagged}}</span>
+          </div>
+          <div class="stat">
+            Verses with Tagging: <span class="stat_number">{{percentageOfVersesWithTagging}} ({{numVersesWithTagging}} verses)</span>
+          </div>
+          <div class="stat">
+            Verses with Confirmed Tagging: <span class="stat_number">{{percentageOfVersesWithConfirmedTagging}} ({{numVersesWithConfirmedTagging}} verses)</span>
+          </div>
+          <div class="stat">
+            Taggers: <span class="stat_number">{{numTaggers}}</span>
+          </div>
+          <div class="stat">
+            Tagged-Verse Submissions: <span class="stat_number">{{numTagSubmissions}}</span>
+          </div>
+
+          <!-- TODO: add graph of tag submissions over time -->
+
+        </div>
+
+        <div class="downloads">
+
+          <h2 class="sub_heading">
+            Downloads
+          </h2>
+
+          <div class="download">
+            <a class="download_a" href="/downloads/tagsets/{{id}}.json?{{now}}" download>
+              Tag Sets (JSON format)
+            </a>
+          </div>
+          <div class="download">
+            <a class="download_a" href="/downloads/tagsets/{{id}}.csv?{{now}}" download>
+              Tag Sets (CSV format)
+            </a>
+          </div>
+
+          <div class="download">
+            <a class="download_a" href="/downloads/translationbreakdowns/{{id}}.json?{{now}}" download>
+              Translation Breakdowns (JSON format)
+            </a>
+          </div>
+          <div class="download">
+            <a class="download_a" href="/downloads/translationbreakdowns/{{id}}.csv?{{now}}" download>
+              Translation Breakdowns (CSV format)
+            </a>
+          </div>
+
+          <div class="download_info">
+            Resource:
+            <a class="download_info_a" href="https://bibletags.org/tag-sets">
+              Understanding Tag Sets
+            </a>
+          </div>
+
+        </div>
+
+        <div class="contact_tagger_lead">
+          <a class="contact_tagger_lead_a" href="https://bibletags.org/contact?defaultMessage=Could%20you%20please%20put%20me%20in%20contact%20with%20tagger%20lead%20for%20{{language}}%3F%0A%0A%5B%20Please%20include%201-2%20sentences%20explaining%20your%20interest%20in%20connecting.%20%5D">
+            Contact the tagger lead for this language
+          </a>
+        </div>
+
+        <div class="technical">
+
+          <h3 class="technical_heading">
+            Technical Information
+          </h3>
+
+          <table>
+            <tbody>
+              <tr>
+                <td>Word division regex</td>
+                <td>{{wordDivisionRegex}}</td>
+              </tr>
+              <tr>
+                <td>Versification model</td>
+                <td>{{versificationModel}}</td>
+              </tr>
+              <tr>
+                <td>Skips unlikely originals</td>
+                <td>{{skipsUnlikelyOriginals}}</td>
+              </tr>
+              <tr>
+                <td>Extra verse mappings</td>
+                <td><a href="#" onclick="javascript:window.openTabWithExtraVerseMappings()">View</a></td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+      {{footer}}
+
+    </div>
+  </body>
+
+</html>
