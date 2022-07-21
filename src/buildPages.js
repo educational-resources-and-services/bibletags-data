@@ -244,10 +244,14 @@ const buildPages = async ({
       standardWordDivider,
       phraseDividerRegex,
       sentenceDividerRegex,
-
     } = getLanguageInfo(id)
 
     const name = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
+
+    const numVersesWithTagging = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numVersesWithTagging, 0)
+    const numVersesWithConfirmedTagging = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numVersesWithTagging, 0)
+    const numTaggers = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numVersesWithTagging, 0)
+    const numTagSubmissions = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numVersesWithTagging, 0)
 
     // BUILD DOWNLOAD: /downloads/definitions-{{id}}.json + /downloads/definitions-{{id}}.csv
     const definitions = await models.definition.findAll({
