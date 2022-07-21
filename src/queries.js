@@ -6,7 +6,6 @@ const queries = `
 
   embeddingApp(uri: String!): EmbeddingApp
   uiWords(languageId: ID!): [UIWord]
-  languages(languageIds: [ID]!): [Language]
 
   tagSets(bookId: Int!, chapter: Int!, verse: Int, versionId: ID!): [TagSet]
   tagSetsByIds(ids: [ID]!): [TagSet]

@@ -31,13 +31,11 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
 
     const { models } = global.connection
 
-    const languagesWithVersions = await models.language.findAll({
-      include: [
-        {
-          model: models.version,
-          required: true,
-        },
-      ],
+    const versionsByLanguageId = {}
+    const versions = await models.version.findAll()
+    versions.forEach(version => {
+      versionsByLanguageId[version.languageId] = versionsByLanguageId[version.languageId] || []
+      versionsByLanguageId[version.languageId].push(version)
     })
 
     const doTestament = async origLangVersionId => {
@@ -61,8 +59,8 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
         }
       })
 
-      for(let language of languagesWithVersions) {
-        for(let version of language.versions) {
+      for(let languageId in versionsByLanguageId) {
+        for(let version of versionsByLanguageId[languageId]) {
 
           console.log(`updateWordTranslationsAndLanguageSpecificDefinitions cron now handling versionId:${version.id} (cron id:${cronId})`)
 

@@ -21,21 +21,19 @@ const updateTranslationBreakdowns = async () => {
 
     const { models } = global.connection
 
-    const languagesWithVersions = await models.language.findAll({
-      include: [
-        {
-          model: models.version,
-          required: true,
-        },
-      ],
+    const versionsByLanguageId = {}
+    const versions = await models.version.findAll()
+    versions.forEach(version => {
+      versionsByLanguageId[version.languageId] = versionsByLanguageId[version.languageId] || []
+      versionsByLanguageId[version.languageId].push(version)
     })
 
     const doTestament = async origLangVersionId => {
 
       console.log(`updateTranslationBreakdowns cron now handling ${origLangVersionId === 'uhb' ? 'ot' : 'nt'} (cron id:${cronId})`)
 
-      for(let language of languagesWithVersions) {
-        for(let version of language.versions) {
+      for(let languageId in versionsByLanguageId) {
+        for(let version of versionsByLanguageId[languageId]) {
 
           console.log(`updateTranslationBreakdowns cron now handling versionId:${version.id} (cron id:${cronId})`)
 

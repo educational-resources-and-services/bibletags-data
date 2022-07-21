@@ -13,35 +13,6 @@ const { setUpConnection } = require('./connect')
 
   const { models } = global.connection
 
-  await models.language.bulkCreate([
-    {
-      "id": "eng",
-      "name": "English",
-      "englishName": "English",
-      "definitionPreferencesForVerbs": [
-        "#infinitive-construct",
-        "#infinitive",
-        "#participle#1st#singular",
-        "#present#1st#singular",
-      ],
-      "createdAt": "2022-01-01 00:00:00 GMT",
-      "updatedAt": "2022-01-01 00:00:00 GMT",
-    },
-    {
-      "id": "spa",
-      "name": "Español",
-      "englishName": "Spanish",
-      "definitionPreferencesForVerbs": [
-        "#infinitive-construct",
-        "#infinitive",
-        "#participle#3rd#singular",
-        "#present#3rd#singular",
-      ],
-      "createdAt": "2022-01-01 00:00:00 GMT",
-      "updatedAt": "2022-01-01 00:00:00 GMT",
-    },
-  ])
-
   await models.version.bulkCreate([
     {
       "id": "esv",

@@ -261,6 +261,14 @@ const setUpConnection = ({
     allowNull: false,
   }
 
+  const languageId = {
+    type: Sequelize.STRING(3),
+    validate: {
+      is: languageIdRegEx,
+    },
+    allowNull: false,
+  }
+
   const loc = {
     type: Sequelize.STRING(8),
     validate: {
@@ -441,59 +449,6 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app (partial), biblearc (partial)
-  // changes some
-  const Language = connection.define(
-    'language',
-    {
-      id: {
-        type: Sequelize.STRING(3),
-        primaryKey: true,
-        validate: {
-          is: languageIdRegEx,
-        },
-      },
-      name: {
-        type: Sequelize.STRING(languageNameLength),
-        allowNull: false,
-      },
-      englishName: {
-        type: Sequelize.STRING(languageNameLength),
-        allowNull: false,
-      },
-      definitionPreferencesForVerbs: {
-        type: Sequelize.JSON,  // an array of search criteria; eg. ["#infinitive-construct","#infinitive","#participle#1st#singular","#present#1st#singular"]
-        allowNull: false,
-        validate: {
-          isDefinitionFormPreferences,
-        },
-      },
-      standardWordDivider: {
-        type: Sequelize.STRING(10),
-        allowNull: false,
-        defaultValue: " ",
-      },
-      createdAt,
-      updatedAt,
-    },
-    {
-      indexes: [
-        {
-          fields: ['name'],
-          unique: true,
-          name: 'name',
-        },
-        {
-          fields: ['englishName'],
-          unique: true,
-          name: 'englishName',
-        },
-      ],
-    },
-  )
-
-  ////////////////////////////////////////////////////////////////////
-
   // needed: app (in combo with PartOfSpeech and LanguageSpecificDefinition), biblearc
   // doesn't change
   const Definition = connection.define(
@@ -627,6 +582,7 @@ const setUpConnection = ({
       },
       createdAt,
       updatedAt,
+      languageId,
     },
     {
       indexes: [
@@ -642,9 +598,6 @@ const setUpConnection = ({
       ],
     },
   )
-
-  Version.belongsTo(Language, required)
-  Language.hasMany(Version)
 
   //////////////////////////////////////////////////////////////////
 
@@ -725,6 +678,7 @@ const setUpConnection = ({
       },
       createdAt,
       updatedAt,
+      languageId,
     },
     {
       indexes: [
@@ -740,9 +694,6 @@ const setUpConnection = ({
       ],
     },
   )
-
-  User.belongsTo(Language, required)
-  Language.hasMany(User)
 
   ////////////////////////////////////////////////////////////////////
 
@@ -778,6 +729,7 @@ const setUpConnection = ({
       },
       createdAt,
       updatedAt,
+      languageId,
     },
     {
       indexes: [
@@ -793,9 +745,6 @@ const setUpConnection = ({
       ],
     },
   )
-
-  LanguageSpecificDefinition.belongsTo(Language, required)
-  Language.hasMany(LanguageSpecificDefinition)
 
   LanguageSpecificDefinition.belongsTo(Definition, required)
   Definition.hasMany(LanguageSpecificDefinition)
@@ -1859,6 +1808,7 @@ const setUpConnection = ({
     'uiWord',
     {
       translation,
+      languageId,
     },
     {
       indexes: [
@@ -1876,9 +1826,6 @@ const setUpConnection = ({
   UiWord.belongsTo(UiEnglishWord, requiredWithCascadeDelete)
   UiEnglishWord.hasMany(UiWord)
 
-  UiWord.belongsTo(Language, required)
-  Language.hasMany(UiWord)
-
   //////////////////////////////////////////////////////////////////
 
   // needed: none
@@ -1888,6 +1835,7 @@ const setUpConnection = ({
     {
       translation,
       createdAt,
+      languageId,
     },
     {
       indexes: [
@@ -1909,9 +1857,6 @@ const setUpConnection = ({
 
   UiWordSubmission.belongsTo(UiEnglishWord, requiredWithCascadeDelete)
   UiEnglishWord.hasMany(UiWordSubmission)
-
-  UiWordSubmission.belongsTo(Language, required)
-  Language.hasMany(UiWordSubmission)
 
   UiWordSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(UiWordSubmission)
