@@ -2,7 +2,9 @@ const versions = async (args, req, queryInfo) => {
 
   const { models } = global.connection
 
-  const versions = await models.version.findAll()
+  const versions = await models.version.findAll({
+    order: [ `name` ],
+  })
 
   return versions
 
