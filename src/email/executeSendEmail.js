@@ -5,9 +5,9 @@ const nodemailer = require("nodemailer")
 const sesConfig = {
   region: process.env.AWS_REGION || 'us-east-1',
 }
-if(process.env.AWS_ACCESS_KEY_ID_OVERRIDE && process.env.AWS_SECRET_ACCESS_KEY_OVERRID) {
-  sesConfig[accessKeyId] = process.env.AWS_ACCESS_KEY_ID_OVERRIDE
-  sesConfig[secretAccessKey] = process.env.AWS_SECRET_ACCESS_KEY_OVERRID
+if(process.env.AWS_ACCESS_KEY_ID_OVERRIDE && process.env.AWS_SECRET_ACCESS_KEY_OVERRIDE) {
+  sesConfig.accessKeyId = process.env.AWS_ACCESS_KEY_ID_OVERRIDE
+  sesConfig.secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY_OVERRIDE
 }
 const ses = new aws.SES(sesConfig)
 
