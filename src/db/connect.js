@@ -212,7 +212,7 @@ const setUpConnection = ({
       throw new Error('Must be an object.')
     }
 
-    const singleVerseRegEx = /^[0-9]{8}(?::[0-9]{1,3}(?:-[0-9]{1,3})?)?$/
+    const singleVerseRegEx = /^[0-9]{8}(?::[0-9]{1,3}(?:-[0-9]{0,3})?(?:,[0-9]{1,3}(?:-[0-9]{0,3})?)*)?$/
     const rangeRegEx = /^[0-9]{8}(?:-[0-9]{3})?$/
     
     Object.keys(obj).forEach(key => {
@@ -222,7 +222,11 @@ const setUpConnection = ({
         // "05022005:1-5": "05022005",
         // "05022005:6-10": "05022006",
         // "08002009:5-10": "08002009:1-7",
-        // "08002010:1-2": "08002009:8-9",
+        // "08002010:4-": "08002009:8-",
+
+      } else if(singleVerseRegEx.test(key) && obj[key] === null) {
+        // Valid option. Examples:
+        // "05022005:1-5": null,
         
       } else if(rangeRegEx.test(key) && typeof obj[key] === "number") {
         // Valid option. Example:
@@ -259,6 +263,11 @@ const setUpConnection = ({
   const updatedAt = {
     type: Sequelize.DATE(3),
     allowNull: false,
+  }
+
+  const deletedAt = {
+    type: Sequelize.DATE(3),
+    allowNull: true,
   }
 
   const languageId = {
@@ -439,7 +448,7 @@ const setUpConnection = ({
     allowNull: false,
   }
 
-  // const createdAtDesc = { attribute: 'createdAt', order: 'DESC' }
+  const createdAtDesc = { attribute: 'createdAt', order: 'DESC' }
   // const updatedAtDesc = { attribute: 'updatedAt', order: 'DESC' }
 
   const required = { foreignKey: { allowNull: false } }
@@ -1860,6 +1869,71 @@ const setUpConnection = ({
 
   UiWordSubmission.belongsTo(EmbeddingApp, required)
   EmbeddingApp.hasMany(UiWordSubmission)
+
+  //////////////////////////////////////////////////////////////////
+
+  const QueuedEmail = connection.define(
+    'queuedEmail',
+    {
+      priority: {
+        type: Sequelize.ENUM('NOW', 'HIGH', 'NORMAL', 'LOW'),
+        defaultValue: 'NORMAL',
+        allowNull: false,
+      },
+      toAddrs: {
+        type: Sequelize.JSON,
+        allowNull: false,
+      },
+      ccAddrs: {
+        type: Sequelize.JSON,
+        allowNull: false,
+      },
+      bccAddrs: {
+        type: Sequelize.JSON,
+        allowNull: false,
+      },
+      fromAddr: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      replyToAddrs: {
+        type: Sequelize.JSON,
+        allowNull: false,
+      },
+      subject: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      body: {
+        type: Sequelize.TEXT('medium'),
+        allowNull: false,
+      },
+      attachments: {
+        type: Sequelize.JSON,
+      },
+      referenceCode: {
+        type: Sequelize.STRING,
+      },
+      error: {
+        type: Sequelize.TEXT,
+      },
+      sentAt: {
+        type: Sequelize.DATE(3),
+      },
+      createdAt,
+      updatedAt,
+      deletedAt,
+    },
+    {
+      indexes: [
+        { fields: ['deletedAt', createdAtDesc] },
+        { fields: ['deletedAt', 'priority', createdAtDesc] },
+        { fields: ['referenceCode', createdAtDesc] },
+        { fields: ['sentAt'] },
+      ],
+      paranoid: true,
+    },
+  )
 
   //////////////////////////////////////////////////////////////////
 

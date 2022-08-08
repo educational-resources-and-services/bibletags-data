@@ -63,6 +63,17 @@ const inputs = `
     translation: String!
   }
 
+  input VersionInput {
+    id: ID!
+    name: String!
+    languageId: ID!
+    wordDividerRegex: String
+    partialScope: String
+    versificationModel: String!
+    skipsUnlikelyOriginals: Boolean!
+    extraVerseMappingsStr: String!
+  }
+
 `
 
 module.exports = inputs

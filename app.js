@@ -10,7 +10,7 @@ const { authenticate, setUpSessionSyncAuthRoutes } = require('session-sync-auth-
 
 const { connectionObj, setUpConnection } = require('./src/db/connect')
 const { schema, root } = require('./src/schema')
-const { doFakeAuthIfTesting } = require('./src/utils')
+const { doFakeAuthIfTesting, doI18nSetup } = require('./src/utils')
 const exampleApi = require('./src/apis/example')
 
 // Middleware
@@ -32,6 +32,7 @@ app.use(
 )
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(cors({ origin: true }))
+app.use(doI18nSetup)
 app.use(authenticate({
   connectionObj,
   userTableColNameMap: {

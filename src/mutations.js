@@ -7,6 +7,7 @@ const mutations = `
   submitWordHashesSets(input: [WordHashesSetInput]!): Boolean
   submitTagSet(input: TagSetInput!, updatedFrom: Milliseconds!): TagSetUpdate
   submitUIWords(input: UIWordsInput!): [UIWord]
+  addVersion(input: VersionInput!): Version
 
 `
 

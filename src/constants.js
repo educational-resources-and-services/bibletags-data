@@ -20,4 +20,7 @@ module.exports = {
   glossLength: 100,
   versionNameLength: 150,
 
+  adminEmail: 'admin@bibletags.org',
+  noReplyEmail: 'no-reply@bibletags.org',
+
 }

@@ -62,7 +62,7 @@
   "dependencies": {
     "@bibletags/bibletags-ui-helper": "^0.9.8",
     "@bibletags/bibletags-versification": "^0.2.12",
-    "aws-sdk": "^2.1179.0",
+    "aws-sdk": "^2.1189.0",
     "better-sqlite3": "^7.5.1",
     "body-parser": "^1.19.1",
     "colors": "^1.4.0",
@@ -73,11 +73,13 @@
     "fs-extra": "^10.1.0",
     "graphql": "^15.4.0",
     "graphql-type-json": "^0.3.2",
+    "inline-i18n": "^0.1.5",
     "inquirer": "^8.2.4",
     "inquirer-file-tree-selection-prompt": "^1.0.19",
     "inquirer-fuzzy-path": "^2.3.0",
     "json2csv": "^5.0.7",
     "mysql2": "^2.3.3",
+    "nodemailer": "^6.7.7",
     "retry-as-promised": "^5.0.0",
     "sequelize": "^6.15.1",
     "session-sync-auth-site": "^0.2.0"

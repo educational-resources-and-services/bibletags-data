@@ -6,8 +6,8 @@ const AWS = require('aws-sdk')
 let s3
 const writeToS3 = (key, body) => new Promise((resolve, reject) => {
   s3 = s3 || new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID_S3_OVERRIDE || process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_S3_OVERRIDE || process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID_OVERRIDE || process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_OVERRIDE || process.env.AWS_SECRET_ACCESS_KEY,
   })
   s3.putObject(
     {
@@ -32,7 +32,7 @@ const buildPages = async ({
   changedVersionIds,
 }={}) => {
 
-  if(!process.env.AWS_DOWNLOADS_BUCKET && !process.env.LOCAL) return
+  if([ undefined, null, false, 'none' ].includes(process.env.AWS_DOWNLOADS_BUCKET) && !process.env.LOCAL) return
 
   const mkdir = process.env.LOCAL ? fs.mkdir : ()=>{}
   const write = process.env.LOCAL ? fs.writeFile : writeToS3

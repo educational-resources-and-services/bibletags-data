@@ -1,14 +1,21 @@
 require('dotenv').config()
 
+const { doI18nSetup } = require('./src/utils')
+const sendQueuedEmails = require('./crons/sendQueuedEmails')
 const updateWordTranslationsAndLanguageSpecificDefinitions = require('./crons/updateWordTranslationsAndLanguageSpecificDefinitions')
 const rerunCalcTagSetsForUntaggedVerses = require('./crons/rerunCalcTagSetsForUntaggedVerses')
 const rebuildAllPages = require('./crons/rebuildAllPages')
 
 const handler = async ({ forceRunAll }={}) => {
+  
+  doI18nSetup()
 
   const day = new Date().getDay()  // 0-6
   const hours = new Date().getHours()  // 0-23
   const minutes = new Date().getMinutes()  // 0-59
+
+  // every minute
+  await sendQueuedEmails()
 
   if((minutes === 0) || forceRunAll) {  // once per hour
     // await updateWordTranslationsAndLanguageSpecificDefinitions()

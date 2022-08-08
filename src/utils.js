@@ -1,5 +1,16 @@
+const { i18nSetup, i18n, i18nNumber } = require("inline-i18n")
+const { passOverI18n, passOverI18nNumber } = require("@bibletags/bibletags-ui-helper")
+const fs = require('fs')
+
 const cloneObj = obj => JSON.parse(JSON.stringify(obj))
 const equalObjs = (obj1, obj2) => JSON.stringify(obj1) === JSON.stringify(obj2)
+
+const determineLocaleFromOptions = ({ req={} }) => {
+  if(req.user) {
+    return req.user.languageId
+  }
+  return 'eng'
+}
 
 module.exports = {
 
@@ -64,5 +75,26 @@ module.exports = {
       }
     })
   },
+
+  doI18nSetup: (req, res, next) => {
+    if(!global.i18nIsSetup) {
+      i18nSetup({
+        fetchLocale: locale => new Promise((resolve, reject) => fs.readFile(`./src/translations/${locale}.json`, (err, contents) => {
+          if(err) {
+            reject(err)
+          } else {
+            resolve(JSON.parse(contents))
+          }
+        })),
+        determineLocaleFromOptions,
+      })
+      passOverI18n(i18n)
+      passOverI18nNumber(i18nNumber)
+      global.i18nIsSetup = true
+    }
+    next && next()
+  },
+
+  determineLocaleFromOptions,
 
 }
