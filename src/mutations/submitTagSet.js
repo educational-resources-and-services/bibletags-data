@@ -1,7 +1,12 @@
+const sendEmail = require('../email/sendEmail')
 const calculateTagSets = require('../calculateTagSets')
 const updatedTagSets = require('../queries/updatedTagSets')
 const getWordInfoByIdAndPart = require('../getWordInfoByIdAndPart')
 const { equalObjs , getTagsJson} = require('../utils')
+
+const {
+  adminEmail,
+} = require('../constants')
 
 const submitTagSet = async (args, req, queryInfo) => {
 
@@ -176,6 +181,33 @@ const submitTagSet = async (args, req, queryInfo) => {
     })
 
   })
+
+  // if this was the first tagSetSubmission for this version, email the admin
+  const numTagSetSubmissions = await models.tagSetSubmission.count({
+    where: {
+      versionId,
+    },
+  })
+
+  if(numTagSetSubmissions === 1) {
+    await sendEmail({
+      models,
+      toAddrs: adminEmail,
+      subject: `First tag set submission for a version! (versionId: ${versionId})`,
+      body: (
+        `
+          VERSION ID: $versionId}
+          —————————
+
+          Tag Set Submitted by:
+
+          USER ID: ${user.id}
+          USER NAME: ${user.name}
+          USER EMAIL: ${user.email}
+        `
+      ),
+    })
+  }
 
   return await updatedTagSets({ versionId, updatedFrom, forceAll: true }, req, queryInfo)
 

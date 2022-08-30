@@ -42,6 +42,62 @@ const buildPages = async ({
   const now = Date.now()
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
+  const aDay = 1000*60*60*24
+  const graphEndDateTimeStamp = new Date(new Date(new Date().toISOString().split('T')[0]).getTime()).getTime()
+  const graphStartDate = new Date(graphEndDateTimeStamp - aDay * 90)
+
+  const getTagSubmissionsOverTimeQuery = versionSpecific => (`
+    (SELECT CONCAT(
+      '[',
+      (
+        SELECT
+          GROUP_CONCAT(CONCAT( '["', createdAtDate, '",', cnt, ']' )) FROM (
+            SELECT
+              SUBSTR(createdAt, 1, 10) AS createdAtDate,
+              COUNT(*) AS cnt
+            FROM tagSetSubmissions
+            WHERE createdAt >= "${graphStartDate.toISOString().split('T')[0]}"
+            ${versionSpecific ? `AND versionId=version.id` : ``}
+            GROUP BY createdAtDate
+            ORDER BY createdAtDate
+          ) AS t1
+      ),
+      ']'
+    ))
+  `)
+
+  const getFilledOutTagSubmissionsOverTime = tagSubmissionsOverTimeJson => {
+    let lastTimestamp = graphStartDate.getTime()
+    return (
+      JSON.parse(tagSubmissionsOverTimeJson || `[[${graphStartDate.getTime()},0]]`)
+        .map(([ date, count ], idx, ary) => {
+          let toReturn = []
+
+          const thisTimeStamp = new Date(date).getTime()
+          while(lastTimestamp + aDay < thisTimeStamp) {
+            lastTimestamp += aDay
+            toReturn.push([ lastTimestamp, 0 ])
+          }
+          lastTimestamp = thisTimeStamp
+
+          toReturn = [ ...toReturn, [ date, count ] ]
+
+          if(idx === ary.length - 1) {
+            while(lastTimestamp < graphEndDateTimeStamp) {
+              lastTimestamp += aDay
+              toReturn.push([ lastTimestamp, 0 ])
+            }
+          }
+
+          return toReturn
+        })
+        .flat()
+        .map(([ date, count ]) => [ new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), count ])
+    )
+  }
+
+  await global.connection.query(`SET SESSION group_concat_max_len = 10000`)  // needed for the GROUP_CONCAT calls
+
   const versions = await models.version.findAll({
     attributes: {
       include: [
@@ -51,6 +107,7 @@ const buildPages = async ({
         [connection.literal(`(SELECT COUNT(*) FROM tagSets WHERE status IN ("confirmed") AND versionId=version.id)`), `numVersesWithConfirmedTagging`],
         [connection.literal(`(SELECT COUNT(DISTINCT userId) FROM tagSetSubmissions WHERE versionId=version.id)`), `numTaggers`],
         [connection.literal(`(SELECT COUNT(*) FROM tagSetSubmissions WHERE versionId=version.id)`), `numTagSubmissions`],
+        [connection.literal(getTagSubmissionsOverTimeQuery(true)), `tagSubmissionsOverTimeJson`],
       ],
     },
     order: [[ 'name' ]],
@@ -61,12 +118,14 @@ const buildPages = async ({
     numVersesWithConfirmedTagging,
     numTaggers,
     numTagSubmissions,
+    tagSubmissionsOverTimeJson,
   }]] = await global.connection.query(`
     SELECT
       (SELECT COUNT(*) FROM tagSets WHERE status IN ("unconfirmed", "confirmed")) AS numVersesWithTagging,
       (SELECT COUNT(*) FROM tagSets WHERE status IN ("confirmed")) AS numVersesWithConfirmedTagging,
       (SELECT COUNT(DISTINCT userId) FROM tagSetSubmissions) AS numTaggers,
-      (SELECT COUNT(*) FROM tagSetSubmissions) AS numTagSubmissions
+      (SELECT COUNT(*) FROM tagSetSubmissions) AS numTagSubmissions,
+      ${getTagSubmissionsOverTimeQuery()} AS tagSubmissionsOverTimeJson
   `)
 
   const versionsByLanguageId = {}
@@ -84,6 +143,7 @@ const buildPages = async ({
   const languageVersionTemplate = (await fs.readFile(`./src/templates/language-version.html`)).toString()
   const headerTemplate = (await fs.readFile(`./src/templates/header.html`)).toString()
   const footerTemplate = (await fs.readFile(`./src/templates/footer.html`)).toString()
+  const tagSubmissionsOverTimeTemplate = (await fs.readFile(`./src/templates/tag-submissions-over-time.html`)).toString()
   const cssIndex = (await fs.readFile(`./src/templates/index.css`)).toString()
 
   await mkdir(`${pagesDir}versions`, { recursive: true })
@@ -100,6 +160,7 @@ const buildPages = async ({
       // general
       .replace(/{{header}}/g, headerTemplate)
       .replace(/{{footer}}/g, footerTemplate)
+      .replace(/{{tag-submissions-over-time}}/g, tagSubmissionsOverTimeTemplate)
       .replace(/{{date}}/g, date)
 
       // global stats
@@ -109,6 +170,7 @@ const buildPages = async ({
       .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
       .replace(/{{numTaggers}}/g, numTaggers)
       .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
+      .replace(/{{tagSubmissionsOverTime}}/g, JSON.stringify(getFilledOutTagSubmissionsOverTime(tagSubmissionsOverTimeJson)))
 
       // list
       .replace(
@@ -153,6 +215,7 @@ const buildPages = async ({
       numVersesWithConfirmedTagging,
       numTaggers,
       numTagSubmissions,
+      tagSubmissionsOverTimeJson,
       wordDivisionRegex,
       versificationModel,
       skipsUnlikelyOriginals,
@@ -202,6 +265,7 @@ const buildPages = async ({
         // general
         .replace(/{{header}}/g, headerTemplate)
         .replace(/{{footer}}/g, footerTemplate)
+        .replace(/{{tag-submissions-over-time}}/g, tagSubmissionsOverTimeTemplate)
         .replace(/{{id}}/g, id)
         .replace(/{{name}}/g, name)
         .replace(/{{language}}/g, languageName)
@@ -219,6 +283,7 @@ const buildPages = async ({
         .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
         .replace(/{{numTaggers}}/g, numTaggers)
         .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
+        .replace(/{{tagSubmissionsOverTime}}/g, JSON.stringify(getFilledOutTagSubmissionsOverTime(tagSubmissionsOverTimeJson)))
 
         // technical
         .replace(/{{wordDivisionRegex}}/g, !wordDivisionRegex ? '<span class="special_value">[default]</span>' : wordDivisionRegex)
@@ -252,6 +317,16 @@ const buildPages = async ({
     const numVersesWithConfirmedTagging = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numVersesWithConfirmedTagging, 0)
     const numTaggers = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numTaggers, 0)
     const numTagSubmissions = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numTagSubmissions, 0)
+    const tagSubmissionsOverTime = versionsByLanguageId[id].reduce(
+      (compiledTagSubmissionsOverTime, version) => {
+        const tagSubmissionsOverTime = getFilledOutTagSubmissionsOverTime(version.dataValues.tagSubmissionsOverTimeJson)
+        tagSubmissionsOverTime.forEach(([ date, count ], idx) => {
+          compiledTagSubmissionsOverTime[idx] = [ date, ((compiledTagSubmissionsOverTime[idx] || [])[1] || 0) + count ]
+        })
+        return compiledTagSubmissionsOverTime
+      },
+      [],
+    )
 
     // BUILD DOWNLOAD: /downloads/definitions-{{id}}.json + /downloads/definitions-{{id}}.csv
     const definitions = await models.definition.findAll({
@@ -287,6 +362,7 @@ const buildPages = async ({
         // general
         .replace(/{{header}}/g, headerTemplate)
         .replace(/{{footer}}/g, footerTemplate)
+        .replace(/{{tag-submissions-over-time}}/g, tagSubmissionsOverTimeTemplate)
         .replace(/{{id}}/g, id)
         .replace(/{{name}}/g, name)
         .replace(/{{iso6391}}/g, iso6391 || '<span class="special_value">[none]</span>')
@@ -301,6 +377,7 @@ const buildPages = async ({
         .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
         .replace(/{{numTaggers}}/g, numTaggers)
         .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
+        .replace(/{{tagSubmissionsOverTime}}/g, JSON.stringify(tagSubmissionsOverTime))
 
         // versions list
         .replace(

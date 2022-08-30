@@ -1,0 +1,37 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<canvas id="chart1" height="70" width="730"></canvas>
+<script>
+  const ctx = document.getElementById('chart1')
+  const tagSubmissionsOverTime = {{tagSubmissionsOverTime}}
+  const chart1 = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: tagSubmissionsOverTime.map(([ label ]) => label),
+      datasets: [
+        {
+          label: 'Tag Submissions',
+          data: tagSubmissionsOverTime.map(([ label, value ]) => value),
+          borderColor: '#000000',
+          backgroundColor: '#000000',
+          borderWidth: 1,
+          pointRadius: 1,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      scales: {
+        y: {
+          display: false,
+        },
+        x: {
+          display: false,
+        },
+      },
+    },
+  })
+</script>
