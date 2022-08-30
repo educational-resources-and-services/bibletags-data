@@ -205,6 +205,9 @@ const submitTagSet = async (args, req, queryInfo) => {
           USER NAME: ${user.name}
           USER EMAIL: ${user.email}
         `
+          .replace(/\n +/g, '\n')
+          .replace(/\n/g, '<br>')
+          .replace(/  +/g, '&nbsp;&nbsp;')
       ),
     })
   }
