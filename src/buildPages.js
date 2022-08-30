@@ -211,7 +211,7 @@ const buildPages = async ({
         .replace(/{{date}}/g, date)
 
         // stats
-        .replace(/{{percentageOfWordsTagged}}/g, numVerses === numVersesWithTagging ? `100%` : `${Math.round(percentageOfWordsTagged * 100)}%`)
+        .replace(/{{percentageOfWordsTagged}}/g, numVerses === numVersesWithTagging ? `100%` : (!percentageOfWordsTagged ? `(requires at least one verse be tagged to calculate)` : `${Math.round(percentageOfWordsTagged * 100)}%`))
         .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
         .replace(/{{percentageOfVersesWithTagging}}/g, `${Math.round((numVersesWithTagging * 100) / numVerses)}%`)
         .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
