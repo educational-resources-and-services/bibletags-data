@@ -33,7 +33,7 @@ For more information on this project, see the [Bible Tags website](https://bible
 
 ## Development
 
-Note that a local MySQL database install is required.
+Note that a local MySQL 8 database install is required.
 
 ### Installation
 
@@ -44,7 +44,7 @@ cd bibletags-data
 cp .env.example .env
 ```
 
-Update `RDS_USERNAME` and `RDS_PASSWORD` in `.env` for accessing your local MySQL database.
+Create a local MySQL database called `BibleTags` with `utf8mb4` encoding and `utf8mb4_bin` collation. Update `RDS_USERNAME` and `RDS_PASSWORD` in `.env` to access this database.
 
 ```bash
 npm install
