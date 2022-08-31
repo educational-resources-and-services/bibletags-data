@@ -43,8 +43,8 @@ const buildPages = async ({
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
   const aDay = 1000*60*60*24
-  const graphEndDateTimeStamp = new Date(new Date(new Date().toISOString().split('T')[0]).getTime()).getTime()
-  const graphStartDate = new Date(graphEndDateTimeStamp - aDay * 90)
+  const graphEndDateTimeStamp = new Date(new Date().toISOString().split('T')[0]).getTime() - aDay
+  const graphStartDate = new Date(graphEndDateTimeStamp - aDay * 89)
 
   const getTagSubmissionsOverTimeQuery = versionSpecific => (`
     (SELECT CONCAT(
@@ -176,6 +176,7 @@ const buildPages = async ({
       .replace(
         /{{languagesWithVersionsList}}/g,
         Object.keys(versionsByLanguageId)
+          .sort((lId1, lId2) => getLanguageInfo(lId1).englishName < getLanguageInfo(lId2).englishName ? -1 : 1)
           .map(languageId => {
             const { englishName, nativeName } = getLanguageInfo(languageId)
             const name = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
@@ -186,11 +187,19 @@ const buildPages = async ({
                 .replace(
                   /{{versionsList}}/g,
                   versionsByLanguageId[languageId]
-                    .map(version => (
-                      versionsVersionTemplate
-                        .replace(/{{id}}/g, version.id)
-                        .replace(/{{name}}/g, version.name)
-                    ))
+                    .map(version => {
+                      const grayScaleNum = parseInt(Math.min(1, (version.dataValues.numTagSubmissions / 6000) * .9 + .1) * -255 + 255, 10)
+                      const numTagSubmissionsBGColor = `rgb(${grayScaleNum} ${grayScaleNum} ${grayScaleNum})`
+                      const numTagSubmissionsColor = grayScaleNum < 160 ? `white` : `black`
+                      return (
+                        versionsVersionTemplate
+                          .replace(/{{id}}/g, version.id)
+                          .replace(/{{name}}/g, version.name)
+                          .replace(/{{numTagSubmissions}}/g, version.dataValues.numTagSubmissions)
+                          .replace(/{{numTagSubmissionsBGColor}}/g, numTagSubmissionsBGColor)
+                          .replace(/{{numTagSubmissionsColor}}/g, numTagSubmissionsColor)
+                      )
+                    })
                     .join('\n')
                 )
             )
