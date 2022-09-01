@@ -101,13 +101,11 @@ const buildPages = async ({
   const versions = await models.version.findAll({
     attributes: {
       include: [
-        [connection.literal(`(SELECT IFNULL((SELECT AVG(LENGTH(tags)) FROM tagSets WHERE versionId=version.id) / (SELECT AVG(LENGTH(tags)) FROM tagSets WHERE status="unconfirmed" AND versionId=version.id), 0))`), `percentageOfWordsTagged`],
         [connection.literal(`(SELECT COUNT(*) FROM tagSets WHERE versionId=version.id)`), `numVerses`],
         [connection.literal(`(SELECT COUNT(*) FROM tagSets WHERE status IN ("unconfirmed", "confirmed") AND versionId=version.id)`), `numVersesWithTagging`],
         [connection.literal(`(SELECT COUNT(*) FROM tagSets WHERE status IN ("confirmed") AND versionId=version.id)`), `numVersesWithConfirmedTagging`],
         [connection.literal(`(SELECT COUNT(DISTINCT userId) FROM tagSetSubmissions WHERE versionId=version.id)`), `numTaggers`],
         [connection.literal(`(SELECT COUNT(*) FROM tagSetSubmissions WHERE versionId=version.id)`), `numTagSubmissions`],
-        [connection.literal(getTagSubmissionsOverTimeQuery(true)), `tagSubmissionsOverTimeJson`],
       ],
     },
     order: [[ 'name' ]],
@@ -218,13 +216,11 @@ const buildPages = async ({
       name,
       languageId,
       partialScope,
-      percentageOfWordsTagged,
       numVerses,
       numVersesWithTagging,
       numVersesWithConfirmedTagging,
       numTaggers,
       numTagSubmissions,
-      tagSubmissionsOverTimeJson,
       wordDivisionRegex,
       versificationModel,
       skipsUnlikelyOriginals,
@@ -233,6 +229,18 @@ const buildPages = async ({
 
     const { englishName, nativeName } = getLanguageInfo(languageId)
     const languageName = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
+
+    const { dataValues: { percentageOfWordsTagged, tagSubmissionsOverTimeJson } } = await models.version.findOne({
+      attributes: {
+        include: [
+          [connection.literal(`(SELECT IFNULL((SELECT AVG(LENGTH(tags)) FROM tagSets WHERE versionId=version.id) / (SELECT AVG(LENGTH(tags)) FROM tagSets WHERE status="unconfirmed" AND versionId=version.id), 0))`), `percentageOfWordsTagged`],
+          [connection.literal(getTagSubmissionsOverTimeQuery(true)), `tagSubmissionsOverTimeJson`],
+        ],
+      },
+      where: {
+        id,
+      },
+    })
 
     // BUILD DOWNLOAD: /downloads/tagsets-{{id}}.json + /downloads/tagsets-{{id}}.csv
     const tagSets = await models.tagSet.findAll({
@@ -284,7 +292,7 @@ const buildPages = async ({
         .replace(/{{date}}/g, date)
 
         // stats
-        .replace(/{{percentageOfWordsTagged}}/g, numVerses === numVersesWithTagging ? `100%` : (!percentageOfWordsTagged ? `(requires at least one verse be tagged to calculate)` : `${Math.round(percentageOfWordsTagged * 100)}%`))
+        .replace(/{{percentageOfWordsTagged}}/g, numVerses === numVersesWithTagging ? `100%` : (percentageOfWordsTagged < 0.005 ? `(requires at least one verse be tagged to calculate)` : `${Math.round(percentageOfWordsTagged * 100)}%`))
         .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
         .replace(/{{percentageOfVersesWithTagging}}/g, `${Math.round((numVersesWithTagging * 100) / numVerses)}%`)
         .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
