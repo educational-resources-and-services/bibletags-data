@@ -143,6 +143,12 @@ const types = `
 
   type EmbeddingApp {
     id: ID
+    uri: String
+    notes: String
+    createdAt: Milliseconds
+    updatedAt: Milliseconds
+    awsAccessKeyId: String  ${/* This is only included upon creation. */ ``}
+    awsSecretAccessKey: String  ${/* This is only included upon creation. */ ``}
   }
 
 `

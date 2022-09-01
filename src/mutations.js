@@ -8,6 +8,7 @@ const mutations = `
   submitTagSet(input: TagSetInput!, updatedFrom: Milliseconds!): TagSetUpdate
   submitUIWords(input: UIWordsInput!): [UIWord]
   addVersion(input: VersionInput!): Version
+  addEmbeddingApp(input: EmbeddingAppInput!): EmbeddingApp
 
 `
 

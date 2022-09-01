@@ -82,7 +82,8 @@
     "nodemailer": "^6.7.7",
     "retry-as-promised": "^5.0.0",
     "sequelize": "^6.15.1",
-    "session-sync-auth-site": "^0.2.0"
+    "session-sync-auth-site": "^0.2.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "chai": "^4.3.6",

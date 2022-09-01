@@ -74,6 +74,14 @@ const inputs = `
     extraVerseMappingsStr: String!
   }
 
+  input EmbeddingAppInput {
+    uri: String!
+    appSlug: String!
+    appName: String!
+    orgName: String!
+    contactEmail: String!
+  }
+
 `
 
 module.exports = inputs

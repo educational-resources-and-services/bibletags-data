@@ -5,7 +5,7 @@ const queries = `
   chapter(bookId: Int!, chapter: Int!, versionId: ID!): [Verse]
   verse(id: ID!): Verse
 
-  embeddingApp(uri: String!): EmbeddingApp
+  embeddingApps: [EmbeddingApp]
   uiWords(languageId: ID!): [UIWord]
 
   tagSets(bookId: Int!, chapter: Int!, verse: Int, versionId: ID!): [TagSet]
