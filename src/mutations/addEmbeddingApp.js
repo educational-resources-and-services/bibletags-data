@@ -8,10 +8,10 @@ const {
 
 const iam = new AWS.IAM()
 
-const makeIamUserAndGetKeys = async ({ appSlug, embeddingAppId }) => {
+const makeIamUserAndGetKeys = async ({ embeddingAppId }) => {
   if(process.env.LOCAL) return {}
 
-  const UserName = `bibletags-embedding-app-${appSlug}`
+  const UserName = `bibletags-embedding-app-${embeddingAppId}`
 
   await iam.createUser({ UserName }).promise()
 
@@ -87,7 +87,6 @@ const addEmbeddingApp = async (args, req, queryInfo) => {
   const { input } = args
   const {
     uri,
-    appSlug,
     appName,
     orgName,
     contactEmail,
@@ -119,15 +118,17 @@ const addEmbeddingApp = async (args, req, queryInfo) => {
 
   let accessKeys = {}
   try {
-    accessKeys = await makeIamUserAndGetKeys({ appSlug, embeddingAppId: embeddingApp.id })
+    accessKeys = await makeIamUserAndGetKeys({ embeddingAppId: embeddingApp.id })
   } catch(err) {
     console.error(`Error when creating IAM user for embedding app`, err.message)
   }
 
+  const hadIamError = !Object.values(accessKeys).length
+
   await sendEmail({
     models,
     toAddrs: adminEmail,
-    subject: `New embedding app (${uri})`,
+    subject: `New embedding app (${uri})${hadIamError ? ` - IAM ERROR` : ``}`,
     body: (
       `
         ID: ${embeddingApp.id}
@@ -136,13 +137,18 @@ const addEmbeddingApp = async (args, req, queryInfo) => {
         Orginization Name: ${orgName}
         Contact Email: ${contactEmail}
 
-        ${!Object.values(accessKeys).length ? `IAM USER CREATION FAILED!!` : ``}
+        ${hadIamError ? `IAM USER CREATION FAILED!!` : ``}
       `
         .replace(/\n +/g, '\n')
         .replace(/\n/g, '<br>')
         .replace(/  +/g, '&nbsp;&nbsp;')
     ),
   })
+
+  if(hadIamError) {
+    await embeddingApp.destroy()
+    throw `Error when creating IAM user for embedding app`
+  }
 
   return {
     ...embeddingApp.dataValues,

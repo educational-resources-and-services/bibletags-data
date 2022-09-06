@@ -5,7 +5,7 @@ describe('Mutation: addEmbeddingApp', async () => {
   it('A Bible Society', async () => {
 
     const embeddingApp = await doMutation(`
-      addEmbeddingApp(input: { uri: "https://abiblesociety.com", appSlug: "abiblesociety", appName: "Our App", orgName: "A Bible Society", contactEmail: "admin@abiblesociety.com" }) {
+      addEmbeddingApp(input: { uri: "https://abiblesociety.com", appName: "Our App", orgName: "A Bible Society", contactEmail: "admin@abiblesociety.com" }) {
         id
         uri
         notes

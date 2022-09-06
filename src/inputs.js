@@ -76,7 +76,6 @@ const inputs = `
 
   input EmbeddingAppInput {
     uri: String!
-    appSlug: String!
     appName: String!
     orgName: String!
     contactEmail: String!

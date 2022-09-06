@@ -1,6 +1,5 @@
 const Database = require('better-sqlite3')
 const fs = require('fs-extra')
-const { Op } = require('sequelize')
 require('dotenv').config()
 
 const { setUpConnection } = require('../db/connect')
