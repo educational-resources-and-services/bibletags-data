@@ -26,7 +26,7 @@
     "go-update-db": "(echo '--------------------\nUpdating database...\n--------------------\n' && npm run confirm && node src/db/update.js) || true",
     "setup-db": "npm run go-setup-db -s",
     "go-setup-db": "(echo '----------------------\nSetting up database...\n----------------------\n\n** WARNING **  This will wipe current data!\n' && npm run confirm && npm run do-setup-db && npm run do-imports && npm run do-unit-words && npm run do-defs-and-lemma) || true",
-    "do-setup-db": "node ./src/scripts/deleteUsersAndSessionsTables.js && node ./node_modules/session-sync-auth-site/src/createDBTables.js mysql://root@localhost/BibleTags && node src/db/setup.js && node src/db/seed.js",
+    "do-setup-db": "node ./src/scripts/deleteUsersAndSessionsTables.js && node ./node_modules/session-sync-auth-site/src/createDBTables.js mysql://root@localhost/$(grep RDS_DATABASE .env | cut -d '=' -f2) && node src/db/setup.js && node src/db/seed.js",
     "do-imports": "node ./src/scripts/importUHBFromUsfm.js && node ./src/scripts/importUGNTFromUsfm.js",
     "do-unit-words": "node ./src/scripts/populateUHBUnitWordsTable.js && node ./src/scripts/populateUGNTUnitWordsTable.js",
     "do-defs-and-lemma": "node ./src/scripts/createUHBDefAndPOS.js && node ./src/scripts/createUGNTDefAndPOS.js && node ./src/scripts/createLemmaTable.js && node ./src/scripts/createTempEngGloss.js",
