@@ -9,7 +9,7 @@ const {
 const iam = new AWS.IAM()
 
 const makeIamUserAndGetKeys = async ({ embeddingAppId }) => {
-  if(process.env.LOCAL) return {}
+  if(process.env.TESTING) return {}
 
   const UserName = `bibletags-embedding-app-${embeddingAppId}`
 
@@ -123,31 +123,35 @@ const addEmbeddingApp = async (args, req, queryInfo) => {
     console.error(`Error when creating IAM user for embedding app`, err.message)
   }
 
-  const hadIamError = !Object.values(accessKeys).length
+  if(!process.env.TESTING) {
 
-  await sendEmail({
-    models,
-    toAddrs: adminEmail,
-    subject: `New embedding app (${uri})${hadIamError ? ` - IAM ERROR` : ``}`,
-    body: (
-      `
-        ID: ${embeddingApp.id}
-        URI: ${uri}
-        App Name: ${appName}
-        Orginization Name: ${orgName}
-        Contact Email: ${contactEmail}
+    const hadIamError = !Object.values(accessKeys).length
 
-        ${hadIamError ? `IAM USER CREATION FAILED!!` : ``}
-      `
-        .replace(/\n +/g, '\n')
-        .replace(/\n/g, '<br>')
-        .replace(/  +/g, '&nbsp;&nbsp;')
-    ),
-  })
+    await sendEmail({
+      models,
+      toAddrs: adminEmail,
+      subject: `New embedding app (${uri})${hadIamError ? ` - IAM ERROR` : ``}`,
+      body: (
+        `
+          ID: ${embeddingApp.id}
+          URI: ${uri}
+          App Name: ${appName}
+          Orginization Name: ${orgName}
+          Contact Email: ${contactEmail}
 
-  if(hadIamError) {
-    await embeddingApp.destroy()
-    throw `Error when creating IAM user for embedding app`
+          ${hadIamError ? `IAM USER CREATION FAILED!!` : ``}
+        `
+          .replace(/\n +/g, '\n')
+          .replace(/\n/g, '<br>')
+          .replace(/  +/g, '&nbsp;&nbsp;')
+      ),
+    })
+
+    if(hadIamError) {
+      await embeddingApp.destroy()
+      throw `Error when creating IAM user for embedding app`
+    }
+
   }
 
   return {

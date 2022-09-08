@@ -3,6 +3,8 @@ const chai = require('chai')
 
 chai.should()
 
+process.env.TESTING = true
+
 exports.mochaHooks = {
 
   beforeAll(done) {

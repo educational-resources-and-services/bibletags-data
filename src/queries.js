@@ -2,6 +2,7 @@ const queries = `
 
   version(id: ID!): Version
   versions: [Version]
+  versionIdsWithIncompleteTagSets(versionIds: [ID]!): [ID]
   chapter(bookId: Int!, chapter: Int!, versionId: ID!): [Verse]
   verse(id: ID!): Verse
 
