@@ -2,7 +2,7 @@ const sendEmail = require('../email/sendEmail')
 const calculateTagSets = require('../calculateTagSets')
 const updatedTagSets = require('../queries/updatedTagSets')
 const getWordInfoByIdAndPart = require('../getWordInfoByIdAndPart')
-const { equalObjs , getTagsJson} = require('../utils')
+const { equalObjs , getVersionTables } = require('../utils')
 
 const {
   adminEmail,
@@ -14,6 +14,7 @@ const submitTagSet = async (args, req, queryInfo) => {
   const { loc, versionId, wordsHash, deviceId, embeddingAppId, tagSubmissions } = input
 
   const { models } = global.connection
+  const { wordHashesSetSubmissionTable, wordHashesSubmissionTable } = await getVersionTables(versionId)
 
   // TODO: look for auth, else use the id of the user with email = user-[deviceId]@bibletags.org
   let [ user, embeddingApp ] = await Promise.all([
@@ -61,16 +62,15 @@ const submitTagSet = async (args, req, queryInfo) => {
     submissionOrigWordIdAndPartSets.push(origWordsInfo.map(({ uhbWordId, ugntWordId, wordPartNumber }) => ugntWordId || `${uhbWordId}|${wordPartNumber}`))
     submissionTranslationWordNumberSets.push(translationWordsInfo.map(({ wordNumberInVerse }) => wordNumberInVerse))
   })
-  const wordHashesSetSubmission = await models.wordHashesSetSubmission.findOne({
+  const wordHashesSetSubmission = await wordHashesSetSubmissionTable.findOne({
     attributes: [ 'id' ],
     where: {
       loc,
-      versionId,
       wordsHash,
     },
     include: [
       {
-        model: models.wordHashesSubmission,
+        model: wordHashesSubmissionTable,
         attributes: [ 'id', 'wordNumberInVerse' ],
         required: true,
       },
@@ -92,7 +92,7 @@ const submitTagSet = async (args, req, queryInfo) => {
   }
 
   // validate that every translation word is covered, without repeats
-  const submittedTranslationWordNumbers = wordHashesSetSubmission.wordHashesSubmissions.map(({ wordNumberInVerse }) => wordNumberInVerse).sort((a,b) => a-b)
+  const submittedTranslationWordNumbers = wordHashesSetSubmission[`${versionId}WordHashesSubmissions`].map(({ wordNumberInVerse }) => wordNumberInVerse).sort((a,b) => a-b)
   const dataTranslationWordNumbers = submissionTranslationWordNumberSets.flat().sort((a,b) => a-b)
   if(!equalObjs(submittedTranslationWordNumbers, dataTranslationWordNumbers)) {
     if(!global.skipConsoleLogError) {

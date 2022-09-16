@@ -1,3 +1,5 @@
+const { getVersionTables } = require('../utils')
+
 const {
   locRegEx,
   versionIdRegEx,
@@ -25,15 +27,14 @@ const tagSet = async (args, req, queryInfo) => {
     throw `Invalid wordsHash (${wordsHash}) indicated in id (${id}).`
   }
 
-  const { models } = global.connection
+  const { tagSetTable } = await getVersionTables(versionId)
 
   const where = {
     loc,
-    versionId,
     wordsHash,
   }
 
-  const tagSet = await models.tagSet.findOne({
+  const tagSet = await tagSetTable.findOne({
     where,
   })
 

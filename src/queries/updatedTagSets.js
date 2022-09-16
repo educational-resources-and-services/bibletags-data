@@ -1,5 +1,7 @@
 const { Op } = require('sequelize')
 
+const { getVersionTables } = require('../utils')
+
 const {
   versionIdRegEx,
 } = require('../constants')
@@ -12,16 +14,15 @@ const updatedTagSets = async (args, req, queryInfo) => {
     throw `Invalid versionId (${versionId}).`
   }
 
-  const { models } = global.connection
+  const { tagSetTable } = await getVersionTables(versionId)
 
   const limit = forceAll ? 10000 : 100
 
-  let tagSets = await models.tagSet.findAll({
+  let tagSets = await tagSetTable.findAll({
     where: {
       createdAt: {
         [Op.gte]: updatedFrom,
       },
-      versionId,
       status: {
         [Op.ne]: `none`,
       },
@@ -36,10 +37,9 @@ const updatedTagSets = async (args, req, queryInfo) => {
     // prevent situation where multiple sets with the same timestamp are split between results
     tagSets = [
       ...tagSets.filter(({ createdAt }) => createdAt.getTime() !== lastCreatedAt),
-      ...(await models.tagSet.findAll({
+      ...(await tagSetTable.findAll({
         where: {
           createdAt: lastCreatedAt,
-          versionId,
           status: {
             [Op.ne]: `none`,
           },

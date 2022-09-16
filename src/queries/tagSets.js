@@ -1,5 +1,7 @@
 const { getLocFromRef } = require('@bibletags/bibletags-versification')
 
+const { getVersionTables } = require('../utils')
+
 const {
   versionIdRegEx,
 } = require('../constants')
@@ -17,7 +19,7 @@ const tagSets = async (args, req, queryInfo) => {
     throw `Invalid versionId (${versionId}).`
   }
 
-  const { models } = global.connection
+  const { tagSetTable } = await getVersionTables(versionId)
 
   let loc = getLocFromRef({
     bookId,
@@ -33,14 +35,13 @@ const tagSets = async (args, req, queryInfo) => {
     loc: {
       [Sequelize.Op.like]: loc,
     },
-    versionId,
   }
 
-  const tagSets = await models.tagSet.findAll({
+  const tagSets = await tagSetTable.findAll({
     where,
   })
 
-  return tagSets.map(({ loc, versionId, wordsHash, tags, status }) => ({
+  return tagSets.map(({ loc, wordsHash, tags, status }) => ({
     id: `${loc}-${versionId}-${wordsHash}`,
     tags,
     status,

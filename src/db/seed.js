@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const { setUpConnection } = require('./connect')
+const setUpVersionDataModel = require('./setUpVersionDataModel')
 
 ;(async () => {
 
@@ -30,6 +31,9 @@ const { setUpConnection } = require('./connect')
       "languageId": "eng",
     },
   ])
+
+  setUpVersionDataModel('esv')
+  await global.connection.sync()
 
   await models.embeddingApp.bulkCreate([
     {

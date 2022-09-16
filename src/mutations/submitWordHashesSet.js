@@ -1,13 +1,16 @@
 const calculateTagSets = require('../calculateTagSets')
 const tagSet = require('../queries/tagSet')
+const { getVersionTables } = require('../utils')
 
 const submitWordHashesSet = async (args, req, queryInfo) => {
 
   const { input, skipGetTagSet } = args
   const { loc, versionId, wordsHash, wordHashes, embeddingAppId } = input
   delete input.wordHashes
+  delete input.versionId
 
   const { models } = global.connection
+  const { wordHashesSetSubmissionTable, wordHashesSubmissionTable } = await getVersionTables(versionId)
 
   const embeddingApp = await models.embeddingApp.findByPk(embeddingAppId)
 
@@ -15,9 +18,8 @@ const submitWordHashesSet = async (args, req, queryInfo) => {
     throw `Invalid embeddingAppId. Please register via bibletags.org.`
   }
 
-  const existingWordHashesSetSubmission = await models.wordHashesSetSubmission.findOne({
+  const existingWordHashesSetSubmission = await wordHashesSetSubmissionTable.findOne({
     where: {
-      versionId,
       wordsHash,
       loc,
     },
@@ -27,13 +29,13 @@ const submitWordHashesSet = async (args, req, queryInfo) => {
 
     await connection.transaction(async t => {
 
-      const wordHashesSetSubmission = await models.wordHashesSetSubmission.create(input, {transaction: t})
+      const wordHashesSetSubmission = await wordHashesSetSubmissionTable.create(input, {transaction: t})
 
       wordHashes.forEach(wordHashGroup => {
-        wordHashGroup.wordHashesSetSubmissionId = wordHashesSetSubmission.id
+        wordHashGroup[`${versionId}WordHashesSetSubmissionId`] = wordHashesSetSubmission.id
       })
 
-      await models.wordHashesSubmission.bulkCreate(
+      await wordHashesSubmissionTable.bulkCreate(
         wordHashes,
         {
           validate: true,

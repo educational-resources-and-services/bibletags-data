@@ -3,6 +3,8 @@ const { getLanguageInfo } = require('@bibletags/bibletags-ui-helper')
 const { Parser } = require('json2csv')
 const AWS = require('aws-sdk')
 
+const { getVersionTables } = require('./utils')
+
 let s3
 const writeToS3 = (key, body) => new Promise((resolve, reject) => {
   s3 = s3 || new AWS.S3({
@@ -28,9 +30,7 @@ const writeToS3 = (key, body) => new Promise((resolve, reject) => {
   )
 })
 
-const buildPages = async ({
-  changedVersionIds,
-}={}) => {
+const buildPages = async () => {
 
   if([ undefined, null, false, 'none' ].includes(process.env.AWS_DOWNLOADS_BUCKET) && !process.env.LOCAL) return
 
@@ -46,7 +46,7 @@ const buildPages = async ({
   const graphEndDateTimeStamp = new Date(new Date().toISOString().split('T')[0]).getTime() - aDay
   const graphStartDate = new Date(graphEndDateTimeStamp - aDay * 89)
 
-  const getTagSubmissionsOverTimeQuery = versionSpecific => (`
+  const getTagSubmissionsOverTimeQuery = versionId => (`
     (SELECT CONCAT(
       '[',
       (
@@ -57,7 +57,7 @@ const buildPages = async ({
               COUNT(*) AS cnt
             FROM tagSetSubmissions
             WHERE createdAt >= "${graphStartDate.toISOString().split('T')[0]}"
-            ${versionSpecific ? `AND versionId=version.id` : ``}
+            ${versionId ? `AND versionId="${versionId}"` : ``}
             GROUP BY createdAtDate
             ORDER BY createdAtDate
           ) AS t1
@@ -100,31 +100,12 @@ const buildPages = async ({
 
   const versions = await models.version.findAll({
     attributes: {
-      include: [
-        [connection.literal(`(SELECT COUNT(*) FROM tagSets WHERE versionId=version.id)`), `numVerses`],
-        [connection.literal(`(SELECT COUNT(*) FROM tagSets WHERE status IN ("unconfirmed", "confirmed") AND versionId=version.id)`), `numVersesWithTagging`],
-        [connection.literal(`(SELECT COUNT(*) FROM tagSets WHERE status IN ("confirmed") AND versionId=version.id)`), `numVersesWithConfirmedTagging`],
-        [connection.literal(`(SELECT COUNT(DISTINCT userId) FROM tagSetSubmissions WHERE versionId=version.id)`), `numTaggers`],
-        [connection.literal(`(SELECT COUNT(*) FROM tagSetSubmissions WHERE versionId=version.id)`), `numTagSubmissions`],
-      ],
+      exclude: [
+        'extraVerseMappings',
+      ]
     },
     order: [[ 'name' ]],
   })
-
-  const [[{
-    numVersesWithTagging,
-    numVersesWithConfirmedTagging,
-    numTaggers,
-    numTagSubmissions,
-    tagSubmissionsOverTimeJson,
-  }]] = await global.connection.query(`
-    SELECT
-      (SELECT COUNT(*) FROM tagSets WHERE status IN ("unconfirmed", "confirmed")) AS numVersesWithTagging,
-      (SELECT COUNT(*) FROM tagSets WHERE status IN ("confirmed")) AS numVersesWithConfirmedTagging,
-      (SELECT COUNT(DISTINCT userId) FROM tagSetSubmissions) AS numTaggers,
-      (SELECT COUNT(*) FROM tagSetSubmissions) AS numTagSubmissions,
-      ${getTagSubmissionsOverTimeQuery()} AS tagSubmissionsOverTimeJson
-  `)
 
   const versionsByLanguageId = {}
 
@@ -151,76 +132,49 @@ const buildPages = async ({
   // CSS
   await write(`${pagesDir}index.css`, cssIndex)
 
-  // BUILD PAGE: /versions
-  await write(`${pagesDir}index.html`,
-    versionsTemplate
-
-      // general
-      .replace(/{{header}}/g, headerTemplate)
-      .replace(/{{footer}}/g, footerTemplate)
-      .replace(/{{tag-submissions-over-time}}/g, tagSubmissionsOverTimeTemplate)
-      .replace(/{{date}}/g, date)
-
-      // global stats
-      .replace(/{{numLanguages}}/g, Object.values(versionsByLanguageId).length)
-      .replace(/{{numVersions}}/g, versions.length)
-      .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
-      .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
-      .replace(/{{numTaggers}}/g, numTaggers)
-      .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
-      .replace(/{{tagSubmissionsOverTime}}/g, JSON.stringify(getFilledOutTagSubmissionsOverTime(tagSubmissionsOverTimeJson)))
-
-      // list
-      .replace(
-        /{{languagesWithVersionsList}}/g,
-        Object.keys(versionsByLanguageId)
-          .sort((lId1, lId2) => getLanguageInfo(lId1).englishName < getLanguageInfo(lId2).englishName ? -1 : 1)
-          .map(languageId => {
-            const { englishName, nativeName } = getLanguageInfo(languageId)
-            const name = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
-            return (
-              versionsLanguageTemplate
-                .replace(/{{id}}/g, languageId)
-                .replace(/{{name}}/g, name)
-                .replace(
-                  /{{versionsList}}/g,
-                  versionsByLanguageId[languageId]
-                    .map(version => {
-                      const grayScaleNum = parseInt(Math.min(1, (version.dataValues.numTagSubmissions / 6000) * .9 + .1) * -255 + 255, 10)
-                      const numTagSubmissionsBGColor = `rgb(${grayScaleNum} ${grayScaleNum} ${grayScaleNum})`
-                      const numTagSubmissionsColor = grayScaleNum < 160 ? `white` : `black`
-                      return (
-                        versionsVersionTemplate
-                          .replace(/{{id}}/g, version.id)
-                          .replace(/{{name}}/g, version.name)
-                          .replace(/{{numTagSubmissions}}/g, version.dataValues.numTagSubmissions)
-                          .replace(/{{numTagSubmissionsBGColor}}/g, numTagSubmissionsBGColor)
-                          .replace(/{{numTagSubmissionsColor}}/g, numTagSubmissionsColor)
-                      )
-                    })
-                    .join('\n')
-                )
-            )
-          })
-          .join('\n')
-      )
-
-  )
-
   // Go through relevant versions
-  const relevantVersions = versions.filter(({ id }) => (!changedVersionIds || changedVersionIds.includes(id)))
-  for(let version of relevantVersions) {
+  for(let version of versions) {
+
+    const [
+      numVerses,
+      numVersesWithTagging,
+      numVersesWithConfirmedTagging,
+      numTagSubmissions,
+      taggerUserIds,
+      percentageOfWordsTagged,
+      tagSubmissionsOverTimeJson,
+    ] = (
+      await Promise.all([
+        global.connection.query(`SELECT COUNT(*) FROM ${version.id}TagSets`),
+        global.connection.query(`SELECT COUNT(*) FROM ${version.id}TagSets WHERE status IN ("unconfirmed", "confirmed")`),
+        global.connection.query(`SELECT COUNT(*) FROM ${version.id}TagSets WHERE status IN ("confirmed")`),
+        global.connection.query(`SELECT COUNT(*) FROM tagSetSubmissions WHERE versionId="${version.id}"`),
+        global.connection.query(`SELECT DISTINCT userId FROM tagSetSubmissions WHERE versionId="${version.id}"`),
+        global.connection.query(`SELECT IFNULL((SELECT AVG(LENGTH(tags)) FROM ${version.id}TagSets) / (SELECT AVG(LENGTH(tags)) FROM ${version.id}TagSets WHERE status="unconfirmed"), 0)`),
+        global.connection.query(getTagSubmissionsOverTimeQuery(version.id)),
+      ])
+    ).map(([[ rows ]], idx) => (
+      [ 4 ].includes(idx)
+        ? rows
+        : Object.values(rows)[0]
+    ))
+
+    version.dataValues = {
+      ...version.dataValues,
+      numVerses,
+      numVersesWithTagging,
+      numVersesWithConfirmedTagging,
+      numTagSubmissions,
+      taggerUserIds,
+      percentageOfWordsTagged,
+      tagSubmissionsOverTimeJson,
+    }
 
     const {
       id,
       name,
       languageId,
       partialScope,
-      numVerses,
-      numVersesWithTagging,
-      numVersesWithConfirmedTagging,
-      numTaggers,
-      numTagSubmissions,
       wordDivisionRegex,
       versificationModel,
       skipsUnlikelyOriginals,
@@ -230,28 +184,14 @@ const buildPages = async ({
     const { englishName, nativeName } = getLanguageInfo(languageId)
     const languageName = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
 
-    const { dataValues: { percentageOfWordsTagged, tagSubmissionsOverTimeJson } } = await models.version.findOne({
-      attributes: {
-        include: [
-          [connection.literal(`(SELECT IFNULL((SELECT AVG(LENGTH(tags)) FROM tagSets WHERE versionId=version.id) / (SELECT AVG(LENGTH(tags)) FROM tagSets WHERE status="unconfirmed" AND versionId=version.id), 0))`), `percentageOfWordsTagged`],
-          [connection.literal(getTagSubmissionsOverTimeQuery(true)), `tagSubmissionsOverTimeJson`],
-        ],
-      },
-      where: {
-        id,
-      },
-    })
-
     // BUILD DOWNLOAD: /downloads/tagsets-{{id}}.json + /downloads/tagsets-{{id}}.csv
-    const tagSets = await models.tagSet.findAll({
+    const { tagSetTable } = await getVersionTables(id)
+    const tagSets = await tagSetTable.findAll({
       attributes: {
         exclude: [
           'id',
           'autoMatchScores',
         ],
-      },
-      where: {
-        versionId: id,
       },
     })
 
@@ -298,7 +238,7 @@ const buildPages = async ({
         .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
         .replace(/{{percentageOfVersesWithConfirmedTagging}}/g, `${Math.round((numVersesWithConfirmedTagging * 100) / numVerses)}%`)
         .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
-        .replace(/{{numTaggers}}/g, numTaggers)
+        .replace(/{{numTaggers}}/g, taggerUserIds.length)
         .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
         .replace(/{{tagSubmissionsOverTime}}/g, JSON.stringify(getFilledOutTagSubmissionsOverTime(tagSubmissionsOverTimeJson)))
 
@@ -313,8 +253,7 @@ const buildPages = async ({
   }
 
   // Go through relevant languages
-  const relevantLanguageIds = Object.keys(versionsByLanguageId).filter(id => (!changedVersionIds || versionsByLanguageId[id].some(({ id }) => changedVersionIds.includes(id))))
-  for(let id of relevantLanguageIds) {
+  for(let id of Object.keys(versionsByLanguageId)) {
 
     const {
       englishName,
@@ -332,7 +271,7 @@ const buildPages = async ({
 
     const numVersesWithTagging = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numVersesWithTagging, 0)
     const numVersesWithConfirmedTagging = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numVersesWithConfirmedTagging, 0)
-    const numTaggers = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numTaggers, 0)
+    const taggerUserIds = [ ...new Set(versionsByLanguageId[id].map(version => version.dataValues.taggerUserIds).flat()) ]
     const numTagSubmissions = versionsByLanguageId[id].reduce((total, version) => total + version.dataValues.numTagSubmissions, 0)
     const tagSubmissionsOverTime = versionsByLanguageId[id].reduce(
       (compiledTagSubmissionsOverTime, version) => {
@@ -392,7 +331,7 @@ const buildPages = async ({
         .replace(/{{numVersions}}/g, versionsByLanguageId[id].length)
         .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
         .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
-        .replace(/{{numTaggers}}/g, numTaggers)
+        .replace(/{{numTaggers}}/g, taggerUserIds.length)
         .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
         .replace(/{{tagSubmissionsOverTime}}/g, JSON.stringify(tagSubmissionsOverTime))
 
@@ -417,6 +356,77 @@ const buildPages = async ({
     )
 
   }
+
+  const numVersesWithTagging = versions.reduce((total, version) => total + version.dataValues.numVersesWithTagging, 0)
+  const numVersesWithConfirmedTagging = versions.reduce((total, version) => total + version.dataValues.numVersesWithConfirmedTagging, 0)
+  const taggerUserIds = [ ...new Set(versions.map(version => version.dataValues.taggerUserIds).flat()) ]
+  const numTagSubmissions = versions.reduce((total, version) => total + version.dataValues.numTagSubmissions, 0)
+  const tagSubmissionsOverTime = versions.reduce(
+    (compiledTagSubmissionsOverTime, version) => {
+      const tagSubmissionsOverTime = getFilledOutTagSubmissionsOverTime(version.dataValues.tagSubmissionsOverTimeJson)
+      tagSubmissionsOverTime.forEach(([ date, count ], idx) => {
+        compiledTagSubmissionsOverTime[idx] = [ date, ((compiledTagSubmissionsOverTime[idx] || [])[1] || 0) + count ]
+      })
+      return compiledTagSubmissionsOverTime
+    },
+    [],
+  )
+
+  // BUILD PAGE: /versions
+  await write(`${pagesDir}index.html`,
+    versionsTemplate
+
+      // general
+      .replace(/{{header}}/g, headerTemplate)
+      .replace(/{{footer}}/g, footerTemplate)
+      .replace(/{{tag-submissions-over-time}}/g, tagSubmissionsOverTimeTemplate)
+      .replace(/{{date}}/g, date)
+
+      // global stats
+      .replace(/{{numLanguages}}/g, Object.values(versionsByLanguageId).length)
+      .replace(/{{numVersions}}/g, versions.length)
+      .replace(/{{numVersesWithTagging}}/g, numVersesWithTagging)
+      .replace(/{{numVersesWithConfirmedTagging}}/g, numVersesWithConfirmedTagging)
+      .replace(/{{numTaggers}}/g, taggerUserIds.length)
+      .replace(/{{numTagSubmissions}}/g, numTagSubmissions)
+      .replace(/{{tagSubmissionsOverTime}}/g, JSON.stringify(tagSubmissionsOverTime))
+
+      // list
+      .replace(
+        /{{languagesWithVersionsList}}/g,
+        Object.keys(versionsByLanguageId)
+          .sort((lId1, lId2) => getLanguageInfo(lId1).englishName < getLanguageInfo(lId2).englishName ? -1 : 1)
+          .map(languageId => {
+            const { englishName, nativeName } = getLanguageInfo(languageId)
+            const name = englishName === nativeName ? englishName : `${englishName} (${nativeName})`
+            return (
+              versionsLanguageTemplate
+                .replace(/{{id}}/g, languageId)
+                .replace(/{{name}}/g, name)
+                .replace(
+                  /{{versionsList}}/g,
+                  versionsByLanguageId[languageId]
+                    .map(version => {
+                      const grayScaleNum = parseInt(Math.min(1, (version.dataValues.numTagSubmissions / 6000) * .9 + .1) * -255 + 255, 10)
+                      const numTagSubmissionsBGColor = `rgb(${grayScaleNum} ${grayScaleNum} ${grayScaleNum})`
+                      const numTagSubmissionsColor = grayScaleNum < 160 ? `white` : `black`
+                      return (
+                        versionsVersionTemplate
+                          .replace(/{{id}}/g, version.id)
+                          .replace(/{{name}}/g, version.name)
+                          .replace(/{{numTagSubmissions}}/g, version.dataValues.numTagSubmissions)
+                          .replace(/{{numTagSubmissionsBGColor}}/g, numTagSubmissionsBGColor)
+                          .replace(/{{numTagSubmissionsColor}}/g, numTagSubmissionsColor)
+                      )
+                    })
+                    .join('\n')
+                )
+            )
+          })
+          .join('\n')
+      )
+
+  )
 
 }
 

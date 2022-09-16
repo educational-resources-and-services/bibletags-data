@@ -1,29 +1,28 @@
 const { hash64 } = require('@bibletags/bibletags-ui-helper')
 
-const { getOrigLangVersionIdFromLoc, equalObjs, getObjFromArrayOfObjs, deepSortTagSetTags, cloneObj } = require('./utils')
+const { getOrigLangVersionIdFromLoc, equalObjs, getObjFromArrayOfObjs, deepSortTagSetTags, cloneObj, getVersionTables } = require('./utils')
 const getWordInfoByIdAndPart = require('./getWordInfoByIdAndPart')
 
-const SUBMIT_TAG_SETS_CALC_ROW_LIMIT_PER_STATUS = 100
+const SUBMIT_TAG_SETS_CALC_ROW_LIMIT = 100
 const WORD_HASHES_SUBMISSIONS_CALC_ROW_LIMIT = 100
 
 const calculateTagSets = async ({
   loc,
-  versionId,
+  versionId,  // required
   wordsHash,
   justSubmittedUserId,
   currentTagSet,
-  t,
+  t,  // required
 }) => {
 
   loc = loc || (currentTagSet || {}).loc
-  versionId = versionId || (currentTagSet || {}).versionId
   wordsHash = wordsHash || (currentTagSet || {}).wordsHash
 
   const { models } = global.connection
+  const { tagSetTable, wordHashesSetSubmissionTable, wordHashesSubmissionTable } = await getVersionTables(versionId)
 
   const autoMatchTagSetUpdatesByUniqueKey = {}
   const origLangVersionId = getOrigLangVersionIdFromLoc(loc)
-  const wordInfoByIdAndPartByVersionAndLoc = {}
 
   const [ baseVersion, tagSetSubmissions, tagSet=currentTagSet ] = await Promise.all([
 
@@ -61,10 +60,9 @@ const calculateTagSets = async ({
     }),
 
     ...(currentTagSet ? [] : [
-      models.tagSet.findOne({
+      tagSetTable.findOne({
         where: {
           loc,
-          versionId,
           wordsHash,
         },
         transaction: t,
@@ -104,19 +102,18 @@ const calculateTagSets = async ({
 
       getWordInfoByIdAndPart({ version: baseVersion, loc, t }),
 
-      models.wordHashesSetSubmission.findOne({
+      wordHashesSetSubmissionTable.findOne({
         where: {
           loc,
-          versionId,
           wordsHash,
         },
         include: [
           {
-            model: models.wordHashesSubmission,
+            model: wordHashesSubmissionTable,
             required: false,
           },
         ],
-        order: [[ models.wordHashesSubmission, 'wordNumberInVerse' ]],
+        order: [[ wordHashesSubmissionTable, 'wordNumberInVerse' ]],
         transaction: t,
       }),
 
@@ -125,7 +122,7 @@ const calculateTagSets = async ({
     return {
       versionsById,
       baseWordInfoByIdAndPart,
-      baseWordHashesSubmissions: wordHashesSetSubmission.wordHashesSubmissions,
+      baseWordHashesSubmissions: wordHashesSetSubmission[`${versionId}WordHashesSubmissions`],
     }
   }
 
@@ -356,26 +353,38 @@ const calculateTagSets = async ({
 
   const updateAutoMatchTags = async () => {
 
-    // destroy tags to be superseded
-    const tagSetUpdates = Object.values(autoMatchTagSetUpdatesByUniqueKey).filter(({ hasChange }) => hasChange).map(({ hasChange, ...otherValues }) => otherValues)
-    const tagSetDeleteIds = tagSetUpdates.map(({ id }) => id).filter(Boolean)
-    if(tagSetDeleteIds.length > 0) {
-      await models.tagSet.destroy({
-        where: {
-          id: tagSetDeleteIds,
-        },
-        transaction: t,
+    const tagSetUpdatesByVersionId = {}
+    Object.values(autoMatchTagSetUpdatesByUniqueKey)
+      .filter(({ hasChange }) => hasChange)
+      .forEach(({ versionId, hasChange, ...otherValues }) => {
+        tagSetUpdatesByVersionId[versionId] = tagSetUpdatesByVersionId[versionId] || []
+        tagSetUpdatesByVersionId[versionId].push(otherValues)
       })
-    }
 
-    // create new auto-match tags
-    await models.tagSet.bulkCreate(
-      tagSetUpdates.map(({ id, ...input }) => input),
-      {
-        validate: true,
-        transaction: t,
-      },
-    )
+    for(let versionId in tagSetUpdatesByVersionId) {
+      const { tagSetTable } = await getVersionTables(versionId)
+      const tagSetUpdates = tagSetUpdatesByVersionId[versionId]
+
+      // destroy tags to be superseded
+      const tagSetDeleteIds = tagSetUpdates.map(({ id }) => id).filter(Boolean)
+      if(tagSetDeleteIds.length > 0) {
+        await tagSetTable.destroy({
+          where: {
+            id: tagSetDeleteIds,
+          },
+          transaction: t,
+        })
+      }
+
+      // create new auto-match tags
+      await tagSetTable.bulkCreate(
+        tagSetUpdates.map(({ id, ...input }) => input),
+        {
+          validate: true,
+          transaction: t,
+        },
+      )
+    }
 
   }
 
@@ -483,112 +492,108 @@ const calculateTagSets = async ({
         await tagSet.destroy({transaction: t})  // will cascade
       }
 
-      await models.tagSet.create({
+      await tagSetTable.create({
         loc,
         tags: newTagSetTags,
         status: newStatus,
         wordsHash,
-        versionId,
       }, {transaction: t})
 
       // attempt to create auto-match tags
 
       const { versionsById, baseWordInfoByIdAndPart, baseWordHashesSubmissions } = await getBaseAutoMatchTagInfo()
-
-      // combining as many of these queries together in a UNION slighly improves performance
+      const versionIds = [ ...new Set([ versionId, ...Object.keys(versionsById) ]) ]  // put the submitted versionId first
+      const statusesToFind = [ 'none', 'automatch' ]
       const wordHashesSetSubmissionsByNewTagSetIdx = {}
-      const wordHashesSetSubmissionsQueriesByNumTranslationWords = {}
-      newTagSetTags.forEach((baseTag, newTagSetIdx) => {
+      await Promise.all(newTagSetTags.map(async (baseTag, newTagSetIdx) => {
 
         if(baseTag.t.length === 0 || baseTag.o.length === 0) return
 
         wordHashesSetSubmissionsByNewTagSetIdx[newTagSetIdx] = []
-        wordHashesSetSubmissionsQueriesByNumTranslationWords[baseTag.t.length] = wordHashesSetSubmissionsQueriesByNumTranslationWords[baseTag.t.length] || []
+        let limit = SUBMIT_TAG_SETS_CALC_ROW_LIMIT
 
-        const getQueryWithSpecificTagStatus = status => `
-          SELECT
-            ${newTagSetIdx} AS newTagSetIdx,
-            whss.id,
-            whss.loc,
-            whss.versionId,
-            whss.wordsHash,
-            ${baseTag.t.map((x, idx) => `
-              whs${idx}.wordNumberInVerse AS 'wordHashesSubmissions.${idx}.wordNumberInVerse',
-              ${/* whs${idx}.hash AS 'wordHashesSubmissions.${idx}.hash', */ ""}
-              whs${idx}.withBeforeHash AS 'wordHashesSubmissions.${idx}.withBeforeHash',
-              whs${idx}.withAfterHash AS 'wordHashesSubmissions.${idx}.withAfterHash',
-              whs${idx}.withBeforeAndAfterHash AS 'wordHashesSubmissions.${idx}.withBeforeAndAfterHash',
-            `).join("")}
-            ts.id AS tagSetId,
-            ts.tags,
-            ts.autoMatchScores
+        for(let status of statusesToFind) {
 
-          FROM wordHashesSetSubmissions AS whss
-            LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
-            ${baseTag.t.map((x, idx) => `
-              LEFT JOIN wordHashesSubmissions AS whs${idx} ON (whs${idx}.wordHashesSetSubmissionId = whss.id)
-            `).join("")}
+          for(let versionId of versionIds) {
 
-          WHERE whss.versionId IN (:versionIds)
-            AND whss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
-            AND ts.status = "${status}"
-            ${baseTag.t.map((wordNumberInVerse, idx) => `
-              AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase()).slice(0,6)}"
-              ${idx === 0 ? `` : `
-                AND whs${idx}.wordNumberInVerse > whs${idx-1}.wordNumberInVerse
-                AND whs${idx}.wordNumberInVerse - whs${idx-1}.wordNumberInVerse <= 3
-              `}
-            `).join("")}
+            const wordHashesSetSubmission = await global.connection.query(
+              `
+                SELECT
+                  whss.id,
+                  whss.loc,
+                  "${versionId}" AS versionId,
+                  whss.wordsHash,
+                  ${baseTag.t.map((x, idx) => `
+                    whs${idx}.wordNumberInVerse AS 'wordHashesSubmissions.${idx}.wordNumberInVerse',
+                    ${/* whs${idx}.hash AS 'wordHashesSubmissions.${idx}.hash', */ ""}
+                    whs${idx}.withBeforeHash AS 'wordHashesSubmissions.${idx}.withBeforeHash',
+                    whs${idx}.withAfterHash AS 'wordHashesSubmissions.${idx}.withAfterHash',
+                    whs${idx}.withBeforeAndAfterHash AS 'wordHashesSubmissions.${idx}.withBeforeAndAfterHash',
+                  `).join("")}
+                  ts.id AS tagSetId,
+                  ts.tags,
+                  ts.autoMatchScores
 
-          LIMIT :limit
-        `
+                FROM ${versionId}WordHashesSetSubmissions AS whss
+                  LEFT JOIN ${versionId}TagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash)
+                  ${baseTag.t.map((x, idx) => `
+                    LEFT JOIN ${versionId}WordHashesSubmissions AS whs${idx} ON (whs${idx}.${versionId}WordHashesSetSubmissionId = whss.id)
+                  `).join("")}
 
-        // doing a UNION is way faster than doing an ORDER BY since it doesn't have to first find all the results
-        const wordHashesSetSubmissionsQuery = `
-          SELECT * FROM ((
-            ${getQueryWithSpecificTagStatus("none")}
-          ) UNION (
-            ${getQueryWithSpecificTagStatus("automatch")}
-          )) AS tbl
-        `
+                WHERE whss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
+                  AND ts.status = :status
+                  ${baseTag.t.map((wordNumberInVerse, idx) => `
+                    AND whs${idx}.hash = "${hash64(wordByNumberInVerse[wordNumberInVerse].toLowerCase()).slice(0,6)}"
+                    ${idx === 0 ? `` : `
+                      AND whs${idx}.wordNumberInVerse > whs${idx-1}.wordNumberInVerse
+                      AND whs${idx}.wordNumberInVerse - whs${idx-1}.wordNumberInVerse <= 3
+                    `}
+                  `).join("")}
 
-        wordHashesSetSubmissionsQueriesByNumTranslationWords[baseTag.t.length].push(wordHashesSetSubmissionsQuery)
+                LIMIT :limit
+              `,
+              {
+                nest: true,
+                replacements: {
+                  status,
+                  limit,
+                },
+                transaction: t,
+              },    
+            )
 
-      })
+            wordHashesSetSubmissionsByNewTagSetIdx[newTagSetIdx].push(...wordHashesSetSubmission)
+            limit -= wordHashesSetSubmission.length
 
-      await Promise.all(Object.values(wordHashesSetSubmissionsQueriesByNumTranslationWords).map(async queries => {
+            if(limit <= 0) break
+          }
 
-        const wordHashesSetSubmissionsGroup = await global.connection.query(
-          `SELECT * FROM (( ${queries.join(' ) UNION ( ')} )) AS tbl2`,
-          {
-            nest: true,
-            replacements: {
-              versionIds: Object.keys(versionsById),
-              limit: SUBMIT_TAG_SETS_CALC_ROW_LIMIT_PER_STATUS,
-            },
-            transaction: t,
-          },
-        )
-
-        wordHashesSetSubmissionsGroup.forEach(({ newTagSetIdx, ...wordHashesSetSubmission }) => {
-          wordHashesSetSubmissionsByNewTagSetIdx[newTagSetIdx].push(wordHashesSetSubmission)
-        })
+          if(limit <= 0) break
+        }
 
       }))
 
       const allWordHashesSetSubmissions = Object.values(wordHashesSetSubmissionsByNewTagSetIdx).flat()
 
-      if(allWordHashesSetSubmissions.length > 0) {
-        // doing the following as a separate query was a lot faster than using a subquery in the SELECT of the query above
-        const wordHashesSetSubmissionIds = [ ...new Set(allWordHashesSetSubmissions.map(({ id }) => id)) ]
+      // doing the following as a separate query was a lot faster than using a subquery in the SELECT of the query above
+      const wordHashesSetSubmissionsByVersionId = {}
+      allWordHashesSetSubmissions.forEach(wordHashesSetSubmission => {
+        const { versionId } = wordHashesSetSubmission
+        wordHashesSetSubmissionsByVersionId[versionId] = wordHashesSetSubmissionsByVersionId[versionId] || []
+        wordHashesSetSubmissionsByVersionId[versionId].push(wordHashesSetSubmission)
+      })
+      await Promise.all(Object.keys(wordHashesSetSubmissionsByVersionId).map(async versionId => {
+
+        const wordHashesSetSubmissionIds = [ ...new Set(wordHashesSetSubmissionsByVersionId[versionId].map(({ id }) => id)) ]
+
         const wordHashesSubmissionCounts = await global.connection.query(
           `
             SELECT
-              whs.wordHashesSetSubmissionId,
+              whs.${versionId}WordHashesSetSubmissionId AS wordHashesSetSubmissionId,
               COUNT(*) AS cnt
-            FROM wordHashesSubmissions AS whs
-            WHERE whs.wordHashesSetSubmissionId IN (:wordHashesSetSubmissionIds)
-            GROUP BY whs.wordHashesSetSubmissionId
+            FROM ${versionId}WordHashesSubmissions AS whs
+            WHERE whs.${versionId}WordHashesSetSubmissionId IN (:wordHashesSetSubmissionIds)
+            GROUP BY whs.${versionId}WordHashesSetSubmissionId
           `,
           {
             nest: true,
@@ -598,14 +603,17 @@ const calculateTagSets = async ({
             transaction: t,
           },
         )
+
         const numTranslationWordsById = {}
         wordHashesSubmissionCounts.forEach(({ wordHashesSetSubmissionId, cnt }) => {
           numTranslationWordsById[wordHashesSetSubmissionId] = cnt
         })
-        allWordHashesSetSubmissions.forEach(wordHashesSetSubmission => {
+
+        wordHashesSetSubmissionsByVersionId[versionId].forEach(wordHashesSetSubmission => {
           wordHashesSetSubmission.numTranslationWords = numTranslationWordsById[wordHashesSetSubmission.id]
         })
-      }
+
+      }))
 
       const wordInfoSetByKey = await getWordInfoByIdAndPart({
         locAndVersionCombos: (
@@ -640,54 +648,61 @@ const calculateTagSets = async ({
   } else {  // coming from submitWordHashesSet
 
     const { versionsById, baseWordInfoByIdAndPart, baseWordHashesSubmissions } = await getBaseAutoMatchTagInfo()
-
-    const wordHashesSetSubmissions = await global.connection.query(
-      `
-        SELECT
-          whss.id,
-          whss.loc,
-          whss.versionId,
-          whss.wordsHash,
-          whs.hash,
-          whs.wordNumberInVerse,
-          whs.withBeforeHash,
-          whs.withAfterHash,
-          whs.withBeforeAndAfterHash,
-          ts.tags
-
-        FROM wordHashesSetSubmissions AS whss
-          LEFT JOIN wordHashesSubmissions AS whs ON (whs.wordHashesSetSubmissionId = whss.id)
-          LEFT JOIN tagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash AND ts.versionId = whss.versionId)
-
-        WHERE whss.versionId IN (:versionIds)
-          AND whss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
-          AND whs.hash IN (:hash)
-          AND ts.status IN ("unconfirmed", "confirmed")
-          AND ts.autoMatchScores IS NULL
-
-        ORDER BY FIELD(ts.status, "confirmed", "unconfirmed")
-        LIMIT :limit
-      `,
-      {
-        nest: true,
-        replacements: {
-          versionIds: Object.keys(versionsById),
-          hash: baseWordHashesSubmissions.map(({ hash }) => hash),
-          limit: WORD_HASHES_SUBMISSIONS_CALC_ROW_LIMIT,
-        },
-        transaction: t,
-      },
-    )
-
+    const versionIds = [ ...new Set([ versionId, ...Object.keys(versionsById) ]) ]  // put the submitted versionId first
     const wordHashesSetSubmissionsByHash = {}
-    wordHashesSetSubmissions.forEach(({ hash, ...wordHashesSetSubmission }) => {
-      wordHashesSetSubmissionsByHash[hash] = wordHashesSetSubmissionsByHash[hash] || []
-      wordHashesSetSubmissionsByHash[hash].push(wordHashesSetSubmission)
-    })
+    let limit = WORD_HASHES_SUBMISSIONS_CALC_ROW_LIMIT
+
+    for(let versionId of versionIds) {
+
+      const wordHashesSetSubmissions = await global.connection.query(
+        `
+          SELECT
+            whss.id,
+            whss.loc,
+            "${versionId}" AS versionId,
+            whss.wordsHash,
+            whs.hash,
+            whs.wordNumberInVerse,
+            whs.withBeforeHash,
+            whs.withAfterHash,
+            whs.withBeforeAndAfterHash,
+            ts.tags
+
+          FROM ${versionId}WordHashesSetSubmissions AS whss
+            LEFT JOIN ${versionId}WordHashesSubmissions AS whs ON (whs.${versionId}WordHashesSetSubmissionId = whss.id)
+            LEFT JOIN ${versionId}TagSets AS ts ON (ts.loc = whss.loc AND ts.wordsHash = whss.wordsHash)
+
+          WHERE whss.loc REGEXP "${origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]'}"
+            AND whs.hash IN (:hash)
+            AND ts.status IN ("unconfirmed", "confirmed")
+            AND ts.autoMatchScores IS NULL
+
+          ORDER BY FIELD(ts.status, "confirmed", "unconfirmed")
+          LIMIT :limit
+        `,
+        {
+          nest: true,
+          replacements: {
+            hash: baseWordHashesSubmissions.map(({ hash }) => hash),
+            limit,
+          },
+          transaction: t,
+        },
+      )
+
+      wordHashesSetSubmissions.forEach(({ hash, ...wordHashesSetSubmission }) => {
+        wordHashesSetSubmissionsByHash[hash] = wordHashesSetSubmissionsByHash[hash] || []
+        wordHashesSetSubmissionsByHash[hash].push(wordHashesSetSubmission)
+      })
+
+      limit -= wordHashesSetSubmissions.length
+
+      if(limit <= 0) break
+    }
 
     const wordInfoSetByKey = await getWordInfoByIdAndPart({
       locAndVersionCombos: (
-        wordHashesSetSubmissions.map(({ versionId, loc }) => ({
+        Object.values(wordHashesSetSubmissionsByHash).flat().map(({ versionId, loc }) => ({
           version: versionsById[versionId],
           loc,
         }))

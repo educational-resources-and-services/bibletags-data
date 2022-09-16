@@ -6,6 +6,11 @@ const { setUpConnection } = require('./connect')
 
   setUpConnection({ setUpCascadeDeletes: true })
 
+  const versionTables = (
+    (await global.connection.query(`SHOW TABLES`))[0].map(row => Object.values(row)[0])
+      .filter(tbl => /(?:TagSets|WordHashesSetSubmissions|WordHashesSubmissions)$/.test(tbl))
+  )
+
   await global.connection.query(
     `
       SET FOREIGN_KEY_CHECKS = 0;
@@ -28,6 +33,11 @@ const { setUpConnection } = require('./connect')
             ].includes(model)
           ))
           .map(model => `TRUNCATE table ${global.connection.models[model].tableName};`)
+          .join('')
+      }
+      ${
+        versionTables
+          .map(tbl => `DROP TABLE ${tbl};`)
           .join('')
       }
       SET FOREIGN_KEY_CHECKS = 1;

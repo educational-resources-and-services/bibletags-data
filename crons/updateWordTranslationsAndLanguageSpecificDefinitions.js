@@ -3,6 +3,7 @@ const { wordPartDividerRegex, getMainWordPartIndex } = require('@bibletags/bible
 
 const { setUpConnection } = require('../src/db/connect')
 const updateTranslationBreakdowns = require('./updateTranslationBreakdowns')
+const { getVersionTables } = require('../src/utils')
 
 const prefixToDefinitionIdMap = {
   "ב": 'b',
@@ -66,6 +67,7 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
 
           const translationsByLocWordsHashAndWordNumbers = {}
           const updatedHitsByUniqueKey = {}
+          const { tagSetTable, wordHashesSetSubmissionTable, wordHashesSubmissionTable } = await getVersionTables(version.id)
 
           {  // blocked off to facilitate memory garbage collection
             const tagSetSubmissionItems = await models.tagSetSubmissionItem.findAll({
@@ -105,18 +107,17 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
           }
 
           {  // blocked off to facilitate memory garbage collection
-            const wordHashesSubmissions = await models.wordHashesSubmission.findAll({
+            const wordHashesSubmissions = await wordHashesSubmissionTable.findAll({
               attributes: [ 'wordNumberInVerse', 'hash' ],
               include: [
                 {
-                  model: models.wordHashesSetSubmission,
+                  model: wordHashesSetSubmissionTable,
                   required: true,
                   attributes: [ 'loc', 'wordsHash' ],
                   where: {
                     loc: {
                       [Op.regexp]: origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]',
                     },
-                    versionId: version.id,
                   },
                 },
               ],
@@ -143,13 +144,12 @@ const updateWordTranslationsAndLanguageSpecificDefinitions = async () => {
           }
 
           {  // blocked off to facilitate memory garbage collection
-            const tagSets = await models.tagSet.findAll({
+            const tagSets = await tagSetTable.findAll({
               attributes: [ 'loc', 'tags', 'wordsHash' ],
               where: {
                 loc: {
                   [Op.regexp]: origLangVersionId === 'uhb' ? '^[0-3]' : '^[4-6]',
                 },
-                versionId: version.id,
               },
             })
 

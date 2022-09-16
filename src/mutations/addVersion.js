@@ -1,5 +1,6 @@
 const sendEmail = require('../email/sendEmail')
 const { equalObjs, cloneObj } = require('../utils')
+const setUpVersionDataModel = require('../db/setUpVersionDataModel')
 
 const {
   adminEmail,
@@ -50,6 +51,8 @@ const addVersion = async (args, req, queryInfo) => {
     }
 
   } else {
+    setUpVersionDataModel(otherInput.id)
+    await global.connection.sync()
     version = await models.version.create(otherInput)
   }
 

@@ -2,6 +2,8 @@ const { i18nSetup, i18n, i18nNumber } = require("inline-i18n")
 const { passOverI18n, passOverI18nNumber } = require("@bibletags/bibletags-ui-helper")
 const fs = require('fs')
 
+const setUpVersionDataModel = require('./db/setUpVersionDataModel')
+
 const cloneObj = obj => JSON.parse(JSON.stringify(obj))
 const equalObjs = (obj1, obj2) => JSON.stringify(obj1) === JSON.stringify(obj2)
 
@@ -96,5 +98,26 @@ module.exports = {
   },
 
   determineLocaleFromOptions,
+
+  getVersionTables: async versionId => {
+    const { models } = global.connection
+
+    if(
+      !models[`${versionId}TagSet`]
+      || !models[`${versionId}WordHashesSetSubmission`]
+      || !models[`${versionId}WordHashesSubmission`]
+    ) {
+      const version = await models.version.findByPk(versionId)
+      if(!version) throw `invalid versionId`
+
+      setUpVersionDataModel(versionId)
+    }
+
+    return {
+      tagSetTable: models[`${versionId}TagSet`],
+      wordHashesSetSubmissionTable: models[`${versionId}WordHashesSetSubmission`],
+      wordHashesSubmissionTable: models[`${versionId}WordHashesSubmission`],
+    }
+  },
 
 }

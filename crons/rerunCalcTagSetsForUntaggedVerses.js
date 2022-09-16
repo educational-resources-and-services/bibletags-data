@@ -2,6 +2,7 @@ const { Op, fn } = require('sequelize')
 
 const { setUpConnection } = require('../src/db/connect')
 const calculateTagSets = require('../src/calculateTagSets')
+const { getVersionTables } = require('../src/utils')
 
 const rerunCalcTagSetsForUntaggedVerses = async ({ day, halfHourIdx }) => {  // day: 0-6, halfHourIdx: 0-47
   const cronId = parseInt(Math.random() * 999999)
@@ -31,10 +32,10 @@ const rerunCalcTagSetsForUntaggedVerses = async ({ day, halfHourIdx }) => {  // 
       if(parseInt(idx, 10) % 7 !== day) continue  // for each version, only run once per week
 
       const versionId = versions[idx].id
+      const { tagSetTable } = await getVersionTables(versionId)
 
-      const tagSets = await models.tagSet.findAll({
+      const tagSets = await tagSetTable.findAll({
         where: {
-          versionId,
           status: [ 'automatch', 'none' ],
           loc: {
             [Op.regexp]: `^0?(${bookIdsToDo})[0-9]{6}`,
@@ -49,6 +50,7 @@ const rerunCalcTagSetsForUntaggedVerses = async ({ day, halfHourIdx }) => {  // 
         await global.connection.transaction(async t => {
           await calculateTagSets({
             currentTagSet,
+            versionId,
             t,
           })
         })

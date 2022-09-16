@@ -27,6 +27,206 @@ const connectionObj = {
   port: process.env.RDS_PORT || '3306',
 }
 
+const createdAt = {
+  type: Sequelize.DATE(3),
+  allowNull: false,
+  defaultValue: Sequelize.NOW,
+}
+
+const updatedAt = {
+  type: Sequelize.DATE(3),
+  allowNull: false,
+}
+
+const deletedAt = {
+  type: Sequelize.DATE(3),
+  allowNull: true,
+}
+
+const languageId = {
+  type: Sequelize.STRING(3),
+  validate: {
+    is: languageIdRegEx,
+  },
+  allowNull: false,
+}
+
+const loc = {
+  type: Sequelize.STRING(8),
+  validate: {
+    is: locRegEx,
+  },
+}
+
+const locPrimaryKey = {
+  type: Sequelize.STRING(8),
+  primaryKey: true,
+  validate: {
+    is: locRegEx,
+  },
+}
+
+const wordsHash = {
+  // Effectively works to distiguish verses which differ due to being
+  // from two different editions of a single Bible version.
+  type: Sequelize.STRING(4),
+  allowNull: false,
+  validate: {
+    is: wordsHashRegEx,
+  },
+}
+
+const wordNumberInVerse = {
+  type: Sequelize.INTEGER.UNSIGNED,
+  allowNull: false,
+}
+
+const hash = {
+  type: Sequelize.STRING(6),
+  allowNull: false,
+  notEmpty: true,
+}
+
+const wordComboHash = {
+  type: Sequelize.STRING(3),
+  allowNull: false,
+  notEmpty: true,
+}
+
+const scope = {
+  type: Sequelize.STRING(2),
+  allowNull: false,
+  validate: {
+    is: scopeRegEx,
+  },
+}
+
+const hits = {
+  type: Sequelize.INTEGER.UNSIGNED,
+  allowNull: false,
+}
+
+const usfm = {
+  type: Sequelize.TEXT,
+  allowNull: false,
+}
+
+const form = {  // no capitalization, accents, vowels or diacritical marks
+  type: Sequelize.STRING(30),
+  allowNull: false,
+  notEmpty: true,
+}
+
+const lemma = {
+  type: Sequelize.STRING(50),
+  allowNull: false,
+  notEmpty: true,
+}
+
+const fullParsing = {
+  type: Sequelize.STRING(30),
+  allowNull: false,
+  notEmpty: true,
+}
+
+const bookId = {
+  type: Sequelize.INTEGER.UNSIGNED,
+  allowNull: false,
+  validate: {
+    min: 1,
+    max: 87,  // 67+ are deuterocanonical (for the LXX)
+  },
+}
+
+const chapter = {
+  type: Sequelize.INTEGER.UNSIGNED,
+  allowNull: false,
+  validate: {
+    min: 1,
+    max: 151,
+  },
+}
+
+const verse = {
+  type: Sequelize.INTEGER.UNSIGNED,
+  allowNull: false,
+  validate: {
+    min: 1,
+    max: 176,
+  },
+}
+
+const wordNumber = {  // in a book (not in a verse); null if it is a variant; used for quoted searches
+  type: Sequelize.INTEGER.UNSIGNED,
+}
+
+const verseNumber = {  // in a book (not in a chapter); used by same:verses:# tag
+  type: Sequelize.INTEGER.UNSIGNED,
+  allowNull: false,
+}
+
+const greekPos = {
+  type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T', 'F'),  // F is for foreign
+  allowNull: false,
+}
+
+const greekType = {  // includes the pos to remove ambiguity
+  type: Sequelize.ENUM(
+    'AS', 'AP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER', 'ET',
+    'PD', 'PE', 'PP', 'PC', 'PI', 'PR', 'PT',  // these are R_ in the usfm, but changed to P_ in importUGNTFromUsfm to match UHB
+    'VT', 'VI', 'VL', 'VM', 'VP',  // these presently are not used, but perhaps they will be in the future
+    'IE', 'ID', 'IR', 'DI', 'DO', 'CC', 'CS', 'CO', 'FF'
+  ),
+}
+
+const greekMood = {
+  type: Sequelize.ENUM('I', 'M', 'S', 'O', 'N', 'P'),
+}
+
+const greekAspect = {
+  type: Sequelize.ENUM('P', 'I', 'F', 'A', 'E', 'L'),
+}
+
+const greekVoice = {
+  type: Sequelize.ENUM('A', 'M', 'P'),
+}
+
+const greekPerson = {
+  type: Sequelize.ENUM('1', '2', '3'),
+}
+
+const greekCase = {
+  type: Sequelize.ENUM('N', 'D', 'G', 'A', 'V'),
+}
+
+const greekGender = {
+  type: Sequelize.ENUM('M', 'F', 'N'),
+}
+
+const greekNumber = {
+  type: Sequelize.ENUM('S', 'P'),
+}
+
+const greekAttribute = {
+  type: Sequelize.ENUM('C', 'S', 'D', 'I'),
+}
+
+const wordPartNumber = {
+  type: Sequelize.INTEGER.UNSIGNED,
+  allowNull: false,
+}
+
+const translation = {
+  type: Sequelize.STRING(translationLength),
+  allowNull: false,
+}
+
+const createdAtDesc = { attribute: 'createdAt', order: 'DESC' }
+// const updatedAtDesc = { attribute: 'updatedAt', order: 'DESC' }
+
+const required = { foreignKey: { allowNull: false } }
+const primaryKey = { foreignKey: { allowNull: false, primaryKey: true } }
+
 const setUpConnection = ({
   setUpCascadeDeletes=false,
 }={}) => {
@@ -254,208 +454,9 @@ const setUpConnection = ({
     }
   }
 
-  const createdAt = {
-    type: Sequelize.DATE(3),
-    allowNull: false,
-    defaultValue: Sequelize.NOW,
-  }
-
-  const updatedAt = {
-    type: Sequelize.DATE(3),
-    allowNull: false,
-  }
-
-  const deletedAt = {
-    type: Sequelize.DATE(3),
-    allowNull: true,
-  }
-
-  const languageId = {
-    type: Sequelize.STRING(3),
-    validate: {
-      is: languageIdRegEx,
-    },
-    allowNull: false,
-  }
-
-  const loc = {
-    type: Sequelize.STRING(8),
-    validate: {
-      is: locRegEx,
-    },
-  }
-
-  const locPrimaryKey = {
-    type: Sequelize.STRING(8),
-    primaryKey: true,
-    validate: {
-      is: locRegEx,
-    },
-  }
-
-  const wordsHash = {
-    // Effectively works to distiguish verses which differ due to being
-    // from two different editions of a single Bible version.
-    type: Sequelize.STRING(4),
-    allowNull: false,
-    validate: {
-      is: wordsHashRegEx,
-    },
-  }
-
-  const wordNumberInVerse = {
-    type: Sequelize.INTEGER.UNSIGNED,
-    allowNull: false,
-  }
-
-  const hash = {
-    type: Sequelize.STRING(6),
-    allowNull: false,
-    notEmpty: true,
-  }
-
-  const wordComboHash = {
-    type: Sequelize.STRING(3),
-    allowNull: false,
-    notEmpty: true,
-  }
-
-  const scope = {
-    type: Sequelize.STRING(2),
-    allowNull: false,
-    validate: {
-      is: scopeRegEx,
-    },
-  }
-
-  const hits = {
-    type: Sequelize.INTEGER.UNSIGNED,
-    allowNull: false,
-  }
-
-  const usfm = {
-    type: Sequelize.TEXT,
-    allowNull: false,
-  }
-
-  const form = {  // no capitalization, accents, vowels or diacritical marks
-    type: Sequelize.STRING(30),
-    allowNull: false,
-    notEmpty: true,
-  }
-
-  const lemma = {
-    type: Sequelize.STRING(50),
-    allowNull: false,
-    notEmpty: true,
-  }
-
-  const fullParsing = {
-    type: Sequelize.STRING(30),
-    allowNull: false,
-    notEmpty: true,
-  }
-
-  const bookId = {
-    type: Sequelize.INTEGER.UNSIGNED,
-    allowNull: false,
-    validate: {
-      min: 1,
-      max: 87,  // 67+ are deuterocanonical (for the LXX)
-    },
-  }
-
-  const chapter = {
-    type: Sequelize.INTEGER.UNSIGNED,
-    allowNull: false,
-    validate: {
-      min: 1,
-      max: 151,
-    },
-  }
-  
-  const verse = {
-    type: Sequelize.INTEGER.UNSIGNED,
-    allowNull: false,
-    validate: {
-      min: 1,
-      max: 176,
-    },
-  }
-
-  const wordNumber = {  // in a book (not in a verse); null if it is a variant; used for quoted searches
-    type: Sequelize.INTEGER.UNSIGNED,
-  }
-
-  const verseNumber = {  // in a book (not in a chapter); used by same:verses:# tag
-    type: Sequelize.INTEGER.UNSIGNED,
-    allowNull: false,
-  }
-
-  const greekPos = {
-    type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T', 'F'),  // F is for foreign
-    allowNull: false,
-  }
-
-  const greekType = {  // includes the pos to remove ambiguity
-    type: Sequelize.ENUM(
-      'AS', 'AP', 'AA', 'AR', 'EA', 'ED', 'EF', 'EP', 'EQ', 'EN', 'EO', 'ER', 'ET',
-      'PD', 'PE', 'PP', 'PC', 'PI', 'PR', 'PT',  // these are R_ in the usfm, but changed to P_ in importUGNTFromUsfm to match UHB
-      'VT', 'VI', 'VL', 'VM', 'VP',  // these presently are not used, but perhaps they will be in the future
-      'IE', 'ID', 'IR', 'DI', 'DO', 'CC', 'CS', 'CO', 'FF'
-    ),
-  }
-
-  const greekMood = {
-    type: Sequelize.ENUM('I', 'M', 'S', 'O', 'N', 'P'),
-  }
-
-  const greekAspect = {
-    type: Sequelize.ENUM('P', 'I', 'F', 'A', 'E', 'L'),
-  }
-
-  const greekVoice = {
-    type: Sequelize.ENUM('A', 'M', 'P'),
-  }
-
-  const greekPerson = {
-    type: Sequelize.ENUM('1', '2', '3'),
-  }
-
-  const greekCase = {
-    type: Sequelize.ENUM('N', 'D', 'G', 'A', 'V'),
-  }
-
-  const greekGender = {
-    type: Sequelize.ENUM('M', 'F', 'N'),
-  }
-
-  const greekNumber = {
-    type: Sequelize.ENUM('S', 'P'),
-  }
-
-  const greekAttribute = {
-    type: Sequelize.ENUM('C', 'S', 'D', 'I'),
-  }
-
-  const wordPartNumber = {
-    type: Sequelize.INTEGER.UNSIGNED,
-    allowNull: false,
-  }
-
-  const translation = {
-    type: Sequelize.STRING(translationLength),
-    allowNull: false,
-  }
-
-  const createdAtDesc = { attribute: 'createdAt', order: 'DESC' }
-  // const updatedAtDesc = { attribute: 'updatedAt', order: 'DESC' }
-
-  const required = { foreignKey: { allowNull: false } }
   const onDeleteAddition = setUpCascadeDeletes ? { onDelete: 'CASCADE' } : {}
   const requiredWithCascadeDelete = { foreignKey: { allowNull: false }, ...onDeleteAddition }
-  const primaryKey = { foreignKey: { allowNull: false, primaryKey: true } }
-
+  
   //////////////////////////////////////////////////////////////////
 
   // needed: app (in combo with PartOfSpeech and LanguageSpecificDefinition), biblearc
@@ -814,67 +815,6 @@ const setUpConnection = ({
 
   //////////////////////////////////////////////////////////////////
 
-  // needed: app (partial), biblearc (partial)
-  // changes often
-  const TagSet = connection.define(
-    'tagSet',
-    {
-      loc,
-      tags: {
-        // contains JSON; did not use JSON type column, however, since that type does not maintain key order
-        type: Sequelize.TEXT('medium'),
-        allowNull: false,
-        notEmpty: true,
-        get() {
-          try {
-            return JSON.parse(this.getDataValue('tags'))
-          } catch(err) {
-            return []
-          }
-        },
-        set(value) {
-          this.setDataValue('tags', JSON.stringify(value))
-        },
-      },
-      autoMatchScores: {  // NOT included in offline version; this array matches tags item for item
-        type: Sequelize.JSON,
-        // null indicates it is based on a human submission
-      },
-      status: {
-        type: Sequelize.ENUM(
-          'none',  // no human submission yet, and nothing tagged
-          'automatch',  // no human submission yet
-          'unconfirmed',  // contains human submission, but contains at least some tags which are not confirmed strongly enough
-          'confirmed'  // contains human submission and is strongly confirmed
-        ),
-        allowNull: false,
-      },
-      wordsHash,
-      createdAt,
-    },
-    {
-      indexes: [
-        {
-          fields: ['loc', 'wordsHash', 'versionId'],
-          unique: true,
-          name: 'loc_wordsHash_versionId',
-        },
-        { fields: ['loc', 'status'] },
-        { fields: ['versionId', 'status'] },
-        { fields: ['versionId', 'loc'] },
-        { fields: ['wordsHash'] },
-        { fields: ['status'] },
-        { fields: ['versionId', 'createdAt'] },
-      ],
-      updatedAt: false,  // since rows are never updated, but rather destroyed and re-created
-    },
-  )
-
-  TagSet.belongsTo(Version, required)
-  Version.hasMany(TagSet)
-
-  //////////////////////////////////////////////////////////////////
-
   // needed: none
   // changes often
   const TagSetSubmission = connection.define(
@@ -959,73 +899,6 @@ const setUpConnection = ({
 
   TagSetSubmissionItemTranslationWord.belongsTo(TagSetSubmissionItem, requiredWithCascadeDelete)
   TagSetSubmissionItem.hasMany(TagSetSubmissionItemTranslationWord)
-
-  //////////////////////////////////////////////////////////////////
-
-  // This table and the next used in the auto-tagging process
-  // since we do now know the actual (copyrighted) words of the translations.
-
-  // needed: none
-  // changes often
-  const WordHashesSetSubmission = connection.define(
-    'wordHashesSetSubmission',
-    {
-      loc,
-      wordsHash,
-      createdAt,
-    },
-    {
-      indexes: [
-        {
-          fields: ['versionId', 'wordsHash', 'loc'],
-          unique: true,
-          name: 'versionId_wordsHash_loc',
-        },
-        { fields: ['loc'] },
-        { fields: ['embeddingAppId'] },
-        { fields: ['createdAt'] },
-      ],
-      updatedAt: false,
-    },
-  )
-
-  WordHashesSetSubmission.belongsTo(Version, required)
-  Version.hasMany(WordHashesSetSubmission)
-
-  WordHashesSetSubmission.belongsTo(EmbeddingApp, required)
-  EmbeddingApp.hasMany(WordHashesSetSubmission)
-
-  //////////////////////////////////////////////////////////////////
-
-  // needed: none
-  // changes often
-  const WordHashesSubmission = connection.define(
-    'wordHashesSubmission',
-    {
-      wordNumberInVerse,
-      hash,
-      withBeforeHash: { ...wordComboHash },
-      withAfterHash: { ...wordComboHash },
-      withBeforeAndAfterHash: { ...wordComboHash },
-    },
-    {
-      indexes: [
-        {
-          fields: ['wordHashesSetSubmissionId', 'wordNumberInVerse'],
-          unique: true,
-          name: 'wordHashesSetSubmissionId_wordNumberInVerse',
-        },
-        { fields: ['hash'] },
-        { fields: ['withBeforeHash'] },
-        { fields: ['withAfterHash'] },
-        { fields: ['withBeforeAndAfterHash'] },
-      ],
-      timestamps: false,  // timestamps for this data kep in related WordHashesSetSubmission row
-    },
-  )
-
-  WordHashesSubmission.belongsTo(WordHashesSetSubmission, required)
-  WordHashesSetSubmission.hasMany(WordHashesSubmission)
 
   //////////////////////////////////////////////////////////////////
 
@@ -1944,4 +1817,11 @@ const setUpConnection = ({
 module.exports = {
   connectionObj,
   setUpConnection,
+  loc,
+  wordsHash,
+  createdAt,
+  required,
+  wordNumberInVerse,
+  hash,
+  wordComboHash,
 }
