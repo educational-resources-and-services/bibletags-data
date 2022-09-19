@@ -153,10 +153,10 @@ const buildPages = async () => {
         global.connection.query(`SELECT IFNULL((SELECT AVG(LENGTH(tags)) FROM ${version.id}TagSets) / (SELECT AVG(LENGTH(tags)) FROM ${version.id}TagSets WHERE status="unconfirmed"), 0)`),
         global.connection.query(getTagSubmissionsOverTimeQuery(version.id)),
       ])
-    ).map(([[ rows ]], idx) => (
+    ).map(([ rows ], idx) => (
       [ 4 ].includes(idx)
         ? rows
-        : Object.values(rows)[0]
+        : Object.values(rows[0])[0]
     ))
 
     version.dataValues = {
