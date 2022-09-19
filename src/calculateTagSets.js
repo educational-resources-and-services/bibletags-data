@@ -498,7 +498,7 @@ const calculateTagSets = async ({
         status: newStatus,
         wordsHash,
       }, {transaction: t})
-
+      
       // attempt to create auto-match tags
 
       const { versionsById, baseWordInfoByIdAndPart, baseWordHashesSubmissions } = await getBaseAutoMatchTagInfo()
@@ -653,6 +653,8 @@ const calculateTagSets = async ({
     let limit = WORD_HASHES_SUBMISSIONS_CALC_ROW_LIMIT
 
     for(let versionId of versionIds) {
+
+      if(baseWordHashesSubmissions.length === 0) throw `loc without words: ${loc}`
 
       const wordHashesSetSubmissions = await global.connection.query(
         `
