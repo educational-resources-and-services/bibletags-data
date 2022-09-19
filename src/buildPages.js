@@ -96,8 +96,6 @@ const buildPages = async () => {
     )
   }
 
-  await global.connection.query(`SET SESSION group_concat_max_len = 10000`)  // needed for the GROUP_CONCAT calls
-
   const versions = await models.version.findAll({
     attributes: {
       exclude: [
@@ -142,6 +140,7 @@ const buildPages = async () => {
       numTagSubmissions,
       taggerUserIds,
       percentageOfWordsTagged,
+      x,
       tagSubmissionsOverTimeJson,
     ] = (
       await Promise.all([
@@ -151,6 +150,7 @@ const buildPages = async () => {
         global.connection.query(`SELECT COUNT(*) FROM tagSetSubmissions WHERE versionId="${version.id}"`),
         global.connection.query(`SELECT DISTINCT userId FROM tagSetSubmissions WHERE versionId="${version.id}"`),
         global.connection.query(`SELECT IFNULL((SELECT AVG(LENGTH(tags)) FROM ${version.id}TagSets) / (SELECT AVG(LENGTH(tags)) FROM ${version.id}TagSets WHERE status="unconfirmed"), 0)`),
+        global.connection.query(`SET SESSION group_concat_max_len = 10000; SELECT 1`),
         global.connection.query(getTagSubmissionsOverTimeQuery(version.id)),
       ])
     ).map(([ rows ], idx) => (
