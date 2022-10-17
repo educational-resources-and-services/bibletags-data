@@ -126,6 +126,26 @@ describe('Query: bibleSearchResults', async () => {
     })
   })
 
+  it('Search: #lemma:Ἰερουσαλήμ / #lemma:δαιμονίζομαι', async () => {
+    const bibleSearchResults = await doQuery(`
+      bibleSearchResults(query: "#lemma:Ἰερουσαλήμ / #lemma:δαιμονίζομαι", hebrewOrdering: false, offset: 0, limit: 0) {
+        ${bibleSearchResultsQuery}
+      }
+    `)
+
+    bibleSearchResults.should.eql({
+      results: [],
+      rowCountByBookId: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,4,27,1,35,4,1,0,2,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,3],
+      hitsByBookId: null,
+      otherSuggestedQueries: [
+        // {
+        //   suggestedQuery: ``,
+        //   resultCount: 1,
+        // },
+      ],
+    })
+  })
+
   it('Search: #G24140#lemma:Ἰερουσαλήμ', async () => {
     const bibleSearchResults = await doQuery(`
       bibleSearchResults(query: "#G24140#lemma:Ἰερουσαλήμ", hebrewOrdering: false, offset: 0, limit: 0) {
