@@ -356,7 +356,7 @@ const setUpConnection = ({
     //           type: "transitive",
     //           meaning: [
     //             {
-    //               text: "transitive def",
+    //               text: "[transitive def]",
     //               perc: "88",
     //             },
     //           ],
@@ -366,6 +366,12 @@ const setUpConnection = ({
     //         },
     //       ]
     //     }
+    //   ],
+    //   alts: [
+    //     {
+    //       id: "bdb",  // the title and copyright info of each lexicon needs to coded directly into the frontends (via bibletags-ui-helper?)
+    //       text: "[bdb entry in markdown]"
+    //     },
     //   ],
     // }
   }
