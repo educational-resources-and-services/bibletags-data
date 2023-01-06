@@ -347,7 +347,11 @@ const setUpConnection = ({
 
     // Eg.
     // const obj = {
-    //   lemmas: ["string"],
+    //   isAramaic: true,
+    //   root: [
+    //     "דגכ",
+    //     "H73642"
+    //   ],
     //   poss: [
     //     {
     //       pos: "verb",
@@ -369,8 +373,7 @@ const setUpConnection = ({
     //   ],
     //   alts: [
     //     {
-    //       id: "bdb",  // the title and copyright info of each lexicon needs to coded directly into the frontends (via bibletags-ui-helper?)
-    //       text: "[bdb entry in markdown]"
+    //       text: "[bdb entry in usfm]"
     //     },
     //   ],
     // }

@@ -20,7 +20,7 @@ const languageSpecificDefinition = `
   gloss: String
   syn: JSON
   rel: JSON
-  lexEntry: String
+  lexEntry: JSON
   editorId: ID
 `
 
