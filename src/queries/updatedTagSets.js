@@ -27,7 +27,7 @@ const updatedTagSets = async (args, req, queryInfo) => {
         [Op.ne]: `none`,
       },
     },
-    order: [ 'createdAt' ],
+    order: [ 'createdAt', 'id' ],
     limit,
   })
 

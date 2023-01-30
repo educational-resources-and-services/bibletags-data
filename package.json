@@ -27,9 +27,9 @@
     "setup-db": "npm run go-setup-db -s",
     "go-setup-db": "(echo '----------------------\nSetting up database...\n----------------------\n\n** WARNING **  This will wipe current data!\n' && npm run confirm && npm run do-setup-db && npm run do-imports && npm run do-unit-words && npm run do-defs-and-lemma) || true",
     "do-setup-db": "node ./src/scripts/deleteUsersAndSessionsTables.js && node ./node_modules/session-sync-auth-site/src/createDBTables.js mysql://root@localhost/$(grep RDS_DATABASE .env | cut -d '=' -f2) && node src/db/setup.js && node src/db/seed.js",
-    "do-imports": "node ./src/scripts/importUHBFromUsfm.js && node ./src/scripts/importUGNTFromUsfm.js",
-    "do-unit-words": "node ./src/scripts/populateUHBUnitWordsTable.js && node ./src/scripts/populateUGNTUnitWordsTable.js",
-    "do-defs-and-lemma": "node ./src/scripts/createUHBDefAndPOS.js && node ./src/scripts/createUGNTDefAndPOS.js && node ./src/scripts/createLemmaTable.js && node ./src/scripts/createTempEngGloss.js",
+    "do-imports": "node ./src/scripts/importUHBFromUsfm.js && node ./src/scripts/importUGNTFromUsfm.js && node ./src/scripts/importLXXFromUsfm.js",
+    "do-unit-words": "node ./src/scripts/populateUHBUnitWordsTable.js && node ./src/scripts/populateUGNTUnitWordsTable.js && node ./src/scripts/populateLXXUnitWordsTable.js",
+    "do-defs-and-lemma": "node ./src/scripts/createUHBDefAndPOS.js && node ./src/scripts/createUGNTDefAndPOS.js && node ./src/scripts/createLemmaTable.js && node ./src/scripts/createTempEngGloss.js && node ./src/scripts/createInitialEngLexEntry.js",
     "import-update-to-original-text": "(echo '----------------------\nImport update to original USFM...\n----------------------\n\n** WARNING **  This will wipe current data!\n' && npm run confirm && npm run do-setup-db && npm run do-imports && npm run do-unit-words && npm run do-defs-and-lemma && update-original-in-apps-default-tenant) || true",
     "update-original-in-apps-default-tenant": "cd ../bibletags-react-native-app && npm run usfm-to-sqlite defaultTenant && cd - && node ./src/scripts/updateOriginalSearchTablesInAppsDefaultTenant.js",
     "reset-db": "npm run go-reset-db -s",
@@ -61,8 +61,8 @@
     "sync-original-data-to-production": "node ./src/scripts/syncOriginalDataToProduction.js"
   },
   "dependencies": {
-    "@bibletags/bibletags-ui-helper": "^0.10.8",
-    "@bibletags/bibletags-versification": "^0.3.6",
+    "@bibletags/bibletags-ui-helper": "^0.11.3",
+    "@bibletags/bibletags-versification": "^2.0.0",
     "aws-sdk": "^2.1189.0",
     "better-sqlite3": "^7.5.1",
     "body-parser": "^1.19.1",

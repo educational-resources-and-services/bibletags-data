@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const mysql = require('mysql2/promise')
+const fs = require('fs').promises
 const TurndownService = require('turndown')
 
 ;(async() => {
@@ -62,6 +63,22 @@ const TurndownService = require('turndown')
         .replace(/\n +/g, '\n')
         .replace(/^\n+|\n+$/g, '')
     )
+  }
+
+  ///// PREP WORK /////
+
+  const [[ hasStrongs ]] = await connection.query(`SHOW TABLES LIKE 'strongs'`)
+
+  if(!hasStrongs) {
+    const sqlImport = (await fs.readFile(`src/data/strongs.sql`)).toString()
+    await connection.query(sqlImport)
+  }
+
+  const [[ hasThayers ]] = await connection.query(`SHOW TABLES LIKE 'thayers'`)
+
+  if(!hasThayers) {
+    const sqlImport = (await fs.readFile(`src/data/thayers.sql`)).toString()
+    await connection.query(sqlImport)
   }
 
   ///// OT /////

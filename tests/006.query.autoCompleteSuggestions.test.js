@@ -507,37 +507,37 @@ describe('Query: autoCompleteSuggestions', async () => {
         from: "look-up",
         originalWords: {},
         resultCount: null,
+        suggestedQuery: "#lemma:βάρ",
+      },
+      {
+        from: "look-up",
+        originalWords: {},
+        resultCount: null,
         suggestedQuery: "#lemma:Βαραββᾶς",
       },
       {
         from: "look-up",
         originalWords: {},
         resultCount: null,
-        suggestedQuery: "#lemma:Βαράκ",
+        suggestedQuery: "#lemma:Βαραγα",
       },
       {
         from: "look-up",
         originalWords: {},
         resultCount: null,
-        suggestedQuery: "#lemma:Βαραχίας",
+        suggestedQuery: "#lemma:Βαραδ",
       },
       {
         from: "look-up",
         originalWords: {},
         resultCount: null,
-        suggestedQuery: "#lemma:βάρβαρος",
+        suggestedQuery: "#lemma:βάραθρον",
       },
       {
         from: "look-up",
         originalWords: {},
         resultCount: null,
-        suggestedQuery: "#lemma:βαρέω",
-      },
-      {
-        from: "look-up",
-        originalWords: {},
-        resultCount: null,
-        suggestedQuery: "#lemma:βαρέως",
+        suggestedQuery: "#lemma:Βαραια",
       },
     ])
   })

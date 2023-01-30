@@ -60,4 +60,29 @@ describe('Query: verse', async () => {
     })
   })
 
+  it('Psalm 151:2', async () => {
+    const verse = await doQuery(`
+      verse(id: "19151002-lxx") {
+        id
+        usfm
+      }
+    `)
+
+    verse.should.eql({
+      id: '19151002-lxx',
+      usfm: '\\p\n' +
+        '\\v 2\n' +
+        '\\w αἱ|lemma="ὁ" strong="G35880" x-morph="Gr,RR,,,,NFP,"\\w*\n' +
+        '\\w χεῖρές|lemma="χείρ" strong="G54950" x-morph="Gr,N,,,,,NFP,"\\w*\n' +
+        '\\w μου|lemma="ἐγώ" strong="G14730" x-morph="Gr,RR,,,,G,S,"\\w*\n' +
+        '\\w ἐποίησαν|lemma="ποιέω" strong="G41600" x-morph="Gr,V,IAA3,,P,"\\w*\n' +
+        '\\w ὄργανον|lemma="ὄργανον" strong="G62903" x-morph="Gr,N,,,,,ANS,"\\w*\n' +
+        '\\w οἱ|lemma="ὁ" strong="G35880" x-morph="Gr,RR,,,,NMP,"\\w*\n' +
+        '\\w δάκτυλοί|lemma="δάκτυλος" strong="G11470" x-morph="Gr,N,,,,,NMP,"\\w*\n' +
+        '\\w μου|lemma="ἐγώ" strong="G14730" x-morph="Gr,RR,,,,G,S,"\\w*\n' +
+        '\\w ἥρμοσαν|lemma="ἁρμόζω" strong="G07180" x-morph="Gr,V,IAA3,,P,"\\w*\n' +
+        '\\w ψαλτήριον|lemma="ψαλτήριον" strong="G60037" x-morph="Gr,N,,,,,ANS,"\\w*'
+    })
+  })
+
 })

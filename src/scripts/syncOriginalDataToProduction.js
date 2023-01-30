@@ -30,12 +30,16 @@ const { equalObjs } = require('../utils')
     definitions: [ 'id' ],
     uhbWords: [ 'id' ],
     ugntWords: [ 'id' ],
+    lxxWords: [ 'id' ],
     uhbVerses: [ 'loc' ],
     uhbUnitWords: [ 'id' ],
     uhbUnitRanges: [ 'id' ],
     ugntVerses: [ 'loc' ],
     ugntUnitWords: [ 'id' ],
     ugntUnitRanges: [ 'id' ],
+    lxxVerses: [ 'loc' ],
+    lxxUnitWords: [ 'id' ],
+    lxxUnitRanges: [ 'id' ],
     lemmas: [ 'id', 'nakedLemma' ],
     partOfSpeeches: [ 'pos', 'definitionId' ],
   }
@@ -46,7 +50,11 @@ const { equalObjs } = require('../utils')
       : (
         typeof val === 'object'
           ? JSON.stringify(JSON.stringify(val))
-          : JSON.stringify(val)
+          : (
+            typeof val === 'number'
+              ? `"${val}"`
+              : JSON.stringify(val)
+          )
       )
   )
 
@@ -174,11 +182,16 @@ const { equalObjs } = require('../utils')
 
       console.log(`\n\nRUNNING UPDATES...`)
 
-      await productionConnection.query(`
-        START TRANSACTION;
-        ${Object.values(updatesByTable).flat().join(';')};
-        COMMIT;
-      `)
+      const allUpdates = Object.values(updatesByTable).flat()
+      const updateGroupSize = 10
+
+      for(let idx=0; idx<allUpdates.length; idx+=updateGroupSize) {
+        await productionConnection.query(`
+          START TRANSACTION;
+          ${allUpdates.slice(idx, idx + updateGroupSize).join(';')};
+          COMMIT;
+        `)
+      }
 
       console.log(`...SUCCESSFUL!`)
 

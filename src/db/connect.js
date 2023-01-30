@@ -379,30 +379,52 @@ const setUpConnection = ({
     // }
   }
 
-  const isArrayOfLXXObjs = ary => {
+  const isArrayOfLXXObjsOrInteger = ary => {
+
+    // if(!(ary instanceof Array)) throw new Error('Must be an array')
+
+    // if(typeof ary[0] === `number`) {
+
+    //   // for Greek words
+
+    //   if(ary.length !== 2) throw new Error('Must list two whole numbers')
+
+    //   ary.forEach(num => {
+    //     if(!Number.isInteger(num) || num < 0) throw new Error('Must list two whole numbers')
+    //   })
+
     if(!(ary instanceof Array)) {
-      throw new Error('Must be an array.')
-    }
 
-    const lxxObjStructure = {
-      w: "string",
-      lex: "string",
-      id: "string",
-      hits: "number",
-      ugntHits: "number",
-    }
+      // for Greek words
 
-    ary.forEach(wordObj => {
-      if(typeof wordObj !== 'object') {
-        throw new Error('Array must contain objects.')
+      if(!Number.isInteger(ary) || ary < 0) throw new Error('Must be an array or object.')
+
+    } else {
+
+      // for Hebrew words
+
+      const lxxObjStructureForHebrew = {
+        w: "string",
+        lex: "string",
+        id: "string",
+        hits: "number",
+        ugntHits: "number",
       }
-      
-      Object.keys(wordObj).forEach(key => {
-        if(typeof wordObj[key] !== lxxObjStructure[key]) {
-          throw new Error('Objects must match lxx object structure: ' + JSON.stringify(lxxObjStructure))
+  
+      ary.forEach(wordObj => {
+        if(typeof wordObj !== 'object') {
+          throw new Error('Array must contain objects.')
         }
+        
+        Object.keys(wordObj).forEach(key => {
+          if(typeof wordObj[key] !== lxxObjStructureForHebrew[key]) {
+            throw new Error('Objects must match lxx object structure: ' + JSON.stringify(lxxObjStructureForHebrew))
+          }
+        })
       })
-    })
+
+    }
+
   }
 
   const isArrayOfStrings = ary => {
@@ -505,7 +527,7 @@ const setUpConnection = ({
         type: Sequelize.JSON,
         allowNull: false,
         validate: {
-          isArrayOfLXXObjs,
+          isArrayOfLXXObjsOrInteger,
         },
       },
       lemmas: {
@@ -1093,7 +1115,7 @@ const setUpConnection = ({
   const uhbUnitWord = connection.define(
     `uhbUnitWord`,
     {
-      id: {  // ["verse"/"paragraph"/"section"]:[word/parsing_detail]
+      id: {  // ["verseNumber"/"paragraph"/"section"]:[word/parsing_detail]
         type: Sequelize.STRING(translationWordLength + 11),  // 11 for "paragraph:="
         primaryKey: true,
       },
@@ -1282,7 +1304,7 @@ const setUpConnection = ({
   const ugntUnitWord = connection.define(
     `ugntUnitWord`,
     {
-      id: {  // ["verse"/"phrase"/"sentence"/"paragraph"]:[word/parsing_detail]
+      id: {  // ["verseNumber"/"phrase"/"sentence"/"paragraph"]:[word/parsing_detail]
         type: Sequelize.STRING(translationWordLength + 11),  // 11 for "paragraph:="
         primaryKey: true,
       },
@@ -1396,7 +1418,12 @@ const setUpConnection = ({
       verseNumber,
       form,
       lemma,
+      fullParsing,
       pos: greekPos,
+      morphPos: {  // akin to UGNT's pos
+        type: Sequelize.ENUM('N', 'A', 'E', 'R', 'V', 'I', 'P', 'D', 'C', 'T'),
+        allowNull: false,
+      },
       type: greekType,
       mood: greekMood,
       aspect: greekAspect,
@@ -1412,18 +1439,21 @@ const setUpConnection = ({
         { fields: ['bookId', 'chapter', 'verse'] },
         { fields: ['bookId', 'wordNumber'] },
         { fields: ['bookId', 'verseNumber'] },
-        { fields: ['form'] },
-        { fields: ['pos'] },
-        { fields: ['type'] },
-        { fields: ['mood'] },
-        { fields: ['aspect'] },
-        { fields: ['voice'] },
-        { fields: ['person'] },
-        { fields: ['case'] },
-        { fields: ['gender'] },
-        { fields: ['number'] },
-        { fields: ['attribute'] },
-        { fields: ['definitionId'] },
+        { fields: ['form', 'bookId', 'wordNumber'] },
+        { fields: ['lemma', 'bookId', 'wordNumber'] },
+        { fields: ['fullParsing', 'bookId', 'wordNumber'] },
+        { fields: ['pos', 'bookId', 'wordNumber'] },
+        { fields: ['morphPos', 'bookId', 'wordNumber'] },
+        { fields: ['type', 'bookId', 'wordNumber'] },
+        { fields: ['mood', 'bookId', 'wordNumber'] },
+        { fields: ['aspect', 'bookId', 'wordNumber'] },
+        { fields: ['voice', 'bookId', 'wordNumber'] },
+        { fields: ['person', 'bookId', 'wordNumber'] },
+        { fields: ['case', 'bookId', 'wordNumber'] },
+        { fields: ['gender', 'bookId', 'wordNumber'] },
+        { fields: ['number', 'bookId', 'wordNumber'] },
+        { fields: ['attribute', 'bookId', 'wordNumber'] },
+        { fields: ['definitionId', 'bookId', 'wordNumber'] },
       ],
       timestamps: false,  // Derived from import files.
     },
@@ -1431,6 +1461,68 @@ const setUpConnection = ({
 
   lxxWord.belongsTo(Definition, required)
   Definition.hasMany(lxxWord)
+
+  //////////////////////////////////////////////////////////////////
+
+  // needed: app (as expo resource), biblearc
+  // doesn't change
+  const lxxUnitWord = connection.define(
+    `lxxUnitWord`,
+    {
+      id: {  // ["verseNumber"/"phrase"/"sentence"/"paragraph"]:[word/parsing_detail]
+        type: Sequelize.STRING(translationWordLength + 11),  // 11 for "paragraph:="
+        primaryKey: true,
+      },
+      scopeMap: {
+        // contains JSON; did not use JSON type column, however, since that type does not maintain key order
+        /*
+          value structure for verse type:
+            {
+              "[loc]-": [
+                [
+                  wordNumber,  // in book
+                  "form",
+                  definitionId,  // as int
+                  "lemma",
+                  "G[type/pos_][mood][voice][aspect][person][gender][number][case][attribute]"  // each hold designated # of chars for a total of 11 chars; if detail is NULL, char(s) will be _; type includes pos; if type is NULL, will show as [pos]_
+                ],
+              ],
+            }
+          keys for other types: "[bookId]:[phraseNumber/sentenceNumber/paragraphNumber]"
+        */
+        type: Sequelize.TEXT('medium'),
+        allowNull: false,
+        notEmpty: true,
+      },
+    },
+    {
+      indexes: [],
+      timestamps: false,
+    },
+  )
+
+  ////////////////////////////////////////////////////////////////////
+
+  // needed: app (as expo resource), biblearc
+  // doesn't change
+  const lxxUnitRange = connection.define(
+    `lxxUnitRange`,
+    {
+      id: {
+        type: Sequelize.STRING(20),
+        primaryKey: true,
+      },
+      originalLoc: {
+        type: Sequelize.STRING(17),  // BBCCCVVV-BBCCCVVV
+        allowNull: false,
+        notEmpty: true,
+      },
+    },
+    {
+      indexes: [],
+      timestamps: false,
+    },
+  )
 
   //////////////////////////////////////////////////////////////////
 

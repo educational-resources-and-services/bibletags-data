@@ -24,10 +24,8 @@ const bibleSearchResults = async (args, req, queryInfo) => {
 
   const getVersions = async versionIds => versionIds.map(versionId => ({
     id: versionId,
-    versificationModel: 'original',
-    partialScope: versionId === 'uhb' ? 'ot' : 'nt',
-    // NOTE: I haven't yet decided if the LXX will use its native versification or if I will convert it to original versification.
-    // If I do the former, then I will need its proper information returned here.
+    versificationModel: [ 'lxx' ].includes(versionId) ? 'lxx' : 'original',
+    partialScope: [ 'uhb', 'lxx' ].includes(versionId) ? 'ot' : 'nt',
   }))
 
   const getUnitWords = async ({ versionId, id, limit }) => (
