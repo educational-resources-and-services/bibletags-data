@@ -33,6 +33,7 @@ const wordColumnsToUse = [
   console.log(`\nSTARTING populateUGNTUnitWordsTable...\n`)
 
   await connection.query(`TRUNCATE ugntUnitWords`)
+  await connection.query(`TRUNCATE ugntUnitRanges`)
 
   const bookIdAndVerseNumberToLocMap = {}
 
