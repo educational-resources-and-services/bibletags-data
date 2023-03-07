@@ -7,6 +7,7 @@ const cors = require('cors')
 const { graphqlHTTP } = require('express-graphql')
 const app = express()
 const { authenticate, setUpSessionSyncAuthRoutes } = require('session-sync-auth-site')
+const compression = require('compression')
 
 const { connectionObj, setUpConnection } = require('./src/db/connect')
 const { schema, root } = require('./src/schema')
@@ -41,6 +42,7 @@ app.use(authenticate({
     language: 'languageId',
   },
 }))
+app.use(compression())
 
 if(process.env.LOCAL) {
   app.use(doFakeAuthIfTesting())
