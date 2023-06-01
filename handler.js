@@ -5,6 +5,7 @@ const sendQueuedEmails = require('./crons/sendQueuedEmails')
 const updateWordTranslationsAndLanguageSpecificDefinitions = require('./crons/updateWordTranslationsAndLanguageSpecificDefinitions')
 const rerunCalcTagSetsForUntaggedVerses = require('./crons/rerunCalcTagSetsForUntaggedVerses')
 const rebuildAllPages = require('./crons/rebuildAllPages')
+const pingToKeepAlive = require('./crons/pingToKeepAlive')
 
 const handler = async ({ forceRunAll }={}) => {
   
@@ -16,6 +17,7 @@ const handler = async ({ forceRunAll }={}) => {
 
   // every minute
   await sendQueuedEmails()
+  await pingToKeepAlive()
 
   if((minutes === 0) || forceRunAll) {  // once per hour
     // await updateWordTranslationsAndLanguageSpecificDefinitions()
