@@ -1,19 +1,44 @@
 org: resourcingeducation
 app: bibletags-data
-component: express
-name: bibletags-data-graphql
+service: bibletags-data
+frameworkVersion: '3'
 
-inputs:
-  src: ./
-  domain: ${param:domain}
-  roleName: bibletags-data
-  env:
-    RDS_HOST: ${param:RDS_HOST}
-    RDS_USERNAME: ${param:RDS_USERNAME}
-    RDS_PASSWORD: ${param:RDS_PASSWORD}
-    RDS_DATABASE: ${param:RDS_DATABASE}
-    AUTH_SITE_ID: ${param:AUTH_SITE_ID}
-    AUTH_DOMAIN: ${param:AUTH_DOMAIN}
-    AUTH_JWT_SECRET: ${param:AUTH_JWT_SECRET}
-    AWS_DOWNLOADS_BUCKET: ${param:AWS_DOWNLOADS_BUCKET}
-    LOCAL: ''
+provider:
+  name: aws
+  runtime: nodejs18.x
+  role: arn:aws:iam::572013440289:role/bibletags-data
+
+functions:
+  api:
+    handler: app.handler
+    events:
+      - httpApi: '*'
+    environment:
+      STAGE: ${param:STAGE}
+      RDS_USERNAME: ${param:RDS_USERNAME}
+      RDS_PASSWORD: ${param:RDS_PASSWORD}
+      AUTH_JWT_SECRET: ${param:AUTH_JWT_SECRET}
+  crons:
+    handler: crons.handler
+    memorySize: 2048  # mb
+    timeout: 900  # 15 minutes
+    events:
+      - schedule: rate(1 minute)
+    environment:
+      STAGE: ${param:STAGE}
+      RDS_USERNAME: ${param:RDS_USERNAME}
+      RDS_PASSWORD: ${param:RDS_PASSWORD}
+
+package:
+  exclude:
+    - .env
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: ${param:DOMAIN}
+    stage: $default
+    apiType: http
+    endpointType: REGIONAL

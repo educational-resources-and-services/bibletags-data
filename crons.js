@@ -1,4 +1,5 @@
 require('dotenv').config()
+require('./src/setNonSecretEnv')()
 
 const { doI18nSetup } = require('./src/utils')
 const sendQueuedEmails = require('./crons/sendQueuedEmails')
@@ -7,7 +8,7 @@ const rerunCalcTagSetsForUntaggedVerses = require('./crons/rerunCalcTagSetsForUn
 const rebuildAllPages = require('./crons/rebuildAllPages')
 const pingToKeepAlive = require('./crons/pingToKeepAlive')
 
-const handler = async ({ forceRunAll }={}) => {
+const crons = async ({ forceRunAll }={}) => {
   
   doI18nSetup()
 
@@ -41,6 +42,4 @@ const handler = async ({ forceRunAll }={}) => {
 
 }
 
-module.exports = {
-  handler,
-}
+module.exports.handler = crons

@@ -36,21 +36,9 @@
     "go-reset-db": "(echo '-------------------------\nResetting the database...\n-------------------------\n\n** WARNING **  This will wipe all current data except for those tables created when you ran `setup-db`!\n' && npm run confirm && npm run do-reset-db) || true",
     "do-reset-db": "node src/db/reset.js && node src/db/seed.js",
     "deploy-staging": "npm run go-deploy-staging -s",
-    "go-deploy-staging": "(echo '-----------------\nDeploy staging...\n-----------------\n' && npm run confirm && rm -rf pages/* && npx serverless@2.72.2 deploy --stage staging && npm run go-deploy-staging-crons-execute) || true",
+    "go-deploy-staging": "(echo '-----------------\nDeploy staging...\n-----------------\n' && npm run confirm && rm -rf pages/* && npx serverless deploy --stage staging) || true",
     "deploy-production": "npm run go-deploy-production -s",
-    "go-deploy-production": "(echo '--------------------\nDeploy production...\n--------------------\n' && npm run confirm && rm -rf pages/* && npx serverless@2.72.2 deploy --stage production && npm run go-deploy-production-crons-execute) || true",
-    "deploy-staging-graphql": "npm run go-deploy-staging-graphql -s",
-    "go-deploy-staging-graphql": "(echo '-------------------------\nDeploy staging graphql...\n-------------------------\n' && npm run confirm && rm -rf pages/* && npx serverless@2.72.2 deploy --stage staging) || true",
-    "deploy-production-graphql": "npm run go-deploy-production-graphql -s",
-    "go-deploy-production-graphql": "(echo '----------------------------\nDeploy production graphql...\n----------------------------\n' && npm run confirm && rm -rf pages/* && npx serverless@2.72.2 deploy --stage production) || true",
-    "deploy-staging-crons": "npm run go-deploy-staging-crons -s",
-    "go-deploy-staging-crons": "(echo '-----------------------\nDeploy staging crons...\n-----------------------\n' && npm run confirm && npm run go-deploy-staging-crons-execute) || true",
-    "go-deploy-staging-crons-execute": "rm -rf pages/* && cd crons && cp serverless.staging.yml serverless.yml && npx serverless@2.72.2 deploy --stage staging && npm run update-staging-cron-role && rm serverless.yml && cd -",
-    "update-staging-cron-role": "aws lambda update-function-configuration --function-name biblearc-data-crons-staging-lambda --role arn:aws:iam::572013440289:role/bibletags-data > /dev/null",
-    "deploy-production-crons": "npm run go-deploy-production-crons -s",
-    "go-deploy-production-crons": "(echo '--------------------------\nDeploy production crons...\n--------------------------\n' && npm run confirm && npm run go-deploy-production-crons-execute) || true",
-    "go-deploy-production-crons-execute": "rm -rf pages/* && cd crons && cp serverless.production.yml serverless.yml && npx serverless@2.72.2 deploy --stage production && npm run update-production-cron-role && rm serverless.yml && cd -",
-    "update-production-cron-role": "aws lambda update-function-configuration --function-name biblearc-data-crons-lambda --role arn:aws:iam::572013440289:role/bibletags-data > /dev/null",
+    "go-deploy-production": "(echo '--------------------\nDeploy production...\n--------------------\n' && npm run confirm && rm -rf pages/* && npx serverless deploy --stage production) || true",
     "update-patch": "npm run go-update-patch -s",
     "update-major": "npm run go-update-major -s",
     "update-minor": "npm run go-update-minor -s",
@@ -70,7 +58,7 @@
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
-    "express": "^4.17.2",
+    "express": "^4.18.2",
     "express-graphql": "^0.12.0",
     "fs-extra": "^10.1.0",
     "graphql": "^15.4.0",
@@ -85,6 +73,7 @@
     "nodemailer": "^6.7.7",
     "retry-as-promised": "^5.0.0",
     "sequelize": "^6.15.1",
+    "serverless-http": "^3.2.0",
     "session-sync-auth-site": "^0.2.0",
     "turndown": "^7.1.1",
     "uuid": "^8.3.2"
@@ -92,6 +81,7 @@
   "devDependencies": {
     "chai": "^4.3.6",
     "mocha": "^9.2.0",
+    "serverless-domain-manager": "^7.1.1",
     "supertest": "^6.2.2"
   }
 }

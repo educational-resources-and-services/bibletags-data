@@ -1,6 +1,8 @@
 'use strict'
 
 require('dotenv').config()
+require('./src/setNonSecretEnv')()
+const serverless = require("serverless-http")
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -17,6 +19,14 @@ const exampleApi = require('./src/apis/example')
 // Middleware
 app.use(async (req, res, next) => {
   // Connect to DB if not already connected
+  if(global.connection) {
+    try {
+      await connection.query(`SELECT 1`)  // test the connection
+    } catch(err) {
+      console.error(`Connection was present, but not working. Attempting to delete and re-establish it.`, err)
+      delete global.connection
+    }
+  }
   if(!global.connection) {
     console.log('Establishing DB connection...')
     setUpConnection()
@@ -106,4 +116,4 @@ if(!!process.env.LOCAL) {
   })
 }
 
-module.exports = app
+module.exports.handler = serverless(app)

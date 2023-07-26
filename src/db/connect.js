@@ -262,7 +262,9 @@ const setUpConnection = ({
           }
           return isValid
         },
-        max: 100,
+        max: 10,
+        // This was 100; trying 10 as having this too big MIGHT cause the DB to exceed max_connections (SHOW VARIABLES LIKE "max_connections";).
+        // I have not confirmed that this was, in fact, the cause of the issue. But the default of max:5 and the errors make this my best guess.
       },
     }
   )
