@@ -11,6 +11,7 @@ provider:
 functions:
   api:
     handler: app.handler
+    timeout: 29  # the HTTP API request times out at 30 seconds; so 29 seconds is the max I can set this to
     events:
       - httpApi: '*'
     environment:
