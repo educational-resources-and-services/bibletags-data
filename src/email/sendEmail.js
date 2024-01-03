@@ -38,6 +38,18 @@ const sendEmail = async input => {
   replyToAddrs = replyToAddrs || fromAddr
   replyToAddrs = replyToAddrs instanceof Array ? replyToAddrs : [replyToAddrs]
 
+  // remove invalid chars
+  const fixAddr = addr => {
+    const [ x, name, email ] = addr.match(/^(.*) <([^>]+)>$/) || []
+    if(!name) return addr
+    return `${name.replace(/[^-a-z. ]/gi, ``)} <${email}>`
+  }
+  toAddrs = toAddrs.map(fixAddr)
+  fromAddr = fixAddr(fromAddr)
+  replyToAddrs = replyToAddrs.map(fixAddr)
+  ccAddrs = ccAddrs.map(fixAddr)
+  bccAddrs = bccAddrs.map(fixAddr)
+
   if(includeLinkWillLoginMessage) {
     body += `
       <p style="color: rgba(0,0,0,.5); font-size: 13px;">${i18n("Links and buttons will automatically log you in the first time they are used.", {}, i18nOptions)}</p>
