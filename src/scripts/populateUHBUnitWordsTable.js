@@ -47,6 +47,7 @@ const wordColumnsToUse = [
   console.log(`\nSTARTING populateUHBUnitWordsTable...\n`)
 
   await connection.query(`TRUNCATE uhbUnitWords`)
+  await connection.query(`TRUNCATE uhbUnitRanges`)
 
   const bookIdAndVerseNumberToLocMap = {}
 
