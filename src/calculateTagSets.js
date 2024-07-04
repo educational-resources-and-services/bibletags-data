@@ -142,7 +142,10 @@ const calculateTagSets = async ({
     if(!startFromTag && !autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey]) {
       autoMatchTagSetUpdatesByUniqueKey[fixedUniqueKey] = (
         currentTagSet
-          ? cloneObj(currentTagSet)
+          ? {
+            versionId,
+            ...cloneObj(currentTagSet),
+          }
           : {
             tags: [],
             autoMatchScores: [],

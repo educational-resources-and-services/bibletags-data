@@ -108,7 +108,7 @@ module.exports = {
       || !models[`${versionId}WordHashesSubmission`]
     ) {
       const version = await models.version.findByPk(versionId)
-      if(!version) throw `invalid versionId`
+      if(!version) throw `invalid versionId: ${versionId}`
 
       setUpVersionDataModel(versionId)
     }

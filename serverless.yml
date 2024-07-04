@@ -19,6 +19,8 @@ functions:
       RDS_USERNAME: ${param:RDS_USERNAME}
       RDS_PASSWORD: ${param:RDS_PASSWORD}
       AUTH_JWT_SECRET: ${param:AUTH_JWT_SECRET}
+      AWS_ACCESS_KEY_ID_OVERRIDE: ${param:AWS_ACCESS_KEY_ID_OVERRIDE}
+      AWS_SECRET_ACCESS_KEY_OVERRIDE: ${param:AWS_SECRET_ACCESS_KEY_OVERRIDE}
   crons:
     handler: crons.handler
     memorySize: 2048  # mb
@@ -29,6 +31,8 @@ functions:
       STAGE: ${param:STAGE}
       RDS_USERNAME: ${param:RDS_USERNAME}
       RDS_PASSWORD: ${param:RDS_PASSWORD}
+      AWS_ACCESS_KEY_ID_OVERRIDE: ${param:AWS_ACCESS_KEY_ID_OVERRIDE}
+      AWS_SECRET_ACCESS_KEY_OVERRIDE: ${param:AWS_SECRET_ACCESS_KEY_OVERRIDE}
 
 package:
   exclude:

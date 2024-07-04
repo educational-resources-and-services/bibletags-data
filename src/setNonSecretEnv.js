@@ -12,7 +12,7 @@ module.exports = () => {
 
     staging: {
 
-      LOCAL: false,
+      LOCAL: "",
       AUTH_SITE_ID: "2",
       AUTH_DOMAIN: "auth.staging.bibletags.org",
       AWS_DOWNLOADS_BUCKET: "none",
@@ -24,7 +24,7 @@ module.exports = () => {
 
     production: {
 
-      LOCAL: false,
+      LOCAL: "",
       AUTH_SITE_ID: "2",
       AUTH_DOMAIN: "auth.bibletags.org",
       AWS_DOWNLOADS_BUCKET: "downloads.bibletags.org",
