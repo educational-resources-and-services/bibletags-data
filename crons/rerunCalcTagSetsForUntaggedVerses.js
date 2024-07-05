@@ -44,6 +44,7 @@ const rerunCalcTagSetsForUntaggedVerses = async ({ minutes, hours, day }) => {
 
     const versions = [
       ...bigLanguageVersions.filter((v, idx) => parseInt(idx, 10) % 24 === hours),
+      // ...bigLanguageVersions.filter((v, idx) => v.id === 'csb'),
       ...otherVersions.filter((v, idx) => parseInt(idx, 10) % 24 === hours),
     ]
 
@@ -58,7 +59,7 @@ const rerunCalcTagSetsForUntaggedVerses = async ({ minutes, hours, day }) => {
         where: {
           status: [ 'automatch', 'none' ],
           loc: {
-            [Op.regexp]: `^0?(${bookIdsToDo})[0-9]{6}`,
+            [Op.regexp]: `^0?(${bookIdsToDo})[0-9]{6}$`,
           },
         },
       })
@@ -86,7 +87,7 @@ const rerunCalcTagSetsForUntaggedVerses = async ({ minutes, hours, day }) => {
               toAddrs: adminEmail,
               subject: `Cron rerunCalcTagSetsForUntaggedVerses ran out of time (day: ${day}, bookIds: ${bookIdsToDo})`,
               body: `
-                On version ${idx} out of ${versions.length} when we ran out of time.
+                On version ${idx+1} out of ${versions.length} when we ran out of time.
                 <br><br>
                 Book ids: ${JSON.stringify(bookIdsToDo)}
                 <br><br>
@@ -95,13 +96,13 @@ const rerunCalcTagSetsForUntaggedVerses = async ({ minutes, hours, day }) => {
                 If this happen repeatedly, reevaluate how to handle this cron.
               `,
             })
-            throw `ran out of time at ${currentSeconds} seconds; on version ${idx}/${versions.length}; undone versions = ${versions.slice(idx).map(({ id }) => id).join()}; book ids ${JSON.stringify(bookIdsToDo)}`
+            throw `ran out of time at ${currentSeconds} seconds; on version ${idx+1}/${versions.length}; undone versions = ${versions.slice(idx).map(({ id }) => id).join()}; book ids ${JSON.stringify(bookIdsToDo)}`
           }
         }
 
       }
 
-      console.log(`rerunCalcTagSetsForUntaggedVerses cron – completed ${tagSets.length} tag sets – versionId: ${versionId}, bookIds: ${bookIdsToDo} (${Math.ceil((Date.now() - now)/1000)}s – cron id:${cronId})`)
+      console.log(`rerunCalcTagSetsForUntaggedVerses cron – completed – versionId: ${versionId}, bookIds: ${bookIdsToDo}, ${tagSets.length} tag sets (${Math.ceil((Date.now() - now)/1000)}s – cron id:${cronId})`)
 
     }
 
