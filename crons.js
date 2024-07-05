@@ -28,13 +28,7 @@ const crons = async ({ forceRunAll }={}) => {
       // 2) For some unknown reason, it is trying to insert a wordTranslationDefinition with definitionId === NULL
   }
 
-  if((minutes === 10) || forceRunAll) {  // once per hour
-    await rerunCalcTagSetsForUntaggedVerses({ day, halfHourIdx: hours })
-  }
-
-  if((minutes === 40) || forceRunAll) {  // once per hour
-    await rerunCalcTagSetsForUntaggedVerses({ day, halfHourIdx: hours + 24 })
-  }
+  await rerunCalcTagSetsForUntaggedVerses({ minutes, hours, day })
 
   if((hours === 0 && minutes === 0) || forceRunAll) {  // once per day
     await rebuildAllPages()

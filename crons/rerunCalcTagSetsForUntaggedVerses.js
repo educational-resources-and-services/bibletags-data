@@ -6,13 +6,12 @@ const { getVersionTables } = require('../src/utils')
 const sendEmail = require('../src/email/sendEmail')
 const { adminEmail } = require('../src/constants')
 
-const rerunCalcTagSetsForUntaggedVerses = async ({ day, halfHourIdx }) => {  // day: 0-6, halfHourIdx: 0-47
+const rerunCalcTagSetsForUntaggedVerses = async ({ minutes, hours, day }) => {
   const cronId = parseInt(Math.random() * 999999)
   console.log(`Beginning cron run for rerunCalcTagSetsForUntaggedVerses (cron id:${cronId})...`)
 
   const now = Date.now()
-  const bookIds = Array(66).fill().map((x, idx) => idx+1)
-  const bookIdsToDo = bookIds.filter(bookId => bookId % 48 === halfHourIdx).join('|')
+  const bookIdsToDo = minutes === 59 ? `60|61|62|63|64|65|66` : `${minutes + 1}`
 
   try {
 
@@ -26,12 +25,31 @@ const rerunCalcTagSetsForUntaggedVerses = async ({ day, halfHourIdx }) => {  // 
 
     const { models } = global.connection
 
-    const versions = await models.version.findAll({
+    const bigLanguageIds = [ `eng` ]
+    const bigLanguageVersions = await models.version.findAll({
+      where: {
+        languageId: bigLanguageIds,
+      },
       order: [[ 'id' ]],
     })
 
+    const otherVersions = await models.version.findAll({
+      where: {
+        languageId: {
+          [Op.notIn]: bigLanguageIds,
+        },
+      },
+      order: [[ 'id' ]],
+    })
+
+    const versions = [
+      ...bigLanguageVersions.filter((v, idx) => parseInt(idx, 10) % 24 === hours),
+      ...otherVersions.filter((v, idx) => parseInt(idx, 10) % 24 === hours),
+    ]
+
+    console.log(`rerunCalcTagSetsForUntaggedVerses cron – versionIds to do: ${versions.map(({ id }) => id).join()}, bookIds: ${bookIdsToDo} (${Math.ceil((Date.now() - now)/1000)}s – cron id:${cronId})`)
+
     for(let idx=0; idx<versions.length; idx++) {
-      if(parseInt(idx, 10) % 7 !== day) continue  // for each version, only run once per week
 
       const versionId = versions[idx].id
       const { tagSetTable } = await getVersionTables(versionId)
@@ -68,12 +86,16 @@ const rerunCalcTagSetsForUntaggedVerses = async ({ day, halfHourIdx }) => {  // 
               toAddrs: adminEmail,
               subject: `Cron rerunCalcTagSetsForUntaggedVerses ran out of time (day: ${day}, bookIds: ${bookIdsToDo})`,
               body: `
-              ${idx} out of ${Math.ceil(versions.length/7)} versions done before running out of time.
+                On version ${idx} out of ${versions.length} when we ran out of time.
+                <br><br>
+                Book ids: ${JSON.stringify(bookIdsToDo)}
+                <br><br>
+                Undone versions = ${versions.slice(idx).map(({ id }) => id).join()}
                 <br><br>
                 If this happen repeatedly, reevaluate how to handle this cron.
               `,
             })
-            throw `ran out of time at ${currentSeconds} seconds`
+            throw `ran out of time at ${currentSeconds} seconds; on version ${idx}/${versions.length}; undone versions = ${versions.slice(idx).map(({ id }) => id).join()}; book ids ${JSON.stringify(bookIdsToDo)}`
           }
         }
 
