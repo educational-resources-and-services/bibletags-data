@@ -50,8 +50,8 @@
     "sync-original-data-to-production": "node ./src/scripts/syncOriginalDataToProduction.js"
   },
   "dependencies": {
-    "@bibletags/bibletags-ui-helper": "^0.11.3",
-    "@bibletags/bibletags-versification": "^2.0.0",
+    "@bibletags/bibletags-ui-helper": "^0.11.18",
+    "@bibletags/bibletags-versification": "^2.1.0",
     "aws-sdk": "^2.1189.0",
     "better-sqlite3": "^7.5.1",
     "body-parser": "^1.19.1",
