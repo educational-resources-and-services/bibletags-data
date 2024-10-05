@@ -37,6 +37,10 @@ functions:
 package:
   exclude:
     - .env
+    - .git
+    - src/data/*
+    - tests/*
+    - pages/*
 
 plugins:
   - serverless-domain-manager
