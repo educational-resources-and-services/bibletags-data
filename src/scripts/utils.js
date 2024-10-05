@@ -98,7 +98,7 @@ const utils = {
   },
 
   padWithZeros: (num, desiredNumDigits) => {
-    return ('000000000000000000000000' + num).substr(desiredNumDigits*-1)
+    return ('000000000000000000000000' + num).slice(desiredNumDigits*-1)
   },
  
   lengthInUtf8Bytes: str => {

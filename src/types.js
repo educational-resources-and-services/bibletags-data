@@ -3,8 +3,11 @@
 // Verse:usfm - every word MUST be in a /w enclosure
 // TagSet:id = [2-digit book][3-digit chapter][3-digit verse]-[versionId]-[wordsHash] (eg. 01001001-esv-Sfgh)
 // TagSet:tags = an array of the original language word ids (followed by |[word part number], if multi-part) and translation word numbers
-  // eg. Gen 1:1's for the esv would be [{o:["01xeN|1"],t:[1]},{o:["01xeN|2"],t:[3]},{o:["01Nvk"],t:[5]},...]
+  // eg. Gen 1:1's for the esv would be [{o:["01xeN|1"],t:[1]},{o:["01xeN|2"],t:[3]},{o:["01Nvk|1"],t:[5]},...]
   //     wherein "בראשית" is tagged to "In" and "beginning", and "ברא" is tagged to "created"
+  //     for OT, wordPartNumber is always present, even if the word only has one part
+  //     for NT, wordPartNumber is never present
+  //     tagSets are always sorted per the deepSortTagSetTags function in utils
 // TagSet:status = none/automatch/unconfirmed/confirmed
 // Definition:id = [extended strongs number]-[languageId] (eg. H234a-eng, G8289-esp; languageId is needed for the gloss)
 // Definition:pos = an array of parts of speech abbreviations (N, V, etc) that this lexeme is found in
@@ -45,6 +48,11 @@ const types = `
     status: String
   }
 
+  type MyTagSet {
+    id: ID
+    tags: JSON
+  }
+
   type TranslationBreakdown {
     id: ID
     breakdown: JSON
@@ -74,6 +82,11 @@ const types = `
     tagSets: [TagSet]
     hasMore: Boolean
     newUpdatedFrom: Milliseconds!
+  }
+
+  type TagSetSubmissionUpdate {
+    myTagSet: MyTagSet
+    tagSet: TagSet
   }
 
   type TranslationBreakdownUpdate {
@@ -149,6 +162,11 @@ const types = `
     updatedAt: Milliseconds
     awsAccessKeyId: String  ${/* This is only included upon creation. */ ``}
     awsSecretAccessKey: String  ${/* This is only included upon creation. */ ``}
+  }
+
+  type NextAndPreviousLocsWithoutTagging {
+    previousLoc: String
+    nextLoc: String
   }
 
 `

@@ -5,7 +5,7 @@ const mutations = `
   logOut: Boolean
   submitWordHashesSet(input: WordHashesSetInput!): TagSet
   submitWordHashesSets(input: [WordHashesSetInput]!): Boolean
-  submitTagSet(input: TagSetInput!, updatedFrom: Milliseconds!): TagSetUpdate
+  submitTagSet(input: TagSetInput!): TagSetSubmissionUpdate
   submitUIWords(input: UIWordsInput!): [UIWord]
   addVersion(input: VersionInput!): Version
   addEmbeddingApp(input: EmbeddingAppInput!): EmbeddingApp

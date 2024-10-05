@@ -4,7 +4,7 @@ describe('Query: updatedTagSets', async () => {
 
   it('Query first page of tagSets', async () => {
     const updatedTagSets = await doQuery(`
-      updatedTagSets(versionId: "esv", updatedFrom: 0) {
+      updatedTagSets(versionId: "esv", updatedSince: 0) {
         tagSets {
           id
           tags

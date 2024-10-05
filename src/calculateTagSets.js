@@ -6,6 +6,19 @@ const getWordInfoByIdAndPart = require('./getWordInfoByIdAndPart')
 const SUBMIT_TAG_SETS_CALC_ROW_LIMIT = 100
 const WORD_HASHES_SUBMISSIONS_CALC_ROW_LIMIT = 100
 
+const getTagsJson = ({ tagSetSubmissionItems, origLangVersionId }) => (
+  tagSetSubmissionItems.map(tagSetSubmissionItem => ({
+    o: (
+      tagSetSubmissionItem[`${origLangVersionId}TagSubmissions`]
+        .map(tag => `${tag[`${origLangVersionId}WordId`]}${origLangVersionId === 'uhb' ? `|${tag.wordPartNumber}` : ``}`)
+    ),
+    t: (
+      tagSetSubmissionItem.tagSetSubmissionItemTranslationWords
+        .map(({ wordNumberInVerse }) => wordNumberInVerse)
+    ),
+  }))
+)
+
 const calculateTagSets = async ({
   loc,
   versionId,  // required
@@ -72,19 +85,6 @@ const calculateTagSets = async ({
   ])
 
   const { languageId } = baseVersion
-
-  const getTagsJson = ({ tagSetSubmissionItems }) => (
-    tagSetSubmissionItems.map(tagSetSubmissionItem => ({
-      o: (
-        tagSetSubmissionItem[`${origLangVersionId}TagSubmissions`]
-          .map(tag => `${tag[`${origLangVersionId}WordId`]}${origLangVersionId === 'uhb' ? `|${tag.wordPartNumber}` : ``}`)
-      ),
-      t: (
-        tagSetSubmissionItem.tagSetSubmissionItemTranslationWords
-          .map(({ wordNumberInVerse }) => wordNumberInVerse)
-      ),
-    }))
-  )
 
   const getBaseAutoMatchTagInfo = async () => {
 
@@ -409,7 +409,7 @@ const calculateTagSets = async ({
         })
       }
 
-      const tags = getTagsJson(tagSetSubmission)
+      const tags = getTagsJson({ ...tagSetSubmission, origLangVersionId })
       const { rating } = tagSetSubmission.user
       tagsByUserId[tagSetSubmission.user.id] = cloneObj(tags)
       if(rating < 2) return  // folks with ratings < 2 (they get more wrong than right!) are discounted
@@ -732,6 +732,8 @@ const calculateTagSets = async ({
   }
 
 }
+
+calculateTagSets.getTagsJson = getTagsJson
 
 module.exports = calculateTagSets
 

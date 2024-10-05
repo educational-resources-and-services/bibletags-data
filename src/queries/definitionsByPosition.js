@@ -45,8 +45,8 @@ const definitionsByPosition = async (args, req, queryInfo) => {
 
   } else {
     wordLocs.push({
-      chapter: parseInt(loc.substr(2,3)),
-      verse: parseInt(loc.substr(5,3)),
+      chapter: parseInt(loc.slice(2,3)),
+      verse: parseInt(loc.slice(5,3)),
       number: wordNum,
     })
   }
@@ -63,7 +63,7 @@ const definitionsByPosition = async (args, req, queryInfo) => {
 
   const where = {
     $or: wordLocs.map(wordLoc => Object.assign({
-      bookId: parseInt(loc.substr(0,2)),
+      bookId: parseInt(loc.slice(0,2)),
       qere: 0,
     }, wordLoc)),
   }

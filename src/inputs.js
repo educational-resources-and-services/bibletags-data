@@ -29,12 +29,10 @@ const inputs = `
     loc: String!
     versionId: ID!
     wordsHash: String!
-    deviceId: ID!
-    embeddingAppId: ID!
-    tagSubmissions: [TagInput]!
+    tagSubmissions: [TagSubmission]!
   }
 
-  input TagInput {
+  input TagSubmission {
     origWordsInfo: [OrigWordsInfo]!
     translationWordsInfo: [TranslationWordsInfo]!
     alignmentType: String!  ${/* ENUM: affirmation, correction, without-suggestion */ ""}

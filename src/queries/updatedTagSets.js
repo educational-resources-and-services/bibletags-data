@@ -8,7 +8,7 @@ const {
 
 const updatedTagSets = async (args, req, queryInfo) => {
 
-  const { versionId, updatedFrom, forceAll } = args
+  const { versionId, updatedSince, forceAll } = args
 
   if(!versionId.match(versionIdRegEx)) {
     throw `Invalid versionId (${versionId}).`
@@ -21,7 +21,7 @@ const updatedTagSets = async (args, req, queryInfo) => {
   let tagSets = await tagSetTable.findAll({
     where: {
       createdAt: {
-        [Op.gte]: updatedFrom,
+        [Op.gt]: updatedSince,
       },
       status: {
         [Op.ne]: `none`,

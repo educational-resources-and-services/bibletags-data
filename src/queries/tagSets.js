@@ -1,4 +1,5 @@
 const { getLocFromRef } = require('@bibletags/bibletags-versification')
+const { Op } = require('sequelize')
 
 const { getVersionTables } = require('../utils')
 
@@ -28,12 +29,12 @@ const tagSets = async (args, req, queryInfo) => {
   })
 
   if(verse === undefined) {
-    loc = `${loc.substr(0,5)}%`
+    loc = `${loc.slice(0,5)}%`
   }
 
   const where = {
     loc: {
-      [Sequelize.Op.like]: loc,
+      [Op.like]: loc,
     },
   }
 

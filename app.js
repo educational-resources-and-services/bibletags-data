@@ -13,7 +13,7 @@ const compression = require('compression')
 
 const { connectionObj, setUpConnection } = require('./src/db/connect')
 const { schema, root } = require('./src/schema')
-const { doFakeAuthIfTesting, doI18nSetup } = require('./src/utils')
+const { authenticateViaEmbeddingApp, doFakeAuthIfTesting, doI18nSetup } = require('./src/utils')
 const exampleApi = require('./src/apis/example')
 
 // Middleware
@@ -52,6 +52,7 @@ app.use(authenticate({
     language: 'languageId',
   },
 }))
+app.use(authenticateViaEmbeddingApp())
 app.use(compression())
 
 if(process.env.LOCAL) {

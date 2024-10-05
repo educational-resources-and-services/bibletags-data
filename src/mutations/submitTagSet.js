@@ -1,8 +1,9 @@
 const sendEmail = require('../email/sendEmail')
 const calculateTagSets = require('../calculateTagSets')
-const updatedTagSets = require('../queries/updatedTagSets')
+const tagSet = require('../queries/tagSet')
 const getWordInfoByIdAndPart = require('../getWordInfoByIdAndPart')
-const { equalObjs , getVersionTables } = require('../utils')
+const { equalObjs , getVersionTables, deepSortTagSetTags } = require('../utils')
+const { getTagsJson } = calculateTagSets
 
 const {
   adminEmail,
@@ -10,21 +11,13 @@ const {
 
 const submitTagSet = async (args, req, queryInfo) => {
 
-  const { input, updatedFrom } = args
-  const { loc, versionId, wordsHash, deviceId, embeddingAppId, tagSubmissions } = input
+  if(!req.user) throw `no login`
+
+  const { input } = args
+  const { loc, versionId, wordsHash, tagSubmissions } = input
 
   const { models } = global.connection
   const { wordHashesSetSubmissionTable, wordHashesSubmissionTable } = await getVersionTables(versionId)
-
-  // TODO: look for auth, else use the id of the user with email = user-[deviceId]@bibletags.org
-  let [ user, embeddingApp ] = await Promise.all([
-    models.user.findByPk(`user-${deviceId}@bibletags.org`),
-    models.embeddingApp.findByPk(embeddingAppId),
-  ])
-
-  if(!embeddingApp) {
-    throw `Invalid embeddingAppId. Please register via bibletags.org.`
-  }
 
   if(!tagSubmissions || tagSubmissions.length === 0) {
     throw `No tags submitted.`
@@ -105,23 +98,14 @@ const submitTagSet = async (args, req, queryInfo) => {
 
   await global.connection.transaction(async t => {
 
-    if(!user) {
-      user = await models.user.create({
-        id: `user-${deviceId}@bibletags.org`,
-        email: `user-${deviceId}@bibletags.org`,
-        name: `ANONYMOUS`,
-        languageId: `eng`,  // TODO
-      })
-    }
-
-    input.userId = user.id
+    input.userId = req.user.id
 
     const existingTagSetSubmission = await models.tagSetSubmission.findOne({
       where: {
         loc,
         versionId,
         wordsHash,
-        userId: user.id,
+        userId: req.user.id,
       },
       transaction: t,
     })
@@ -130,7 +114,13 @@ const submitTagSet = async (args, req, queryInfo) => {
       await existingTagSetSubmission.destroy({transaction: t})
     }
 
-    const tagSetSubmission = await models.tagSetSubmission.create(input, {transaction: t})
+    const tagSetSubmission = await models.tagSetSubmission.create(
+      {
+        ...input,
+        embeddingAppId: req.embeddingAppId,
+      },
+      {transaction: t},
+    )
     const tagSetSubmissionId = tagSetSubmission.id
 
     await Promise.all(tagSubmissions.map(async tagSubmission => {
@@ -176,7 +166,7 @@ const submitTagSet = async (args, req, queryInfo) => {
       loc,
       wordsHash,
       versionId,
-      justSubmittedUserId: user.id,
+      justSubmittedUserId: req.user.id,
       t,
     })
 
@@ -201,9 +191,9 @@ const submitTagSet = async (args, req, queryInfo) => {
 
           Tag Set Submitted by:
 
-          USER ID: ${user.id}
-          USER NAME: ${user.name}
-          USER EMAIL: ${user.email}
+          USER ID: ${req.user.id}
+          USER NAME: ${req.user.name}
+          USER EMAIL: ${req.user.email}
         `
           .replace(/\n +/g, '\n')
           .replace(/\n/g, '<br>')
@@ -212,7 +202,49 @@ const submitTagSet = async (args, req, queryInfo) => {
     })
   }
 
-  return await updatedTagSets({ versionId, updatedFrom, forceAll: true }, req, queryInfo)
+  const id = `${loc}-${versionId}-${wordsHash}`
+
+  const myTagSetSubmission = await models.tagSetSubmission.findOne({
+    where: {
+      loc,
+      versionId,
+      wordsHash,
+      userId: req.user.id,
+    },
+    include: [
+      {
+        model: models.tagSetSubmissionItem,
+        required: true,
+        include: [
+          {
+            model: models.tagSetSubmissionItemTranslationWord,
+            required: false,
+          },
+          {
+            model: models[`${origLangVersionId}TagSubmission`],
+            required: false,
+          },
+        ],
+      },
+    ],
+  })
+
+  if(!myTagSetSubmission) throw `Unexpected missing tagSetSubmission after creation`
+
+  return {
+    myTagSet: {
+      id,
+      tags: (
+        deepSortTagSetTags(
+          getTagsJson({
+            ...myTagSetSubmission,
+            origLangVersionId,
+          })
+        )
+      ),  
+    },
+    tagSet: await tagSet({ id, req, queryInfo }),
+  }
 
 }
 

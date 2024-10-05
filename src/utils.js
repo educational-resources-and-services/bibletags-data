@@ -17,7 +17,7 @@ const determineLocaleFromOptions = ({ req={} }) => {
 module.exports = {
 
   getOrigLangVersionIdFromLoc: loc => (
-    parseInt(loc.substr(0,2), 10) <= 39 ? 'uhb' : 'ugnt'
+    parseInt(loc.slice(0,2), 10) <= 39 ? 'uhb' : 'ugnt'
   ),
 
   createLoginToken: ({ user, t, models }) => {
@@ -45,6 +45,71 @@ module.exports = {
     next()
   },
 
+  authenticateViaEmbeddingApp: () => async (req, res, next) => {
+
+    const uri = req.headers[`x-embedding-app-uri`]
+    const secretKey = req.headers[`x-embedding-app-secret-key`]
+    const userJson = req.headers[`x-authenticated-user`]
+
+    if(!uri) return next()
+
+    if(!secretKey || !userJson) {
+      return res.status(401).send(`Missing headers (x-embedding-app-secret-key and x-authenticated-user required)`)
+    }
+
+    let userInfo
+    try {
+      userInfo = JSON.parse(userJson)
+    } catch(e) {}
+
+    if(!userInfo || !userInfo.id || !userInfo.email) {
+      return res.status(401).send(`Invalid x-authenticated-user header (must be a JSON object with id and email properties)`)
+    }
+
+    if(/ /.test(`${userInfo.id}`)) {
+      return res.status(401).send(`Invalid x-authenticated-user header (id may not have a space)`)
+    }
+
+    const userId = `${uri} ${userInfo.id}`
+
+    if(userId.length > 255) {
+      return res.status(401).send(`Invalid x-authenticated-user header (id is too long)`)
+    }
+
+    const { models } = global.connection
+
+    let [ embeddingApp, user ] = await Promise.all([
+
+      models.embeddingApp.findOne({
+        where: {
+          uri,
+          secretKey,
+        },
+      }),
+
+      models.user.findByPk(userId),
+
+    ])
+
+    if(!embeddingApp) {
+      return res.status(401).send(`Invalid embedding app`)
+    }
+
+    if(!user) {
+      user = await models.user.create({
+        id: userId,
+        email: userInfo.email,
+        name: userInfo.name || null,
+        languageId: userInfo.languageId || `eng`,
+      })
+    }
+
+    req.embeddingAppId = embeddingApp.dataValues.id
+    req.user = user.dataValues
+    next()
+
+  },
+
   cloneObj,
   equalObjs,
 
@@ -57,12 +122,18 @@ module.exports = {
     return itemsByKey
   },
 
-  // tag order doesn’t really matter except that it must be consistent
+  // tag order doesn’t really matter except that it must be consistent (should match function in biblearc repo)
   deepSortTagSetTags: tags => {
     // first sort o and t keys
     tags.forEach(tag => {
-      tag.o.sort()
-      tag.t.sort((a,b) => a-b)
+      const { o, t } = tag
+      o.sort()
+      t.sort((a,b) => a-b)
+      for(let key in tag) {
+        delete tag[key]
+      }
+      tag.o = o
+      tag.t = t
     })
     // then sort tags
     tags.sort((a,b) => {
@@ -76,6 +147,7 @@ module.exports = {
         return -1
       }
     })
+    return tags
   },
 
   doI18nSetup: (req, res, next) => {
@@ -118,6 +190,10 @@ module.exports = {
       wordHashesSetSubmissionTable: models[`${versionId}WordHashesSetSubmission`],
       wordHashesSubmissionTable: models[`${versionId}WordHashesSubmission`],
     }
+  },
+
+  padWithZeros: (num, desiredNumDigits) => {
+    return ('000000000000000000000000' + num).slice(desiredNumDigits*-1)
   },
 
 }

@@ -661,6 +661,9 @@ const setUpConnection = ({
       notes: {
         type: Sequelize.TEXT,
       },
+      secretKey: {
+        type: Sequelize.UUID,
+      },
       createdAt,
       updatedAt,
     },

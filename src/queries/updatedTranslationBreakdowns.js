@@ -6,7 +6,7 @@ const {
 
 const updatedTranslationBreakdowns = async (args, req, queryInfo) => {
 
-  const { versionId, updatedFrom } = args
+  const { versionId, updatedSince } = args
 
   if(!versionId.match(versionIdRegEx)) {
     throw `Invalid versionId (${versionId}).`
@@ -19,7 +19,7 @@ const updatedTranslationBreakdowns = async (args, req, queryInfo) => {
   let translationBreakdowns = await models.translationBreakdown.findAll({
     where: {
       createdAt: {
-        [Op.gte]: updatedFrom,
+        [Op.gt]: updatedSince,
       },
       versionId,  
     },

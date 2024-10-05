@@ -45,6 +45,7 @@ const setUpVersionDataModel = require('./setUpVersionDataModel')
     {
       "id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
       "uri": "https://biblearc.com",
+      "secretKey": "secret",
       "createdAt": "2022-01-01 00:00:00 GMT",
       "updatedAt": "2022-01-01 00:00:00 GMT",
     },

@@ -6,7 +6,7 @@ const {
 
 const updatedLanguageSpecificDefinitions = async (args, req, queryInfo) => {
 
-  const { languageId, updatedFrom } = args
+  const { languageId, updatedSince } = args
 
   if(!languageId.match(languageIdRegEx)) {
     throw `Invalid languageId (${languageId}).`
@@ -19,7 +19,7 @@ const updatedLanguageSpecificDefinitions = async (args, req, queryInfo) => {
   let languageSpecificDefinitions = await models.languageSpecificDefinition.findAll({
     where: {
       updatedAt: {
-        [Op.gte]: updatedFrom,
+        [Op.gt]: updatedSince,
       },
       languageId,
     },
