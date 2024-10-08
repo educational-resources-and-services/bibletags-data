@@ -65,7 +65,7 @@ const getWordInfoByIdAndPart = async ({
 
           if(
             wordRangesByOriginalLoc[verse.loc]
-            && !wordRangesByOriginalLoc[verse.loc].some(([ start, end ]) => (idx+1 >= start && idx+1 <= end))
+            && !wordRangesByOriginalLoc[verse.loc].some(([ start, end ]) => (idx+1 >= start && idx+1 <= (end || Infinity)))
           ) return
 
           const [ x, strong, morph, id ] = usfmWord.match(/\\w [^|]*\|lemma="[^"]*" strong="([^"]+)" x-morph="([^"]+)" x-id="([^"]+)"\\w\*/)
