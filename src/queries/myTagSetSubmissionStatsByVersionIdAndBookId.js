@@ -1,6 +1,7 @@
 const { getRefFromLoc } = require('@bibletags/bibletags-versification')
 
-const { getVersionTables, equalObjs, getOrigLangVersionIdFromLoc } = require('../utils')
+const { getVersionTables, equalObjs, getOrigLangVersionIdFromLoc, deepSortTagSetTags } = require('../utils')
+const { getTagsJson } = require('../calculateTagSets')
 
 const myTagSetSubmissionStatsByVersionIdAndBookId = async (args, req, queryInfo) => {
 
@@ -42,7 +43,7 @@ const myTagSetSubmissionStatsByVersionIdAndBookId = async (args, req, queryInfo)
     const origLangVersionId = getOrigLangVersionIdFromLoc(loc)
     const tags = getTagsJson({ tagSetSubmissionItems, origLangVersionId })
     deepSortTagSetTags(tags)
-    myTagsByVersionIdAndBookId[versionId] = myTagsByVersionIdAndBookId[versionId] || [ null, Array(66).fill().map(() => []) ]
+    myTagsByVersionIdAndBookId[versionId] = myTagsByVersionIdAndBookId[versionId] || [ null, ...Array(66).fill().map(() => []) ]
     myTagsByVersionIdAndBookId[versionId][bookId].push({
       loc,
       tags,
@@ -65,10 +66,9 @@ const myTagSetSubmissionStatsByVersionIdAndBookId = async (args, req, queryInfo)
 
   const tagsByVersionIdAndLoc = {}
   await Promise.all(
-    myTagsByVersionIdAndBookId.map(async versionId => {
+    Object.keys(myTagsByVersionIdAndBookId).map(async versionId => {
       const tagSets = await getTagSetsByVersionId(versionId)
-      tagSets.forEach(({ id, tags }) => {
-        const [ loc ] = id.split(`-`)
+      tagSets.forEach(({ loc, tags }) => {
         deepSortTagSetTags(tags)
         tagsByVersionIdAndLoc[`${versionId} ${loc}`] = tags
       })
