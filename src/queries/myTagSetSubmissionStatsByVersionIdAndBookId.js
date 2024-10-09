@@ -1,13 +1,37 @@
-const { getRefFromLoc } = require('@bibletags/bibletags-versification')
+// const { getRefFromLoc } = require('@bibletags/bibletags-versification')
 
-const { getVersionTables, equalObjs, getOrigLangVersionIdFromLoc, deepSortTagSetTags } = require('../utils')
-const { getTagsJson } = require('../calculateTagSets')
+// const { getVersionTables, equalObjs, getOrigLangVersionIdFromLoc, deepSortTagSetTags } = require('../utils')
+// const { getTagsJson } = require('../calculateTagSets')
 
 const myTagSetSubmissionStatsByVersionIdAndBookId = async (args, req, queryInfo) => {
 
   if(!req.user) throw `no login`
 
-  const { models } = global.connection
+  const [ tagSetSubmissions ] = await global.connection.query(
+    `
+      SELECT SUBSTRING(loc, 1, 2) AS bookId, versionId, COUNT(*) AS submissions
+      FROM tagSetSubmissions
+      WHERE userId = :userId
+      GROUP BY bookId, versionId
+    `,
+    {
+      replacements: {
+        userId: req.user.id,
+      },
+    },    
+  )
+
+  const statsByVersionIdAndBookId = {}
+  tagSetSubmissions.forEach(({ bookId, versionId, submissions }) => {
+    statsByVersionIdAndBookId[versionId] = statsByVersionIdAndBookId[versionId] || [ null, ...Array(66).fill().map(() => ({ submissions: 0 })) ]
+    statsByVersionIdAndBookId[versionId][parseInt(bookId, 10)].submissions = submissions
+  })
+
+  return statsByVersionIdAndBookId
+
+  // The below is slow, so just count submissions for now
+
+  /*
 
   // 1. Get all my submissions
 
@@ -89,6 +113,8 @@ const myTagSetSubmissionStatsByVersionIdAndBookId = async (args, req, queryInfo)
   }
 
   return statsByVersionIdAndBookId
+
+  */
 
 }
 
