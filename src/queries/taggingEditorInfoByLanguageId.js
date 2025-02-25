@@ -2,7 +2,6 @@ const { parse } = require('json2csv')
 
 const MIN_RATING_TO_BE_TAGGING_EDITOR = 50
 const MIN_NUM_SUBMISSIONS_TO_BE_TAGGING_EDITOR = 25
-const MIN_NUM_SUBMISSIONS_TO_CONSIDER_LANGUAGE = 5
 const MAX_USERS_FOR_TAGGERS_REPORT = 300
 
 const taggingEditorInfoByLanguageId = async (args, req, queryInfo) => {
@@ -41,19 +40,13 @@ const taggingEditorInfoByLanguageId = async (args, req, queryInfo) => {
       `
         SELECT DISTINCT v.languageId
         FROM versions AS v
-        WHERE (SELECT COUNT(*) FROM tagSetSubmissions AS tss WHERE tss.versionId = v.id) >= :minNumSubmissionsToConsiderLanguage
+        WHERE (SELECT tss.versionId FROM tagSetSubmissions AS tss WHERE tss.versionId = v.id LIMIT 1) IS NOT NULL
       `,
-      {
-        replacements: {
-          userId: req.user.id,
-          minNumSubmissionsToConsiderLanguage: MIN_NUM_SUBMISSIONS_TO_CONSIDER_LANGUAGE,
-        },
-      },
     )
     languageIds.push(...languageIdRows.map(({ languageId }) => languageId))
   }
 
-  await Promise.all(languageIds.map(async languageId => {
+  await Promise.all([ ...new Set(languageIds) ].map(async languageId => {
 
     const queries = []
 
@@ -83,7 +76,8 @@ const taggingEditorInfoByLanguageId = async (args, req, queryInfo) => {
         (${tssBaseQuery} ${getBetweenDates(firstOfTheMonthStr, tomorrowStr)}) AS "This Month",
         (${tssBaseQuery} ${getBetweenDates(firstOfLastMonthStr, firstOfTheMonthStr)}) AS "Last Month"
       FROM users AS u
-      WHERE (${tssBaseQuery}) > 0
+      WHERE u.email NOT LIKE "user-%@bibletags.org"
+        AND (${tssBaseQuery}) > 0
       LIMIT :maxUsersForTaggersReport  ${/* prevent an overly slow query */ ``}
     `)
 
@@ -108,7 +102,9 @@ const taggingEditorInfoByLanguageId = async (args, req, queryInfo) => {
 
     }
 
-    const [ taggersReportData, otLocsNeedingConfirm, ntLocsNeedingConfirm ] = (await global.connection.query(
+    queries.push(`SELECT 1 WHERE 1=2`)  // make it multi-query no matter what so that taggersReportData comes through properly
+
+    const [ taggersReportData, otLocsNeedingConfirm=[], ntLocsNeedingConfirm=[] ] = (await global.connection.query(
       queries.join(';'),
       {
         replacements: {
@@ -119,7 +115,7 @@ const taggingEditorInfoByLanguageId = async (args, req, queryInfo) => {
       },
     ))[0]
 
-    const taggersReport = parse(taggersReportData, {})
+    const taggersReport = (taggersReportData || []).length > 0 ? parse(taggersReportData, {}) : null
 
     taggingEditorInfo[languageId] = {
       taggersReport,
