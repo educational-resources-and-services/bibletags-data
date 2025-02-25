@@ -106,6 +106,7 @@ module.exports = {
 
     req.embeddingAppId = embeddingApp.dataValues.id
     req.user = user.dataValues
+    req.user.adminLevel = userInfo.adminLevel
     next()
 
   },

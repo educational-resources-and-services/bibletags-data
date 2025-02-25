@@ -18,6 +18,7 @@ const queries = `
   versionProgressByBookId(versionId: ID!): JSON  ${/* E.g. [ null, { total: 933, tagged: 283, confirmed: 12 }, ... ] */ ``}
   myTagSetSubmissions(bookId: Int!, chapter: Int!, versionId: ID!): [MyTagSet]
   myTagSetSubmissionStatsByVersionIdAndBookId: JSON  ${/* E.g. { esv: [ null, { submissions: 123, used: 120 }, ... ] } */ ``}
+  taggingEditorInfoByLanguageId: JSON  ${/* E.g. { eng: { locsNeedingConfirm: [ { versionId: "esv", loc: "01001002" }, ... ], taggersReport: "[csv]" } } */ ``}
 
   ${/*
     THESE TWO WERE DESIGNED SO THAT THE WIDGET WOULD ONLY REQUIRE A SINGLE REQUEST ROUNDTRIP. NOT YET SURE IF THEY ARE REALLY HELPFUL OR NOT.
