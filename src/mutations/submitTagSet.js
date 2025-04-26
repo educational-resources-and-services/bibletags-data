@@ -186,7 +186,7 @@ const submitTagSet = async (args, req, queryInfo) => {
       subject: `First tag set submission for a version! (versionId: ${versionId})`,
       body: (
         `
-          VERSION ID: $versionId}
+          VERSION ID: ${versionId}
           —————————
 
           Tag Set Submitted by:
