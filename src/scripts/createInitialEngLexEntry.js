@@ -48,6 +48,7 @@ const TurndownService = require('turndown')
       str
       .replace(/ data-(?:pron|xlit|root)="[^"]+"/g, '')
       .replace(/ class="(?:lang-[^"]+|gw|s1|s2)"/g, '')
+      .replace(/< /g, '')
       .replace(/<b data-stgs="([^"]+)">([^<]*)<\/b>/g, (match, strongs, word) => (
         `<a_href="#search=%23${getStrongs(strongs)}">${word || `?`}</a>`
       ))

@@ -46,6 +46,8 @@ cp .env.example .env
 
 Create a local MySQL database called `BibleTags` with `utf8mb4` encoding and `utf8mb4_bin` collation. Update `RDS_USERNAME` and `RDS_PASSWORD` in `.env` to access this database.
 
+better-sqlite3 needs to compile C++ code which may may require you to install certain build tools before you can run `npm install`
+
 ```bash
 npm install
 npm run setup-db
