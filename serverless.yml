@@ -5,7 +5,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   role: arn:aws:iam::572013440289:role/bibletags-data
 
 functions:
@@ -14,6 +14,7 @@ functions:
     timeout: 29  # the HTTP API request times out at 30 seconds; so 29 seconds is the max I can set this to
     events:
       - httpApi: '*'
+    provisionedConcurrency: ${param:PROVISIONED_CONCURRENCY}
     environment:
       STAGE: ${param:STAGE}
       RDS_USERNAME: ${param:RDS_USERNAME}
