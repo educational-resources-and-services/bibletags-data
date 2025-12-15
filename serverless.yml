@@ -45,6 +45,7 @@ package:
 
 plugins:
   - serverless-domain-manager
+  - serverless-prune-plugin
 
 custom:
   customDomain:
@@ -52,3 +53,6 @@ custom:
     stage: $default
     apiType: http
     endpointType: REGIONAL
+  prune:
+    automatic: true
+    number: 5
