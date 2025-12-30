@@ -14,7 +14,8 @@ module.exports = () => {
 
       LOCAL: "",
       AUTH_SITE_ID: "2",
-      AUTH_DOMAIN: "auth.staging.bibletags.org",
+      AUTH_FRONTEND_BASE_URL: "https://app.staging.biblearc.com",
+      AUTH_BACKEND_BASE_URL: "https://app-data.staging.biblearc.com/apis/auth",
       AWS_DOWNLOADS_BUCKET: "none",
 
       RDS_HOST: "group-staging.cmrypjnyrjea.us-east-1.rds.amazonaws.com",
@@ -26,7 +27,8 @@ module.exports = () => {
 
       LOCAL: "",
       AUTH_SITE_ID: "2",
-      AUTH_DOMAIN: "auth.bibletags.org",
+      AUTH_FRONTEND_BASE_URL: "https://app.biblearc.com",
+      AUTH_BACKEND_BASE_URL: "https://app-data.biblearc.com/apis/auth",
       AWS_DOWNLOADS_BUCKET: "downloads.bibletags.org",
 
       RDS_HOST: "group-production.cmrypjnyrjea.us-east-1.rds.amazonaws.com",

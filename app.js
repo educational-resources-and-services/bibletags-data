@@ -63,8 +63,8 @@ if(process.env.LOCAL) {
 setUpSessionSyncAuthRoutes({
   app,
   siteId: process.env.AUTH_SITE_ID,
-  authDomain: process.env.AUTH_DOMAIN,
-  protocol: process.env.AUTH_PROTOCOL || 'https',
+  authFrontendBaseUrl: process.env.AUTH_FRONTEND_BASE_URL,
+  authBackendBaseUrl: process.env.AUTH_BACKEND_BASE_URL,
   jwtSecret: process.env.AUTH_JWT_SECRET,
 })
 
