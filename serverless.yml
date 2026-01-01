@@ -36,12 +36,13 @@ functions:
       AWS_SECRET_ACCESS_KEY_OVERRIDE: ${param:AWS_SECRET_ACCESS_KEY_OVERRIDE}
 
 package:
-  exclude:
-    - .env
-    - .git
-    - src/data/*
-    - tests/*
-    - pages/*
+  patterns:
+    - '!.env' 
+    - '!.git/**' 
+    - '!.DS_Store' 
+    - '!src/data/**' 
+    - '!tests/**' 
+    - '!pages/**' 
 
 plugins:
   - serverless-domain-manager
