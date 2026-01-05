@@ -12,7 +12,7 @@ const example = () => async (req, res) => {
       // return something
       // const payloadIn = jwt.verify(req.query.payload, process.env.EXAMPLE_API_JWT_SECRET)
       const something = { some: "thing" }
-      // const payloadOut = jwt.sign(something, process.env.EXAMPLE_API_JWT_SECRET)
+      // const payloadOut = jwt.sign(something, process.env.EXAMPLE_API_JWT_SECRET, { expiresIn: '5m' })
       // return res.send(payloadOut)
       return res.send(something)
     }

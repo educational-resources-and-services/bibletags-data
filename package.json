@@ -76,7 +76,6 @@
     "retry-as-promised": "^5.0.0",
     "sequelize": "^6.37.7",
     "serverless-http": "^3.2.0",
-    "session-sync-auth-site": "^3.0.5",
     "turndown": "^7.1.1",
     "uuid": "^8.3.2"
   },

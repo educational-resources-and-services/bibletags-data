@@ -8,7 +8,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const { graphqlHTTP } = require('express-graphql')
 const app = express()
-const { authenticate, setUpSessionSyncAuthRoutes } = require('session-sync-auth-site')
+// const { authenticate, setUpSessionSyncAuthRoutes } = require('session-sync-auth-site')
 const compression = require('compression')
 
 const { connectionObj, setUpConnection } = require('./src/db/connect')
@@ -44,14 +44,14 @@ app.use(
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(cors({ origin: true }))
 app.use(doI18nSetup)
-app.use(authenticate({
-  connectionObj,
-  userTableColNameMap: {
-    created_at: 'createdAt',
-    updated_at: 'updatedAt',
-    language: 'languageId',
-  },
-}))
+// app.use(authenticate({
+//   connectionObj,
+//   userTableColNameMap: {
+//     created_at: 'createdAt',
+//     updated_at: 'updatedAt',
+//     language: 'languageId',
+//   },
+// }))
 app.use(authenticateViaEmbeddingApp())
 app.use(compression())
 
@@ -60,13 +60,13 @@ if(process.env.LOCAL) {
 }
 
 // Auth
-setUpSessionSyncAuthRoutes({
-  app,
-  siteId: process.env.AUTH_SITE_ID,
-  authFrontendBaseUrl: process.env.AUTH_FRONTEND_BASE_URL,
-  authBackendBaseUrl: process.env.AUTH_BACKEND_BASE_URL,
-  jwtSecret: process.env.AUTH_JWT_SECRET,
-})
+// setUpSessionSyncAuthRoutes({
+//   app,
+//   siteId: process.env.AUTH_SITE_ID,
+//   authFrontendBaseUrl: process.env.AUTH_FRONTEND_BASE_URL,
+//   authBackendBaseUrl: process.env.AUTH_BACKEND_BASE_URL,
+//   jwtSecret: process.env.AUTH_JWT_SECRET,
+// })
 
 // GraphQL
 const runGraphql = graphqlHTTP({
