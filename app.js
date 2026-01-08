@@ -23,15 +23,15 @@ app.use(async (req, res, next) => {
     try {
       await connection.query(`SELECT 1`)  // test the connection
     } catch(err) {
-      console.error(`Connection was present, but not working. Attempting to delete and re-establish it.`, err)
+      console.error(`Connection (BibleTags) was present, but not working. Attempting to delete and re-establish it.`, err)
       delete global.connection
     }
   }
   if(!global.connection) {
-    console.log('Establishing DB connection...')
+    console.log('Establishing DB connection (BibleTags)...')
     setUpConnection()
     await global.connection.authenticate()
-    console.log('...DB connection established.')
+    console.log('...DB connection (BibleTags) established.')
   }
   next()
 })
